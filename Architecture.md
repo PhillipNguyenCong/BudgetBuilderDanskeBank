@@ -16,7 +16,16 @@ No backend, database, authentication, external APIs, or real banking integration
 
 ## Folder Structure
 
+Project-level documentation lives in the repository root because it applies to the whole bachelor project, not only the frontend implementation.
+
 ```text
+README.md
+AGENTS.md
+PRD.md
+Architecture.md
+Security.md
+Skills.md
+
 web_app/
   backend/
     README.md
@@ -27,6 +36,8 @@ web_app/
       features/
       shared/
 ```
+
+Do not place project-level markdown files inside `web_app/`. The only markdown files inside `web_app/` should be implementation-specific notes such as `web_app/frontend/README.md` or `web_app/backend/README.md`.
 
 ## Architecture Pattern
 
@@ -95,4 +106,3 @@ Data should be shaped like realistic banking data, but must not contain real cus
 - `main` stays stable.
 - accepted feature work is pushed to `dev`.
 - feature work should be reviewed before it is merged into `main`.
-

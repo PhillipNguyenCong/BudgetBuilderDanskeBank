@@ -12,6 +12,8 @@ The feature should make the Danske Bank app feel like the natural place to manag
 
 ## Working Docs
 
+Project-level documentation is kept in the repository root:
+
 - [PRD.md](PRD.md)
 - [Architecture.md](Architecture.md)
 - [Security.md](Security.md)
@@ -21,6 +23,8 @@ The feature should make the Danske Bank app feel like the natural place to manag
 ## Current Direction
 
 The first prototype is a frontend-only React + TypeScript app in `web_app/frontend`.
+
+`web_app/backend` is reserved for a later version and should stay empty for now.
 
 The prototype should prove:
 
