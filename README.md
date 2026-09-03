@@ -1,20 +1,28 @@
-# Budget Feature for Danske Bank
+# Budget Feature For Danske Bank
 
 Bachelor project exploring a budget builder concept for the Danske Bank mobile banking experience.
 
 The goal is to design and prototype a calm, useful budget feature that helps customers understand monthly spending, forecast upcoming expenses, and adjust category budgets without needing an interactive chat assistant.
 
-## Project Brief
+## Project Goal
 
-The main project brief lives here:
+Create a clean, user-friendly budget feature inside the Danske Bank app experience that helps customers build, understand, and adjust personal budgets with minimal effort.
 
-- [brief/danske-bank-budget-builder-brief.md](brief/danske-bank-budget-builder-brief.md)
+The feature should make the Danske Bank app feel like the natural place to manage everyday money, not only check balances or transactions.
+
+## Working Docs
+
+- [PRD.md](PRD.md)
+- [Architecture.md](Architecture.md)
+- [Security.md](Security.md)
+- [AGENTS.md](AGENTS.md)
+- [Skills.md](Skills.md)
 
 ## Current Direction
 
-This project should start platform-neutral.
+The first prototype is a frontend-only React + TypeScript app in `web_app/frontend`.
 
-The first priority is to define the product experience:
+The prototype should prove:
 
 - What problem the budget builder solves.
 - What the main user journey looks like.
@@ -22,21 +30,26 @@ The first priority is to define the product experience:
 - How automatic budget forecasting should be shown.
 - How the experience should feel inside a banking app.
 
-After that, the prototype can move in one or both directions:
+## Workflow
 
-- Web prototype: fastest way to test layout, flows, and interactions.
-- iOS prototype: best fit if the project should focus on native app craft and SwiftUI.
+Each feature should follow this process:
 
-## Suggested Project Structure
+1. User Story Agent writes the story and acceptance criteria.
+2. Unit Test Agent writes tests.
+3. Frontend Developer Agent implements the feature.
+4. Code Reviewer Agent reviews the work.
+5. Frontend Developer Agent fixes important review findings.
+6. Code Reviewer Agent reviews again.
+7. Accepted work is pushed to `dev`.
 
-- `brief/`: project brief and scope.
-- `docs/`: decisions, research notes, product thinking, and design rationale.
-- `prototype/`: implementation experiments.
-- `ios/`: optional SwiftUI prototype if the project moves toward iOS.
+## MVP Focus
 
-## Next Decisions
+The first useful feature is the Budget Home screen:
 
-1. Decide whether the first prototype should be web, iOS, or a product/design prototype.
-2. Define the core screens for the MVP.
-3. Decide what sample customer data the prototype should use.
-4. Build the smallest useful version of the budget home screen.
+- Monthly income.
+- Fixed expenses.
+- Flexible spending.
+- Savings.
+- Left to spend.
+- Upcoming recurring payments.
+- Automatic forecast insights.
