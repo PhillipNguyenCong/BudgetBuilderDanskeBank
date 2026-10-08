@@ -96,7 +96,7 @@ For documentation-only changes, verify content, relative links and consistency r
 
 ## Commands and current setup
 
-At the time this file was introduced, application and package directories contained responsibility READMEs only. Workspace tooling, executable scripts, migration commands and deployment configuration were not initialised.
+The repository uses npm workspaces. Only apps/backend is initialised. From the repository root, use npm ci, npm run dev:backend, npm test, npm run typecheck, npm run build and npm run check:db. The database check reads apps/backend/.env and requires the Neon development connection. See apps/backend/README.md for exact commands. Lint, migration and deployment commands are not configured yet; do not invent them.
 
 Inspect the actual manifests and lockfiles before choosing commands or a package manager. Do not claim that npm test, lint or build scripts exist without checking. When initialising a workspace, document its exact development, test, typecheck, lint and build commands in that workspace's README and update this section. Run the relevant checks once available. If a check cannot run, report the specific reason rather than reporting success.
 

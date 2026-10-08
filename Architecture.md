@@ -1,6 +1,6 @@
 # Architecture
 
-Status: agreed architectural direction for the prototype. The repository currently contains documentation and directory scaffolds, not running applications. The structures below describe where implementation will go; create subdirectories only when they have a responsibility and content.
+Status: agreed architectural direction for the prototype. The backend workspace now implements Express health routing and a read-only Neon connection check; other application directories remain scaffolds. The structures below describe where implementation will go; create subdirectories only when they have a responsibility and content.
 
 ## Goals and scope
 
@@ -136,7 +136,7 @@ Use dated forecasts with their input period and material assumptions. A successf
 
 Store schema changes under database/migrations and select a migration tool before creating executable migrations. Keep migration history and synthetic fixtures separate. Do not commit database credentials, raw banking datasets or database dumps.
 
-The agreed hosting direction is Vercel for the backend and Neon for PostgreSQL. Provisioning, deployment boundaries, environment configuration and workspace tooling are not implemented yet. Before deployment, document database connection management, regions, secrets, access control and permitted data use. Confirm approval before uploading the supplied bank dataset to cloud services.
+The agreed hosting direction is Vercel for the backend and Neon for PostgreSQL. Neon is provisioned with production and development branches in Frankfurt. The backend uses npm workspaces, Express and Drizzle with the Neon HTTP driver. The local connection is stored in an ignored apps/backend/.env file. Deployment and domain migrations are not implemented yet. Before deployment, document database connection management, regions, secrets, access control and permitted data use. Confirm approval before uploading the supplied bank dataset to cloud services.
 
 No production banking connection or payment execution is in the initial scope.
 
@@ -152,10 +152,10 @@ Use stable FR, NFR and US identifiers to connect tests and implementation with t
 
 ## Next implementation decisions
 
-1. Backend HTTP framework, authentication and API error conventions.
-2. Workspace/package tooling and executable development/test commands.
+1. Authentication and domain API error conventions. Express is selected for HTTP; the initial 404 format is { error: { code, message } }.
+2. Additional workspace and lint tooling as web/shared packages are initialised; backend commands are documented in apps/backend/README.md.
 3. PostgreSQL schema, migration tool and test-database setup.
 4. Forecast balance basis, minimum historical coverage and uncertain payment handling.
 5. Deployment environments and approved use of the supplied dataset.
 
-Write repository-specific AGENTS.md instructions against this architecture once the executable workflow is defined. Update this document when a decision changes rather than letting implementation and documentation diverge.
+Keep AGENTS.md commands aligned with the implemented workspace workflow. Update this document when a decision changes rather than letting implementation and documentation diverge.

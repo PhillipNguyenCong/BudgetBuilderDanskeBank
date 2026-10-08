@@ -40,10 +40,10 @@ docs/                  # Personas, requirements, stories and delivery plan
 
 Neon is the PostgreSQL database provider. Both clients use the backend API; only the backend accesses Neon and runs authoritative calculations. The web application supports desktop and mobile browsers; the native application is a later phase.
 
-Current status: directories contain responsibility notes only. Applications, workspace tooling, database migrations, Neon provisioning and Vercel deployments have not been initialised. Each directory README explains its intended role.
+Current status: the backend npm workspace has a working health endpoint and a read-only Neon connection check. Neon has separate production and development branches. Web, mobile and shared packages remain scaffolds. No domain tables, bank-data import or Vercel deployment have been added. See [backend setup](docs/backend-setup.md) and [backend commands](apps/backend/README.md).
 
 ## Working with the documentation
 
 Keep requirement and story IDs stable. Update acceptance criteria when a decision changes and link implementation work and tests to the relevant IDs. Record assumptions separately from observed results. Completed unit tests alone do not demonstrate forecast accuracy or usability.
 
-This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. The agreed directory structure is recorded above. The architectural direction is recorded in Architecture.md. Agent working rules are recorded in AGENTS.md. Source-code migration and executable workspace setup remain subsequent work.
+This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. The agreed directory structure is recorded above. The architectural direction is recorded in Architecture.md. Agent working rules are recorded in AGENTS.md. Budget-core migration, domain schema and user-facing features remain subsequent work.

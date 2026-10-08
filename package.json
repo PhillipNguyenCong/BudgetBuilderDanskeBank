@@ -1,0 +1,17 @@
+{
+  "name": "budget-builder-danske-bank",
+  "private": true,
+  "workspaces": [
+    "apps/backend"
+  ],
+  "engines": {
+    "node": "^22.9.0 || ^24.0.0"
+  },
+  "scripts": {
+    "dev:backend": "npm run dev --workspace @budget-builder/backend",
+    "test": "npm test --workspace @budget-builder/backend",
+    "typecheck": "npm run typecheck --workspace @budget-builder/backend",
+    "build": "npm run build --workspace @budget-builder/backend",
+    "check:db": "npm run check:db --workspace @budget-builder/backend"
+  }
+}
