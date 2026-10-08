@@ -4,6 +4,8 @@ A bachelor-project prototype exploring how customers can create and adjust separ
 
 ## Project documentation
 
+- [Agent instructions](AGENTS.md): working rules, architecture boundaries, verification and safe data handling.
+
 - [Architecture](Architecture.md): foundation and feature boundaries, backend responsibilities and data flow.
 
 - [Personas](docs/personas.md): preliminary audience hypotheses and validation questions.
@@ -44,4 +46,4 @@ Current status: directories contain responsibility notes only. Applications, wor
 
 Keep requirement and story IDs stable. Update acceptance criteria when a decision changes and link implementation work and tests to the relevant IDs. Record assumptions separately from observed results. Completed unit tests alone do not demonstrate forecast accuracy or usability.
 
-This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. The agreed directory structure is recorded above. The architectural direction is recorded in Architecture.md. Source-code migration and repository-specific AGENTS.md instructions are subsequent work.
+This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. The agreed directory structure is recorded above. The architectural direction is recorded in Architecture.md. Agent working rules are recorded in AGENTS.md. Source-code migration and executable workspace setup remain subsequent work.
