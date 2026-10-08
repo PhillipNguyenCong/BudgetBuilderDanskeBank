@@ -19,8 +19,27 @@ These documents are the initial planning baseline, not evidence that functionali
 - A transparent rules-based forecast first; any later statistical or AI-assisted approach must be compared with that baseline.
 - Demonstration data only; no payment execution or live bank integration in the initial prototype.
 
+## Repository structure
+
+```text
+apps/
+  web/                 # Responsive React + TypeScript + Vite web application
+  backend/             # TypeScript backend hosted on Vercel
+  mobile/              # Future React Native application
+packages/
+  budget-core/         # Framework-independent budget calculations
+  contracts/           # Shared API types and validation schemas
+database/
+  migrations/          # PostgreSQL schema migrations
+docs/                  # Personas, requirements, stories and delivery plan
+```
+
+Neon is the PostgreSQL database provider. Both clients use the backend API; only the backend accesses Neon and runs authoritative calculations. The web application supports desktop and mobile browsers; the native application is a later phase.
+
+Current status: directories contain responsibility notes only. Applications, workspace tooling, database migrations, Neon provisioning and Vercel deployments have not been initialised. Each directory README explains its intended role.
+
 ## Working with the documentation
 
 Keep requirement and story IDs stable. Update acceptance criteria when a decision changes and link implementation work and tests to the relevant IDs. Record assumptions separately from observed results. Completed unit tests alone do not demonstrate forecast accuracy or usability.
 
-This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. Source-code migration, architecture documents and repository-specific AGENTS.md instructions are subsequent work; no framework or directory layout is imposed by these planning documents.
+This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. The agreed directory structure is recorded above. Source-code migration, detailed architecture documents and repository-specific AGENTS.md instructions are subsequent work.
