@@ -1,0 +1,30 @@
+{
+  "name": "@budget-builder/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.9.0 || ^24.0.0"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
+    "test": "node --import tsx --test src/features/health/routes.test.ts src/infrastructure/database.test.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node --env-file-if-exists=.env dist/server.js",
+    "check:db": "node --env-file-if-exists=.env --import tsx scripts/check-database.ts"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.19.1",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
