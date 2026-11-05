@@ -6,7 +6,7 @@ Status: proposed plan, not a record of completed work.
 
 | Stage | Stories | Intended outcome |
 | --- | --- | --- |
-| 1. Budget setup and data foundation | US-01, US-02, US-03, US-04, US-11, planning portion of US-05, US-10 | Select one account, configure typed virtual pots and salary allocations, save rollover choices and expose input problems. |
+| 1. Budget setup and data foundation | US-01, US-02, US-03, US-04, US-11, planning portion of US-05, US-10 | Select one account, configure typed virtual pots and salary allocations, offer optional automatic rollover and expose input problems. |
 | 2. Actual spending and monthly continuity | US-06, US-12 | Show remaining monthly/weekly spending and supplementary daily guidance; preserve history and apply rollover exactly once with transfer and duplicate handling. |
 | 3. Forecasting and warnings | US-07, US-08, forecast portion of US-05 | Explain a baseline forecast and identify daily shortfalls, including irregular bills. |
 | 4. Spending insights | US-09 | Explain category changes using defensible comparison periods. |
@@ -16,7 +16,7 @@ US-05 and US-10 span stages. Do not mark a story complete until all of its accep
 ## Test and evaluation plan
 
 - Unit tests: exact monetary calculations, salary over-allocation, carried-in amounts, weekly allowances in short/final weeks, zero/negative leftovers, both rollover destinations, recurring-payment dates, normalisation, category overrides, duplicates, transfers, cancelled payments and daily forecast balances.
-- Integration tests: exactly-one-account selection through budget persistence; saved rollover preferences and eligible savings targets; concurrent/retried month closure without duplicate or partial movement; preserved history after preference changes; normalised records through assignment, reconciliation and forecasting; incomplete-input and failure states.
+- Integration tests: exactly-one-account selection through budget persistence; setup opt-in/off states, month-end prompts, deferred decisions and eligible savings targets; concurrent/retried month closure without duplicate or partial movement; preserved history after preference changes; normalised records through assignment, reconciliation and forecasting; incomplete-input and failure states.
 - Usability evaluation: representative participants divide salary into virtual pots, interpret monthly/weekly allowances, choose a rollover destination, explain the next month’s carried-in amount, interpret a forecast, explain a shortfall warning and identify a data-quality limitation. Capture task outcomes and misunderstandings using the proposed NFR targets.
 - Forecast evaluation: compare predictions with later observed outcomes at historical cutoffs. Prevent future information from entering model inputs. Compare any later model with the transparent baseline using the same periods and inputs.
 - Security and privacy review: inspect fixture provenance, logs, credentials, persistence and data exposure. Production banking security is outside the prototype scope and must not be implied by passing these checks.

@@ -1,0 +1,48 @@
+flowchart LR
+    subgraph Setup[1. Create budget]
+    direction TB
+    A([User clicks Create budget]) --> B[Select one account and confirm monthly salary]
+    B --> C[AI analyses the previous 12 complete months]
+    C --> D[Suggest named pots and monthly allocations]
+    D --> E[Explain salary source, spending history and calculations]
+    E --> F[User reviews or edits suggestions]
+    F --> G{Allocations within salary?}
+    G -->|No| F
+    G -->|Yes| H{Enable automatic rollover during setup?}
+    H -->|Yes| I[Choose savings pot or next month's spending]
+    H -->|Not now| J[Leave automatic rollover off]
+    I --> K[User accepts and creates budget]
+    J --> K
+
+    end
+
+    subgraph Daily[2. Use the budget]
+    direction TB
+    L[Show remaining monthly allowance and weekly spending guide]
+    L --> M[Recalculate when transactions or allocations change]
+    M --> N{Month ended?}
+    N -->|No| L
+    N -->|Yes| EndMonth[Month completed]
+    end
+
+    subgraph Monthly[3. Handle month-end leftovers]
+    direction TB
+    O[Show monthly summary]
+    O --> P{Positive leftover money?}
+    P -->|No| Q[No rollover; preserve any overspending in history]
+    P -->|Yes| R{Automatic rollover enabled?}
+    R -->|Yes| S[Apply saved destination automatically]
+    R -->|No| T[Show month-end prompt]
+    T --> U{User's choice}
+    U -->|Decide now| V[Choose destination for this month; optionally enable automation]
+    U -->|Later| W[Keep leftovers pending until user decides]
+    V --> X[Allocate leftovers once and record the destination]
+    S --> X
+    X --> Y[Start next month with its normal allocations and any confirmed carry-forward]
+    Q --> Y
+    W --> Y
+    end
+
+    Setup --> Daily
+    Daily --> Monthly
+    Monthly -->|Next month| Daily

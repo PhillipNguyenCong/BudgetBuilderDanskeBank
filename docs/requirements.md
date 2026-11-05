@@ -14,7 +14,7 @@ Status: proposed MVP baseline. Requirements describe intended behaviour, not com
 | FR-06 | The system shall explain forecasts, spending changes and warnings using relevant amounts, categories, assumptions and dates. |
 | FR-07 | The system shall identify missing, conflicting or uncertain data and explain its effect on calculations. |
 | FR-08 | The system shall avoid counting the same cash movement more than once and distinguish internal transfers from income and expenses. |
-| FR-09 | The system shall save an editable rollover preference for each spending subaccount: move positive month-end leftovers to a selected savings subaccount in the same account, or add them to the same spending subaccount’s next monthly allocation. |
+| FR-09 | The system shall offer optional automatic rollover per spending subaccount during setup and later: to a selected savings pot in the same account or next month’s spending. Automation is off until enabled. When off, a positive month-end remainder prompts the customer to choose once, enable future automation, or decide later; unresolved money stays pending and visible. |
 | FR-10 | The system shall record each completed rollover’s month, amount, source and actual destination, process it at most once per spending subaccount and month, and preserve monthly results and past rollover records when preferences change. Zero or negative leftovers do not roll over. |
 
 ## Non-functional requirements

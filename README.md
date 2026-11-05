@@ -7,6 +7,7 @@ A bachelor-project prototype exploring how customers can create and adjust separ
 - [Agent instructions](AGENTS.md): working rules, architecture boundaries, verification and safe data handling.
 
 - [Architecture](Architecture.md): foundation and feature boundaries, backend responsibilities and data flow.
+- [Budget creation flow](docs/budget-creation-flow.md): AI suggestions, optional automatic rollover and the month-end prompt.
 - [Domain model](domain-model-notes.md): core concepts, allocation rules and monthly rollover, with [Mermaid source](domain-model.mmd) and [image](domain-model.png).
 
 - [Personas](docs/personas.md): preliminary audience hypotheses and validation questions.
@@ -20,7 +21,7 @@ These documents are the initial planning baseline, not evidence that functionali
 
 - Multiple independent budgets; each uses exactly one user-owned account. An account belongs to at most one budget at a time.
 - Named virtual savings, spending and fixed-expense subaccounts divide the monthly take-home salary.
-- Monthly and weekly spending allowances, with a supplementary daily guide. Positive month-end leftovers follow a saved preference: savings or next month’s spending.
+- Monthly and weekly spending allowances, with a supplementary daily guide. Positive month-end leftovers follow a saved preference when automation is enabled; otherwise the monthly summary asks where they should go.
 - Reviewable suggestions for income, fixed expenses, variable expenses and savings.
 - DKK reporting, explicit data-quality limitations and protection against double counting.
 - A transparent rules-based forecast first; any later statistical or AI-assisted approach must be compared with that baseline.

@@ -6,7 +6,8 @@ Read these documents in order:
 2. [Requirements](requirements.md) — functional requirements and proposed quality targets.
 3. [User stories](user-stories.md) — MVP stories with acceptance criteria and requirement links.
 4. [Domain model](../domain-model-notes.md) — core concepts, salary allocation and month-end rollover.
-5. [Delivery and evaluation plan](delivery-plan.md) — implementation sequence, tests and open decisions.
+5. [Budget creation flow](budget-creation-flow.md) — AI suggestions, optional automatic rollover and month-end decisions.
+6. [Delivery and evaluation plan](delivery-plan.md) — implementation sequence, tests and open decisions.
 
 Status: initial planning baseline. Requirements are intended behaviour; personas and quality targets are not yet validated.
 

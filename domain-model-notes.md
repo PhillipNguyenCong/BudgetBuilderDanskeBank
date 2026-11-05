@@ -19,7 +19,8 @@ A simplified conceptual model of the agreed design, not an implemented database 
 
 ## Month-end rollover
 
-- Each spending pot has a saved preference that the user can change: `TO_SAVINGS` or `TO_NEXT_MONTH`.
+- Each spending pot can have a saved preference: `TO_SAVINGS` or `TO_NEXT_MONTH`. Automatic rollover is off until the user enables it, optionally during budget setup. They can change or disable it later.
+- With automation off, positive month-end leftovers produce a prompt in the monthly summary. The user can choose once, enable that choice for future months, or decide later. Pending leftovers remain visible and are not counted in the next month’s allowance until allocated. See the [creation and rollover flow](docs/budget-creation-flow.md) for deferred decisions.
 - Savings rollover requires a selected savings pot in the same account. Carry-forward adds the leftover amount to the same spending pot's next monthly allocation.
 - Only positive leftovers roll over, at most once per spending pot and completed month. Zero or negative leftovers do not roll over.
 - MonthlyRollover records the completed month, amount, source and actual destination. Later preference changes do not alter past transfers. Monthly results must be preserved.

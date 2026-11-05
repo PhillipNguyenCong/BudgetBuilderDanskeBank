@@ -91,7 +91,7 @@ Requirements: FR-02, FR-03, FR-06, FR-07. Persona: P-01.
 4. The total monthly allocation cannot exceed salary. The setup shows the unallocated salary and explains any over-allocation without discarding entered values.
 5. Savings accumulate across months; fixed-expense allocations reserve money for bills. Allocating money does not execute a bank transfer or count as spending.
 6. Salary, subaccounts and allocations remain saved when the budget is reopened. The customer can adjust allocations while keeping the salary constraint; past monthly results are preserved.
-7. Each spending pot has a saved rollover preference as specified in US-11. Savings is a virtual pot, not a second bank account.
+7. Each spending pot offers optional automatic rollover as specified in US-11. Skipping this choice does not block budget creation. Savings is a virtual pot, not a second bank account.
 
 ## US-05 — Plan for irregular expenses
 
@@ -198,11 +198,12 @@ Requirements: FR-09. Personas: P-01, P-02.
 
 ### Acceptance criteria
 
-1. Each spending pot offers `TO_SAVINGS` and `TO_NEXT_MONTH`; the customer chooses and saves one during setup and can change it later.
+1. Each spending pot offers optional automatic rollover during setup. It is off until enabled; enabling it requires `TO_SAVINGS` or `TO_NEXT_MONTH`. The customer can skip setup and change or disable automation later.
 2. `TO_SAVINGS` requires a selected savings subaccount within the same account. A missing or ineligible target prevents saving that preference and is explained.
 3. `TO_NEXT_MONTH` adds positive leftovers to the same spending pot’s next monthly allocation; it does not replace that allocation.
-4. Reopening the budget shows the saved choice and target. A failed save preserves input and reports the failure without implying the preference changed.
-5. The preference effective at month-end is used. Changing it later does not rewrite completed rollover history.
+4. Reopening the budget shows whether automation is enabled, the saved choice and any target. A failed save preserves input and reports the failure without implying the preference changed.
+5. When automation is enabled, the preference effective at month-end is used. Changing it later does not rewrite completed rollover history.
+6. With automation off and positive leftovers, the monthly summary prompts for a one-time destination and offers to enable it for future months. The user may decide later; pending money remains visible and is not silently included in savings or the next month’s spending. The summary also offers future automation settings when there is no positive remainder.
 
 ## US-12 — Review completed month-end rollover
 
@@ -212,8 +213,8 @@ Requirements: FR-04, FR-08, FR-09, FR-10. Personas: P-01, P-02.
 
 ### Acceptance criteria
 
-1. At month-end, positive remaining spending is allocated to the selected savings pot or carried into the same spending pot’s next month. Zero or negative remainders produce no rollover; overspending remains visible in the closed month.
-2. Each completed record preserves the closed month, amount, source and actual destination. The next period follows that month. Later preference changes do not alter the record.
+1. At month-end, positive remaining spending is allocated automatically only when enabled; otherwise it waits for the US-11 prompt decision. Zero or negative remainders produce no rollover; overspending remains visible in the closed month.
+2. Each completed record preserves the closed month, amount, source and actual destination. Automatic rollover targets the next month. A deferred manual decision targets savings or spending in the then-current month, recording the destination period as well as the closed source month. Later preference changes do not alter the record.
 3. Processing retries or concurrent runs cannot apply the same pot’s rollover twice. Recording the rollover and updating the virtual amounts succeed together or leave no partial movement.
 4. With DKK 500 remaining and a DKK 3,000 next-month allocation, carry-forward gives DKK 3,500 before new spending. Choosing savings instead increases that savings pot by DKK 500 and leaves the spending allocation at DKK 3,000.
 5. The bank balance does not change, and rollover is not reported as new salary, income or an expense. Allocations and actual spending remain distinct.
