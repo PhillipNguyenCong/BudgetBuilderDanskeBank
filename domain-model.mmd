@@ -1,139 +1,63 @@
 classDiagram
     direction TB
 
-    class Kunde {
-        kundeId
-        navn
-    }
-    class Konto {
-        kontoId
-        navn
-        valuta
-        bogfoertSaldo
-        disponibelSaldo
-        opdateretTidspunkt
+    class User {
+        name
     }
     class Budget {
-        budgetId
-        navn
-        valuta
-        maanedligNettoLoenDKK
-        ufordeltLoenDKK()
+        name
+        monthlySalary
     }
-    class Subkonto {
+    class Account {
+        balance
+    }
+    class Subaccount {
         <<abstract>>
-        subkontoId
-        navn
-        maanedligAllokeringDKK
+        name
+        monthlyAllocation
     }
-    class OpsparingsSubkonto {
-        opsparetBeloebDKK
+    class SavingsSubaccount {
+        savedAmount
     }
-    class ForbrugsSubkonto {
-        aktuelMaaned
-        overfoertFraSidsteMaanedDKK
-        forbrugtDenneMaanedDKK
-        overfoerselsvalg
-        resterendeDenneMaanedDKK()
-        ugentligtRaadighedsbeloebDKK()
+    class SpendingSubaccount {
+        carriedIn
+        rolloverPreference
+        remainingThisMonth()
+        weeklyAllowance()
     }
-    class FastUdgiftSubkonto {
-        reserveretBeloebDKK
+    class FixedExpenseSubaccount {
+        reservedAmount
     }
-    class Overfoerselsvalg {
+    class RolloverPreference {
         <<enumeration>>
-        TIL_OPSPARING
-        TIL_NAESTE_MAANED
+        TO_SAVINGS
+        TO_NEXT_MONTH
     }
-    class Maanedsoverfoersel {
-        fraMaaned
-        tilMaaned
-        beloebDKK
-        anvendtValg
-        gennemfoertTidspunkt
+    class MonthlyRollover {
+        month
+        amount
     }
-    class Budgetpost {
-        navn
+    class Transaction {
+        date
+        amount
         type
-        beloebPrBetalingDKK
-        maanedsbeloebDKK
-        betalingshyppighed
-        naesteBetalingsdato
     }
-    class Kategori {
-        navn
-    }
-    class Transaktion {
-        transaktionId
-        kildeId
-        dato
-        beloebDKK
-        originalBeloeb
-        originalValuta
-        retning
-        status
-        tekst
-        modpart
-        kategoriseringskilde
-        datakvalitet
-    }
-    class PlanlagtBetaling {
-        betalingId
-        forventetDato
-        beloebDKK
-        originalBeloeb
-        originalValuta
-        retning
-        status
-        tekst
-        modpart
-        tilbagevendende
-        datakvalitet
-    }
-    class Prognose {
-        beregnetTidspunkt
-        periodeFra
-        periodeTil
-        forventetSlutsaldoDKK
-        lavesteSaldoDKK
-        datoForLavesteSaldo
-        forklaring
-        datagrundlagKomplet
-    }
-    class Budgetadvarsel {
-        forventetDato
-        forventetSaldoDKK
-        forklaring
+    class Forecast {
+        period
+        expectedBalance
+        warning
     }
 
-    Kunde "1" -- "0..*" Budget : ejer
-    Kunde "1" -- "0..*" Konto : ejer
-    Budget "0..1" -- "1" Konto : omfatter
-    Konto "1" *-- "1..*" Subkonto : opdeles virtuelt i
-    Subkonto <|-- OpsparingsSubkonto
-    Subkonto <|-- ForbrugsSubkonto
-    Subkonto <|-- FastUdgiftSubkonto
-    ForbrugsSubkonto --> Overfoerselsvalg : gemt valg
-    ForbrugsSubkonto "0..*" --> "0..1" OpsparingsSubkonto : valgt opsparingsmaal
-    ForbrugsSubkonto "1" -- "0..*" Maanedsoverfoersel : kilde
-    Maanedsoverfoersel "0..*" --> "1" Subkonto : faktisk destination
-    Budget "1" *-- "0..*" Budgetpost : indeholder
-    Subkonto "0..1" -- "0..*" Budgetpost : detaljerer allokering
-    Kategori "1" -- "0..*" Budgetpost : grupperer
-    Konto "1" -- "0..*" Transaktion : har
-    Konto "1" -- "0..*" PlanlagtBetaling : har
-    Kategori "0..1" -- "0..*" Transaktion : kategoriserer
-    Subkonto "0..1" -- "0..*" Transaktion : tilskrives
-    Budgetpost "0..1" -- "0..*" PlanlagtBetaling : matches med
-    PlanlagtBetaling "0..1" -- "0..1" Transaktion : afstemmes med
-    Budget "1" *-- "0..*" Prognose : faar beregnet
-    Prognose "1" *-- "0..*" Budgetadvarsel : indeholder
-    Prognose ..> Budgetpost : bruger plan
-    Prognose ..> Transaktion : bruger faktisk forbrug
-    Prognose ..> PlanlagtBetaling : bruger kendte betalinger
-    Prognose ..> Konto : bruger saldo
-    Prognose ..> Subkonto : bruger allokeringer
-
-    note for Subkonto "Hver subkonto har netop en type.<br/>Alle subkonti er virtuelle puljer i samme konto."
-    note for ForbrugsSubkonto "Rest = allokering + overfoert beloeb - faktisk forbrug.<br/>Brugeren kan aendre det gemte overfoerselsvalg."
-    note for Maanedsoverfoersel "Kun positiv rest overfoeres, hoejst en gang pr. kilde og maaned.<br/>Destination er valgt opsparing eller samme forbrugspulje naeste maaned.<br/>Intern allokering, ikke en bankbetaling eller udgift."
+    User "1" -- "0..*" Budget : owns
+    Budget "0..1" -- "1" Account : uses
+    Account "1" *-- "1..*" Subaccount : divided into
+    Subaccount <|-- SavingsSubaccount
+    Subaccount <|-- SpendingSubaccount
+    Subaccount <|-- FixedExpenseSubaccount
+    SpendingSubaccount --> RolloverPreference : follows
+    SpendingSubaccount "0..*" --> "0..1" SavingsSubaccount : savings target
+    SpendingSubaccount "1" -- "0..*" MonthlyRollover : source
+    MonthlyRollover "0..*" --> "1" Subaccount : destination
+    Account "1" -- "0..*" Transaction : records
+    Subaccount "0..1" -- "0..*" Transaction : assigned to
+    Budget "1" -- "0..*" Forecast : has
