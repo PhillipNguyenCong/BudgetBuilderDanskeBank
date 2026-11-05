@@ -10,7 +10,7 @@ A bachelor-project prototype exploring how customers can create and adjust separ
 
 - [Personas](docs/personas.md): preliminary audience hypotheses and validation questions.
 - [Requirements](docs/requirements.md): functional requirements and proposed quality targets.
-- [User stories](docs/user-stories.md): eight MVP stories with acceptance criteria and requirement links.
+- [User stories](docs/user-stories.md): MVP stories in customer-journey order, with acceptance criteria and requirement links.
 - [Delivery and evaluation plan](docs/delivery-plan.md): implementation order, testing and open decisions.
 
 These documents are the initial planning baseline, not evidence that functionality has been implemented or evaluated. Personas and quantitative quality targets require validation with the supervisor and representative users.
