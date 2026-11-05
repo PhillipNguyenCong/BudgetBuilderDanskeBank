@@ -17,14 +17,17 @@ Before implementation, read:
 3. [Requirements](docs/requirements.md)
 4. [User stories](docs/user-stories.md)
 5. [Delivery and evaluation plan](docs/delivery-plan.md)
-6. The README and any nested AGENTS.md in each area you change.
+6. [Domain model](domain-model-notes.md) and its linked Mermaid source.
+7. The README and any nested AGENTS.md in each area you change.
 
 For product or UX decisions, also read [Personas](docs/personas.md). These are hypotheses, not validated research findings. Do not require nonexistent PRD.md, Security.md or Skills.md files from the old project.
 
 ## Product constraints
 
 - Budget intelligence is presented through calculations, forecasts, warnings and short explanations, not a chatbot.
-- Support multiple independent budgets. Each budget has at least one account; an account belongs to at most one budget at a time.
+- Support multiple independent budgets. Each budget uses exactly one user-owned account; an account belongs to at most one budget at a time.
+- Follow domain-model.mmd and domain-model-notes.md: named virtual savings, spending and fixed-expense subaccounts; salary allocations; monthly/weekly spending guidance; saved month-end rollover preferences.
+- Rollover is an internal allocation, not a payment. Preserve monthly results and process each spending pot and month at most once.
 - Distinguish income, fixed expenses, variable expenses and savings allocations.
 - Keep the budget plan distinct from the forecast estimate. Do not cap predicted spending at the planned amount.
 - Explain data uncertainty. Missing amounts are not zero; unknown payment directions are not confirmed expenses.

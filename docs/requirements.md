@@ -6,14 +6,16 @@ Status: proposed MVP baseline. Requirements describe intended behaviour, not com
 
 | ID | Requirement |
 | --- | --- |
-| FR-01 | The system shall allow customers to create multiple separate budgets, each containing one or more accounts. An account may belong to at most one budget at a time. |
+| FR-01 | The system shall allow customers to create multiple separate budgets, each using exactly one account owned by that customer. An account may belong to at most one budget at a time. |
 | FR-02 | The system shall suggest budget items and transaction categories from available banking data and allow customer corrections. |
-| FR-03 | The system shall distinguish income, fixed expenses, variable expenses and savings allocations. |
-| FR-04 | The system shall display planned and actual amounts for a selected budget period. |
+| FR-03 | The system shall record monthly take-home salary and divide the account into named virtual subaccounts, each of exactly one type: savings, spending or fixed expense. The customer sets non-negative monthly allocations whose total cannot exceed salary. Savings accumulate; fixed-expense allocations reserve money for bills. |
+| FR-04 | The system shall display planned and actual amounts for a selected budget period and subaccount, including remaining monthly spending and a weekly allowance. Remaining spending includes money carried in from the previous month. A daily guide may supplement the weekly allowance; neither is a cash-flow forecast. |
 | FR-05 | The system shall estimate the end-of-month balance and identify the first projected negative-balance date when sufficient data is available. |
 | FR-06 | The system shall explain forecasts, spending changes and warnings using relevant amounts, categories, assumptions and dates. |
 | FR-07 | The system shall identify missing, conflicting or uncertain data and explain its effect on calculations. |
 | FR-08 | The system shall avoid counting the same cash movement more than once and distinguish internal transfers from income and expenses. |
+| FR-09 | The system shall save an editable rollover preference for each spending subaccount: move positive month-end leftovers to a selected savings subaccount in the same account, or add them to the same spending subaccount’s next monthly allocation. |
+| FR-10 | The system shall record each completed rollover’s month, amount, source and actual destination, process it at most once per spending subaccount and month, and preserve monthly results and past rollover records when preferences change. Zero or negative leftovers do not roll over. |
 
 ## Non-functional requirements
 
@@ -33,4 +35,10 @@ The numerical targets below are proposals to agree before evaluation. Results mu
 
 The initial prototype does not execute payments, access live accounts or implement production banking authentication. A trained machine-learning model is not assumed to exist. Joint ownership, split transactions and historical account reassignment are outside the first design. A Budget Health Score is a possible extension, subject to a defined calculation, explanation and usability evaluation.
 
-Savings allocations are planning commitments. A transfer between accounts inside the same budget is not an expense or new income. A transfer outside that budget may affect its balance; the exact classification must be documented before implementation.
+Savings allocations and rollover are virtual planning movements within the account, not expenses, income or bank payments. They do not change its balance. A real transfer outside that account affects its balance but remains classified as a transfer; its treatment in displayed totals must be specified before implementation.
+
+A transaction belongs to one account and may be assigned to at most one subaccount, or remain unassigned. Unassigned spending and uncertain data must remain visible rather than silently disappearing from the budget. Detailed categories and bill schedules remain supporting scope even though they are omitted from the simplified [domain model](../domain-model-notes.md).
+
+## Design alignment — 5 November 2026
+
+The domain model is the conceptual baseline for this revision. FR-01 now requires exactly one account per budget; FR-03 and FR-04 explicitly cover virtual subaccounts and spending allowances; FR-09 and FR-10 add rollover. Existing requirement IDs are preserved. These describe intended behaviour, not implemented functionality.

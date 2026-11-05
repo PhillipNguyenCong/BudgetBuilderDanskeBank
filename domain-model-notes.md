@@ -27,4 +27,4 @@ A simplified conceptual model of the agreed design, not an implemented database 
 
 ## Relationship to existing requirements
 
-This design narrows the earlier one-or-more-accounts baseline in FR-01 / US-03 to exactly one account per budget. Weekly guidance supplements the daily guide in US-06. These are design decisions from 5 November 2026; implementation must explicitly align the existing requirements and acceptance criteria. This documentation does not claim that those features are implemented or tested.
+The [requirements](docs/requirements.md), [user stories](docs/user-stories.md), [architecture](Architecture.md) and [delivery plan](docs/delivery-plan.md) are aligned with this model as of 5 November 2026. FR-01 / US-03 require exactly one account; FR-03 / US-04 define typed pots and salary allocations; FR-04 / US-06 cover monthly and weekly spending guidance with a supplementary daily guide. FR-09–10 / US-11–12 cover saved rollover preferences and completed transfers. This alignment describes intended behaviour, not implemented or tested features. Month-close scheduling and correction policies remain explicit implementation decisions in the delivery plan.

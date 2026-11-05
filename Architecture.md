@@ -6,7 +6,7 @@ Status: agreed architectural direction for the prototype. The backend workspace 
 
 Support a responsive desktop/mobile web application first, followed by a React Native application using the same backend. Keep UI presentation, application workflows, financial calculations and persistence independently understandable and testable.
 
-Use [requirements](docs/requirements.md) and [user stories](docs/user-stories.md) as the behavioural baseline. The previous bachelor-project repository is not a source of current requirements.
+Use [requirements](docs/requirements.md), [user stories](docs/user-stories.md) and the [domain model](domain-model-notes.md) as the behavioural baseline. The previous bachelor-project repository is not a source of current requirements.
 
 ## System boundaries
 
@@ -106,7 +106,7 @@ Derive the customer identity from the authenticated server context, never trust 
 
 Keep normalisation, categorisation, reconciliation and forecasting deterministic where possible. Pass input data and the calculation date explicitly. Use integer oere or exact decimal arithmetic. Return explicit data-quality issues rather than silently interpreting missing values as zero.
 
-Keep budget plans distinct from forecast estimates. Quarterly and annual bills have both monthly planning equivalents and dated cash movements; do not count both as cash outflows. Internal transfers within a budget must not inflate income or spending. Review the existing local budget-core experiment against current requirements before migration.
+Keep budget plans distinct from forecast estimates. Quarterly and annual bills have both monthly planning equivalents and dated cash movements; do not count both as cash outflows. Virtual allocations and rollover between subaccounts must not inflate income or spending or alter the account balance. Actual bank transfers are separate recorded movements. Review the existing local budget-core experiment against current requirements before migration.
 
 ### contracts
 
@@ -128,9 +128,23 @@ flowchart TD
 
 The diagram shows logical processing stages, not separate deployed services. Imported source records and customer overrides remain distinguishable so re-imports do not silently erase corrections. Mark invalid or uncertain records for review; do not silently discard them or invent replacement values. Reconcile booked transactions, pending movements and planned payments before combining them in a forecast.
 
-Budget creation must validate account ownership and enforce the one-budget-per-account rule atomically, including concurrent requests. The database schema and transaction strategy must support this rule; disabling a checkbox in the frontend is insufficient.
+Budget creation must require exactly one account, validate ownership and enforce the one-budget-per-account rule atomically, including concurrent requests. The database schema and transaction strategy must support this rule; disabling a checkbox in the frontend is insufficient.
 
 Use dated forecasts with their input period and material assumptions. A successful budget save and an unavailable forecast are distinct outcomes; the response and UI should represent them separately.
+
+## Domain responsibilities
+
+The simplified model describes concepts, not persistence entities or API payloads. Each budget uses exactly one user-owned account, divided into named virtual SavingsSubaccount, SpendingSubaccount and FixedExpenseSubaccount pots. Categories and bill schedules remain supporting details rather than additional bank accounts.
+
+- Budget stores the monthly take-home salary. Subaccount allocations are non-negative and their total cannot exceed it. Savings accumulate; fixed-expense pots reserve money for bills.
+- Transactions belong to the account and may be assigned to at most one pot. Imported data and customer assignment overrides remain distinguishable. Unassigned or uncertain transactions stay visible.
+- Budget-core calculates remaining monthly spending, weekly/daily guidance and rollover amounts using explicit periods and exact money. Remaining spending includes carried-in money. A forecast remains a separate estimate and must not treat an allocation or rollover as a cash outflow.
+- The backend saves each spending pot’s rollover preference and validates any savings target against ownership, type and the same account. Clients display and edit the choice through the API.
+- At month-end, a service applies positive leftovers to the chosen destination. A database transaction must make the rollover record and virtual amount updates atomic, with uniqueness per source spending pot and closed month. Retries must not allocate money twice.
+- Preserve monthly results and the actual source/destination of completed rollovers. Changing preferences or allocations must not rewrite closed history. The simplified diagram omits the persistence details needed for this history.
+- Missing inputs or an invalid destination leave rollover unresolved with a visible reason. Do not silently redirect it or infer zero. The rollover workflow does not execute payments.
+
+Before implementing month closure, specify the budget timezone/cutoff, the trigger and retry mechanism, and handling of late transactions or corrections. These operational details are not determined by the conceptual diagram.
 
 ## Persistence and deployment
 
@@ -142,9 +156,9 @@ No production banking connection or payment execution is in the initial scope.
 
 ## Verification
 
-- Unit tests: pure calculations, normalisation, classification overrides and reconciliation edge cases.
+- Unit tests: salary-allocation totals, monthly/weekly allowances, rollover amounts, normalisation, classification overrides and reconciliation edge cases.
 - Component tests: observable UI behaviour, including accessibility and uncertainty states.
-- Backend integration tests: request validation, account ownership, persistence, concurrency and errors using an isolated test database.
+- Backend integration tests: request validation, account ownership, same-account savings targets, monthly history, atomic rollover retries/concurrency and errors using an isolated test database.
 - End-to-end tests: create and reopen a budget, review corrections and interpret forecast availability.
 - Usability and forecast evaluation: follow the delivery plan; passing automated tests is not evidence of forecast accuracy or user understanding.
 
@@ -157,5 +171,7 @@ Use stable FR, NFR and US identifiers to connect tests and implementation with t
 3. PostgreSQL schema, migration tool and test-database setup.
 4. Forecast balance basis, minimum historical coverage and uncertain payment handling.
 5. Deployment environments and approved use of the supplied dataset.
+6. Month-close timezone, cutoff, trigger/retries and late-transaction correction policy for US-12.
+7. Effective dates for allocation changes and how reserved fixed-expense amounts evolve after bill payments; retain closed monthly results.
 
 Keep AGENTS.md commands aligned with the implemented workspace workflow. Update this document when a decision changes rather than letting implementation and documentation diverge.
