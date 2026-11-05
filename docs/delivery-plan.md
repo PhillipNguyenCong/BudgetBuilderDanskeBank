@@ -6,12 +6,12 @@ Status: proposed plan, not a record of completed work.
 
 | Stage | Stories | Intended outcome |
 | --- | --- | --- |
-| 1. Budget setup and data foundation | US-01, US-02, planning portion of US-03, US-08 | Create separate budgets, review suggestions and expose input problems. |
-| 2. Actual spending | US-04 | Compare planned and actual spending with transfer and duplicate handling. |
-| 3. Forecasting and warnings | US-06, US-07, forecast portion of US-03 | Explain a baseline forecast and identify daily shortfalls, including irregular bills. |
-| 4. Spending insights | US-05 | Explain category changes using defensible comparison periods. |
+| 1. Budget setup and data foundation | US-01, US-02, US-03, US-04, planning portion of US-05, US-10 | Create separate budgets, review suggestions and expose input problems. |
+| 2. Actual spending | US-06 | Compare planned and actual spending with transfer and duplicate handling. |
+| 3. Forecasting and warnings | US-07, US-08, forecast portion of US-05 | Explain a baseline forecast and identify daily shortfalls, including irregular bills. |
+| 4. Spending insights | US-09 | Explain category changes using defensible comparison periods. |
 
-US-03 and US-08 span stages. Do not mark a story complete until all of its acceptance criteria pass. A Budget Health Score is deferred until its meaning, calculation and usefulness are validated.
+US-05 and US-10 span stages. Do not mark a story complete until all of its acceptance criteria pass. A Budget Health Score is deferred until its meaning, calculation and usefulness are validated.
 
 ## Test and evaluation plan
 
@@ -36,12 +36,12 @@ Existing local diagrams and the budget-core experiment are separate artifacts. T
 ## Open decisions
 
 1. Validate personas and confirm usability tasks and measurable quality targets with the supervisor.
-2. Define a significant spending change and the comparison window for US-05.
-3. Confirm the balance basis, payment-direction interpretation, historical coverage and duplicate matching for US-06/US-08.
+2. Define a significant spending change and the comparison window for US-09.
+3. Confirm the balance basis, payment-direction interpretation, historical coverage and duplicate matching for US-07/US-10.
 4. Define how refunds, transfers outside a budget and savings allocations affect each displayed total.
 5. Define persistence and edit behaviour before implementing the save/reopen stories.
 6. Choose the implementation structure and record it before creating agent instructions tied to paths or commands.
 
 ## Traceability and completion
 
-Use stable IDs in issues, tests and pull requests, for example `US-06 AC-2` and `NFR-06`. For each completed story, record the implementation link, tests run, unresolved limitations and any usability evidence. Changes to acceptance criteria should be documented as decisions, not silently rewritten to match the implementation.
+Use stable IDs in issues, tests and pull requests, for example `US-07 AC-2` and `NFR-06`. For each completed story, record the implementation link, tests run, unresolved limitations and any usability evidence. Changes to acceptance criteria should be documented as decisions, not silently rewritten to match the implementation.

@@ -9,7 +9,7 @@ Emma has a regular income but no structured budget. She finds manual categorisat
 - Goal: create an understandable budget with minimal manual work.
 - Needs: account selection, reviewable suggestions, clear categories and a simple monthly overview.
 - Pain points: setup effort, unfamiliar budget concepts and uncertainty about remaining spending capacity.
-- Relevant stories: US-01, US-02, US-03, US-04 and US-08.
+- Relevant stories: US-03, US-04, US-05, US-06 and US-10.
 
 ## P-02 — Daniel: proactive budget planner
 
@@ -18,7 +18,7 @@ Daniel already tracks expenses but struggles with irregular bills and changes in
 - Goal: understand spending changes and identify potential shortfalls before they occur.
 - Needs: dated payments, comparable spending periods, explained forecasts and actionable warnings.
 - Pain points: annual bills, unexplained category changes and forecasts whose assumptions are unclear.
-- Relevant stories: US-03, US-04, US-05, US-06, US-07 and US-08.
+- Relevant stories: US-05, US-06, US-09, US-07, US-08 and US-10.
 
 ## Validation questions
 

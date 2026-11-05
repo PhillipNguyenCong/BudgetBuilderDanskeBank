@@ -1,6 +1,6 @@
 # Backend setup task
 
-Status: infrastructure task supporting US-01 and NFR-05/NFR-07; not an implementation of budget creation.
+Status: infrastructure task supporting US-03 and NFR-05/NFR-07; not an implementation of budget creation.
 
 As a developer, I want a testable HTTP backend and an isolated development database connection so that the first budget workflow can be implemented safely.
 
