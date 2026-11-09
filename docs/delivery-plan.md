@@ -2,6 +2,10 @@
 
 Status: proposed plan, not a record of completed work.
 
+## Frontend priority — 9 November 2026
+
+Native mobile is the first frontend delivery. Start with the [mobile shell](mobile-shell-story.md): four tabs, local fonts and a disabled budget introduction. Budget setup and backend integration follow in separate slices. The responsive web client is deferred. Bundling does not constitute a physical device or usability test.
+
 ## Delivery order
 
 | Stage | Stories | Intended outcome |

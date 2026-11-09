@@ -1,6 +1,6 @@
 # Web application
 
-Status: directory scaffold; no runnable application yet.
+Status: directory scaffold; no runnable application yet. Native mobile in `apps/mobile` is the first frontend delivery; web implementation is deferred.
 
 The responsive React, TypeScript and Vite web application will support desktop and mobile browsers in one codebase.
 

@@ -248,3 +248,7 @@ US-03 now selects exactly one account. US-04 defines typed virtual pots and sala
 US-03/04 now have validated account-scoped create/edit APIs, exact row totals, editable names/colors, revision conflicts and memory/PostgreSQL repository adapters. Income is a separate income widget; each pot's monthly allocation is the sum of its rows. Savings changes only when explicitly submitted. AI is initial-only in the intended flow; generation and item-goal AI remain deferred.
 
 US-10 has conservative data normalization and explicit issues; categorization, assignment and forecast reconciliation remain deferred. US-11 has validated preference persistence, not month-end execution. US-05 scheduling is not implemented by free-form monthly rows. These stories are partially implemented, not fully accepted end-to-end. See [foundation criteria](backend-foundation-story.md).
+
+## Mobile shell delivery slice
+
+US-01/02 now have a native navigation/introduction slice, with creation deliberately disabled. This does not complete saved-budget, request-state or creation criteria. See [mobile shell acceptance criteria](mobile-shell-story.md).

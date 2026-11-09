@@ -4,7 +4,7 @@ Status: modular monolith with feature-based layers and ports/adapters at banking
 
 ## Goals and scope
 
-Support a responsive desktop/mobile web application first, followed by a React Native application using the same backend. Keep UI presentation, application workflows, financial calculations and persistence independently understandable and testable.
+Deliver a React Native / Expo application first, with a responsive web client deferred. Both will use the same backend contracts. Keep UI presentation, application workflows, financial calculations and persistence independently understandable and testable.
 
 Use [requirements](docs/requirements.md), [user stories](docs/user-stories.md) and the [domain model](domain-model-notes.md) as the behavioural baseline. The previous bachelor-project repository is not a source of current requirements.
 
@@ -12,7 +12,7 @@ Use [requirements](docs/requirements.md), [user stories](docs/user-stories.md) a
 
 - `apps/web`: React, TypeScript and Vite; one responsive application for desktop and mobile browsers.
 - `apps/backend`: TypeScript HTTP backend intended for Vercel. It validates requests, enforces access, coordinates workflows and performs authoritative calculations.
-- `apps/mobile`: future React Native client with native screens and navigation.
+- `apps/mobile`: React Native / Expo client with native screens and navigation; API integration deferred.
 - `packages/budget-core`: framework-independent calculation and data-processing logic.
 - `packages/contracts`: shared API request/response types and runtime validation schemas.
 - `database/migrations`: version-controlled PostgreSQL schema changes.
@@ -21,7 +21,7 @@ Use [requirements](docs/requirements.md), [user stories](docs/user-stories.md) a
 ```mermaid
 flowchart LR
   W[Responsive web app] --> B[TypeScript backend on Vercel]
-  M[Future React Native app] --> B
+  M[React Native app - integration deferred] -.-> B
   B --> C[Budget core]
   B --> D[(Neon PostgreSQL)]
 ```
@@ -185,3 +185,11 @@ The current plan is an atomic budget aggregate with income rows, ordered typed p
 PostgreSQL persists indexed identity/owner/account fields, revision/timestamps and a validated JSONB plan. A unique account constraint and revision-conditioned update protect concurrent writes. Public API responses omit owner IDs and database internals. Normalization exposes unknown amounts/directions and actual coverage. An initial suggestion must not rerun during edits; AI, savings-goal recommendations and forecasts remain unimplemented.
 
 The current plan is not historical accounting. Closed months, allocation effective dates and month-close policy must be implemented separately before execution; current-plan updates cannot be represented as preserved monthly history. See [backend foundation story](docs/backend-foundation-story.md) and [API specification](docs/openapi.json).
+
+## Native mobile shell — first frontend delivery
+
+`apps/mobile` uses Expo SDK 57, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and font/safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget/screens`; demo screens and the navigation bar belong to `features/shell`.
+
+Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. Fonts are local licensed assets. Four tabs open on Budget; Create budget is deliberately disabled. No API client, repository or state library is added before a concrete workflow needs one. Native UI components are not shared with the future web UI.
+
+Native Jest/Expo tests run separately from the backend Node runner. Root dev dependencies pin shared React/native test peers to the SDK-compatible versions so npm does not hoist newer incompatible peers into Expo Router. Backend runtime and its memory default are unchanged.

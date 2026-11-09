@@ -32,7 +32,7 @@ For product or UX decisions, also read [Personas](docs/personas.md). These are h
 - Keep the budget plan distinct from the forecast estimate. Do not cap predicted spending at the planned amount.
 - Explain data uncertainty. Missing amounts are not zero; unknown payment directions are not confirmed expenses.
 - Use DKK and approved demonstration data for the prototype.
-- Deliver the responsive web flow first. Native mobile implementation is a later phase unless the user changes the priority.
+- Deliver the native mobile shell first, followed by native budget flows. Responsive web implementation is deferred by the current user decision.
 
 ## Repository responsibilities
 
@@ -40,7 +40,7 @@ For product or UX decisions, also read [Personas](docs/personas.md). These are h
 | --- | --- |
 | apps/web | Responsive React, TypeScript and Vite web application |
 | apps/backend | TypeScript HTTP backend intended for Vercel; authoritative workflows and calculations |
-| apps/mobile | Future React Native client using the same backend |
+| apps/mobile | React Native / Expo client; shell implemented, API integration deferred |
 | packages/budget-core | Framework-independent normalisation, categorisation, reconciliation and forecasting |
 | packages/contracts | Shared API request/response types, errors and runtime validation schemas |
 | database/migrations | Version-controlled PostgreSQL schema changes for Neon |
@@ -99,7 +99,7 @@ For documentation-only changes, verify content, relative links and consistency r
 
 ## Commands and current setup
 
-The repository uses npm workspaces. apps/backend, packages/contracts and packages/budget-core are initialised. From the repository root, use npm ci, npm run dev:backend, npm test, npm run typecheck, npm run build and npm run check:db. The database check reads apps/backend/.env and requires the Neon development connection. See apps/backend/README.md for exact commands. Formatting and contract drift checks are npm run format:check and npm run check:contracts. Migration generation is npm run migrations:generate; application is an explicit ALLOW_DATABASE_MIGRATIONS=true npm run migrations:apply action, never part of startup/tests. Deployment and lint are not configured.
+The repository uses npm workspaces. apps/backend, apps/mobile, packages/contracts and packages/budget-core are initialised. From the repository root, use npm ci, npm run dev:backend, npm test, npm run typecheck, npm run build and npm run check:db. The database check reads apps/backend/.env and requires the Neon development connection. See apps/backend/README.md for exact commands. Formatting and contract drift checks are npm run format:check and npm run check:contracts. Migration generation is npm run migrations:generate; application is an explicit ALLOW_DATABASE_MIGRATIONS=true npm run migrations:apply action, never part of startup/tests. Deployment and lint are not configured.
 
 Inspect the actual manifests and lockfiles before choosing commands or a package manager. Do not claim that npm test, lint or build scripts exist without checking. When initialising a workspace, document its exact development, test, typecheck, lint and build commands in that workspace's README and update this section. Run the relevant checks once available. If a check cannot run, report the specific reason rather than reporting success.
 
@@ -108,3 +108,7 @@ Inspect the actual manifests and lockfiles before choosing commands or a package
 Inspect the branch, working tree and current diff before editing. Preserve unrelated user changes. Use focused commits and feature branches named codex/<short-description> when a new branch is appropriate. Do not assume a dev branch exists or automatically merge into main. Follow the user's requested delivery workflow and the repository's actual branch rules; never force-push or discard unrelated changes as routine cleanup.
 
 A completion report should state what changed, which story or requirement it addresses, what was verified and what remains unresolved. Distinguish automated correctness checks from usability findings and measured forecast accuracy. Keep README and Architecture.md consistent with structural changes.
+
+## Mobile shell commands
+
+The first frontend delivery is now `apps/mobile`, using Expo Router and React Native StyleSheet. Its theme folder is `foundation/theme`. Run `npm run dev:mobile`, `npm run test:mobile`, `npm run typecheck:mobile`, `npm run check:mobile`, `npm run bundle:mobile:ios` and `npm run bundle:mobile:android` from the root. These do not start the backend. Root `npm test` remains backend/shared Node tests; `npm run typecheck` includes mobile. Native device verification is separate from bundling. See apps/mobile/README.md.

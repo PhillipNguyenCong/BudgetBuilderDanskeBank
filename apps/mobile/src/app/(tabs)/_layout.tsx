@@ -1,0 +1,17 @@
+import { Tabs } from 'expo-router';
+import { TabBar } from '../../features/shell/components/TabBar';
+export default function TabsLayout() {
+  return (
+    <Tabs
+      initialRouteName="budget"
+      backBehavior="initialRoute"
+      screenOptions={{ headerShown: false, animation: 'none' }}
+      tabBar={(props) => <TabBar {...props} />}
+    >
+      <Tabs.Screen name="home" options={{ title: 'Home' }} />
+      <Tabs.Screen name="budget" options={{ title: 'Budget' }} />
+      <Tabs.Screen name="cards" options={{ title: 'Cards' }} />
+      <Tabs.Screen name="more" options={{ title: 'More' }} />
+    </Tabs>
+  );
+}

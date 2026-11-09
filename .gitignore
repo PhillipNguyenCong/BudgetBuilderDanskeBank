@@ -7,3 +7,6 @@ coverage/
 .vercel/
 .DS_Store
 *.log
+
+.expo/
+expo-env.d.ts
