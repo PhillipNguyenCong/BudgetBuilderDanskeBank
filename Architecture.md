@@ -188,7 +188,7 @@ The current plan is not historical accounting. Closed months, allocation effecti
 
 ## Native mobile shell — first frontend delivery
 
-`apps/mobile` uses Expo SDK 58, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and font/safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget/screens`; demo screens and the navigation bar belong to `features/shell`.
+`apps/mobile` uses Expo SDK 58, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and font/safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget-overview/screens`; demo screens and the navigation bar belong to `features/shell`.
 
 Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. Fonts are local licensed assets. Four tabs open on Budget. The initial shell had Create budget disabled; account selection and the sample-widget preview now extend that shell as described below. Native UI components are not shared with the future web UI.
 
@@ -202,13 +202,13 @@ A configured file failure maps to safe HTTP 503 BANK_DATA_UNAVAILABLE and remain
 
 ## Native account selection
 
-The Budget tab contains a nested stack for introduction and account selection. The feature screen owns request/selection state; AccountOption receives presentation props. A small `lib/api` client handles cancellation, timeout and safe transport errors. The feature API validates /me, /accounts and /budgets against shared contracts before returning selection data. No global store or financial calculations are added. Selection is transient; Continue now opens the manual creation slice below. Only explicit creation persists a plan.
+The Budget tab contains a nested stack for introduction and account selection. The account-selection screen composes state-specific presentation components. `useAccountSelection` owns request/selection state and cancellation; AccountOption receives presentation props. A small `lib/api` client handles cancellation, timeout and safe transport errors. The feature API validates /me, /accounts and /budgets against shared contracts before returning selection data. No global store or financial calculations are added. Selection is transient; Continue now opens the manual creation slice below. Only explicit creation persists a plan.
 
 Physical phones use an explicit public API URL and the opt-in backend LAN command. Loopback remains the default. Existing API contracts and server-side exclusivity checks remain authoritative; disabling an account in the app does not replace atomic checks when budget creation is implemented.
 
 ## Native widget editor — partial US-04 / US-13
 
-The offline sample-preview route composes a feature screen and owns navigation/discard confirmation. `BudgetEditor` owns its local draft and expansion state; widget, row and savings-review components receive props/callbacks. `features/budget/editor` separates raw input strings and original row evidence from validated plans. Foundation adds a domain-agnostic labelled TextField and keyboard-aware Screen behavior. No global business store is introduced.
+The offline sample-preview route composes a feature screen and owns navigation/discard confirmation. `BudgetEditor` composes small display components and uses `useBudgetEditor` to own local draft, overlay and review state; widget, row and savings-review components receive props/callbacks. `features/budget-editor/editor` separates raw input strings and original row evidence from validated plans. Foundation adds a domain-agnostic labelled TextField and keyboard-aware Screen behavior. No global business store is introduced.
 
 Mobile imports `@budget-builder/budget-core/allocations`, a native-safe entry point without the Node crypto normalization module. Core derives totals and the explicit single-row savings proposal; the UI only parses and formats money. Whole-DKK user input becomes exact integer øre. Existing fractional amounts remain exact unless explicitly changed. Savings changes only through a direct edit or confirmed review, preserving every other row.
 
@@ -216,7 +216,7 @@ The sample entry remains separate from account creation and makes no requests or
 
 ## Manual native creation — staged before AI
 
-The customer chose manual creation first. `app/(tabs)/budget/create` owns route parameters and discard/pending-save navigation protection. `CreateBudgetScreen` composes the account context and existing editor; `useBudgetCreation` coordinates eligibility reads, creation, pending/error state and uncertain-outcome recovery. `features/budget/api/budgets` validates requests/responses. The technical HTTP client supports JSON writes, safe error codes, timeout and cancellation; no owner ID or derived totals are submitted.
+The customer chose manual creation first. `app/(tabs)/budget/create` owns route parameters and discard/pending-save navigation protection. `CreateBudgetScreen` composes the account context and existing editor; `useBudgetCreation` coordinates eligibility reads, creation, pending/error state and uncertain-outcome recovery. `features/budget-shared/api/budgets` validates budget requests/responses; `features/budget-creation/api/setup` coordinates eligibility through the account-selection public API. The technical HTTP client supports JSON writes, safe error codes, timeout and cancellation; no owner ID or derived totals are submitted.
 
 The editor starts with blank amount text over a structural four-widget template. Template zero values are never shown as confirmed amounts or submitted before explicit input. Optional spending rollover controls validate saved preferences without claiming execution. Source adjustment metadata uses backward-compatible optional contract fields. No database migration is needed for these fields in the existing validated JSONB plan.
 
@@ -227,3 +227,13 @@ The supplied account history is disclosed but is not used to generate manual amo
 Live allocation guidance is derived independently of full-plan validity: the native draft adapter maps amount text to integer øre, missing or invalid values, and budget-core calculates the provisional global remainder. Summary/widget components render the same result and identify unfinished pots. No per-keystroke API call or persisted progress field is introduced. Blank amounts still block saving; backend validation remains authoritative. See [guidance criteria](docs/mobile-allocation-guidance-story.md).
 
 Fixed-expense frequency is optional row data in the existing plan JSON. Budget-core owns conversion from per-payment amounts to monthly allocations (rounding each bill up to integer oere). Native partial guidance, completed-plan totals and backend validation share that conversion; clients do not persist authoritative derived monthly amounts. Missing frequency preserves existing monthly semantics.
+
+## Mobile feature boundaries — 10 November 2026
+
+The native frontend separates `account-selection`, `budget-creation`, `budget-editor`, `budget-overview`, `budget-preview`, `budget-shared` and `shell`. Each owns its components, hooks, API orchestration and models where needed; styles and prop types remain beside each component. Screens compose focused components rather than embedding whole bill lists, colour pickers, recovery controls or saved-plan cards. Loading and error views are feature-owned.
+
+App routes import feature `index.ts` exports and retain navigation/discard guards. Creation imports the editor and the account-selection API; preview imports the editor; account selection, creation, editor and overview can depend on budget-shared. Shared modules never depend on workflow features. Overview renders saved contracts directly without editor draft conversion. `useSavedBudgets` owns list loading, retry and cancellation; no global business store is introduced.
+
+Account-selection and budget-creation additionally expose a React Native-free `api.ts` entry for setup orchestration and the Node integration harness. Production cross-feature imports must target `index.ts` or these explicit API entries. Internal modules use direct local imports; test mocks may target the concrete modules they replace. Foundation and lib remain independent of features. Exact monetary algorithms and public HTTP contracts are unchanged.
+
+This is a maintenance refactor of existing US-03/04/11/13 slices, not new product functionality or evidence of usability. See [acceptance criteria and verification](docs/mobile-feature-refactor-story.md).

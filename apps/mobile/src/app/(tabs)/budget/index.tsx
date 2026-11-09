@@ -1,5 +1,5 @@
-import { useRouter, useIsFocused, useLocalSearchParams } from 'expo-router';
-import { BudgetHomeScreen } from '../../../features/budget/screens/BudgetHomeScreen';
+import { useIsFocused, useLocalSearchParams, useRouter } from 'expo-router';
+import { BudgetHomeScreen } from '../../../features/budget-overview';
 export default function Budget() {
   const router = useRouter();
   const active = useIsFocused();

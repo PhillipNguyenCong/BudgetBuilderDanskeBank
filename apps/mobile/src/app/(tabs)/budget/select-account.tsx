@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { AccountSelectionScreen } from '../../../features/budget/screens/AccountSelectionScreen';
+import { AccountSelectionScreen } from '../../../features/account-selection';
 export default function SelectAccount() {
   const router = useRouter();
   return (

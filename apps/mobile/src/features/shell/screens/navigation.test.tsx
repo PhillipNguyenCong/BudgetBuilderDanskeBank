@@ -1,19 +1,19 @@
-import { fireEvent, screen, renderRouter } from 'expo-router/testing-library';
+import { act } from '@testing-library/react-native';
+import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { Alert } from 'react-native';
 import TabsLayout from '../../../app/(tabs)/_layout';
-import Index from '../../../app/index';
-import Budget from '../../../app/(tabs)/budget/index';
 import BudgetLayout from '../../../app/(tabs)/budget/_layout';
+import Budget from '../../../app/(tabs)/budget/index';
 import SelectAccount from '../../../app/(tabs)/budget/select-account';
 import WidgetPreview from '../../../app/(tabs)/budget/widget-preview';
-import { Alert } from 'react-native';
-import { act } from '@testing-library/react-native';
-jest.mock('../../budget/api/accounts', () => ({
+import Cards from '../../../app/(tabs)/cards';
+import Home from '../../../app/(tabs)/home';
+import More from '../../../app/(tabs)/more';
+import Index from '../../../app/index';
+jest.mock('../../account-selection/api/accounts', () => ({
   loadAccountSelection: jest.fn(() => new Promise(() => {})),
 }));
-jest.mock('../../budget/api/budgets', () => ({ listBudgets: jest.fn(async () => []) }));
-import Home from '../../../app/(tabs)/home';
-import Cards from '../../../app/(tabs)/cards';
-import More from '../../../app/(tabs)/more';
+jest.mock('../../budget-shared/api/budgets', () => ({ listBudgets: jest.fn(async () => []) }));
 
 it('opens Budget and navigates all four labelled tabs without creating a budget', async () => {
   const result = await renderRouter(

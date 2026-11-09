@@ -37,10 +37,19 @@ Root `npm test` still runs only backend/shared Node tests. `npm run typecheck` c
 - `src/app`: startup, layouts and thin Expo Router routes.
 - `src/foundation/components`: reusable presentation primitives.
 - `src/foundation/theme`: colors, typography and spacing.
-- `src/features/budget/screens`: saved-budget loading/overview, introduction, account selection, manual creation and sample-widget preview.
-- `src/features/budget/components` and `editor`: compact widgets, focused pot overlays, row inputs, savings review and local draft validation. Exact calculations come from the native-safe budget-core allocation entry point.
+- `src/features/account-selection`: account eligibility/loading hook, account list and history components.
+- `src/features/budget-creation`: setup checks, initial manual plan, save/recovery hook and creation UI.
+- `src/features/budget-editor`: draft hook and validation adapter; composed widgets, bill inputs, savings review and rollover controls.
+- `src/features/budget-overview`: saved-budget loading hook and read-only plan components using contract data directly.
+- `src/features/budget-preview`: offline sample-plan factory and preview screen.
+- `src/features/budget-shared`: budget list/create requests, DKK formatting, labels and widget palette; no workflow or React Native imports.
 - `src/features/shell`: demo screens, navigation bar and colocated navigation tests.
+- `src/tests`: cross-feature creation/navigation tests, outside the Expo Router route directory.
 - `assets/fonts`: local Open Sans Regular/SemiBold and OFL license, sourced from `@expo-google-fonts/open-sans@0.4.2`. No runtime font downloads.
+
+Each feature exposes its supported interface through `index.ts`. Routes and other features use these public exports; internal modules import local files directly. The account-selection and budget-creation features also expose `api.ts` as a small React Native-free public entry for setup orchestration and the Node integration harness. Only test mocks target implementation modules directly. Do not export every component from a feature or import another feature's private files.
+
+Screens compose named components; hooks own request/draft state, cancellation and transitions. Display components receive explicit props and callbacks, with styles and prop types in the same file. Keep financial algorithms in budget-core and foundation components domain-agnostic. Creation and preview share the editor; overview reads saved contracts without importing draft state. See [refactor criteria and verification](../../docs/mobile-feature-refactor-story.md).
 
 The Figma reference is [Your money, organised](https://www.figma.com/design/0ka6z9Ob7PgioGkZfnEN4V?node-id=194-9). Layout adapts to native safe areas and scalable text. Create budget opens account selection; Continue opens manual setup for an eligible account. Saving returns to Budget with the new plan selected.
 

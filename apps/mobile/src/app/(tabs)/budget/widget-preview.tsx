@@ -1,7 +1,7 @@
-import { useRouter, usePreventRemove } from 'expo-router';
+import { usePreventRemove, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import { WidgetPreviewScreen } from '../../../features/budget/screens/WidgetPreviewScreen';
+import { WidgetPreviewScreen } from '../../../features/budget-preview';
 
 export default function WidgetPreview() {
   const router = useRouter();

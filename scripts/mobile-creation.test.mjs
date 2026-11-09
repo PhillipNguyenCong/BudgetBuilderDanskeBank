@@ -4,13 +4,9 @@ import { once } from 'node:events';
 import { createApp } from '../apps/backend/dist/app.js';
 import { MemoryBudgetRepository } from '../apps/backend/dist/features/budgets/memory-repository.js';
 import { JsonBankDataProvider } from '../apps/backend/dist/infrastructure/banking/json-bank-data-provider.js';
-import { loadAccountSelection } from '../apps/mobile/src/features/budget/api/accounts.ts';
-import {
-  createBudget,
-  listBudgets,
-  loadBudgetSetup,
-} from '../apps/mobile/src/features/budget/api/budgets.ts';
-import { manualPlan } from '../apps/mobile/src/features/budget/editor/manualPlan.ts';
+import { loadAccountSelection } from '../apps/mobile/src/features/account-selection/api.ts';
+import { createBudget, listBudgets } from '../apps/mobile/src/features/budget-shared/index.ts';
+import { manualPlan, loadBudgetSetup } from '../apps/mobile/src/features/budget-creation/api.ts';
 
 test('native feature API creates and reopens a manual budget against an isolated synthetic HTTP backend', async () => {
   const app = createApp({

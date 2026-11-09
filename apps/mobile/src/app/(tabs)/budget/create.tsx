@@ -1,8 +1,8 @@
+import type { Budget } from '@budget-builder/contracts';
 import { useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import type { Budget } from '@budget-builder/contracts';
-import { CreateBudgetScreen } from '../../../features/budget/screens/CreateBudgetScreen';
+import { CreateBudgetScreen } from '../../../features/budget-creation';
 
 export default function CreateBudget() {
   const router = useRouter();

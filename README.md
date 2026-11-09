@@ -70,3 +70,5 @@ Mobile Create budget now follows account selection → manual widget entry → C
 The editor shows live “left to allocate” guidance while filling the pots, based on entered amounts and clearly marked as provisional when amounts are missing. It does not automatically distribute income. See [allocation guidance](docs/mobile-allocation-guidance-story.md).
 
 The offline **Preview sample widgets** entry remains available. For physical phones, use the opt-in LAN setup in [mobile instructions](apps/mobile/README.md). See [manual creation criteria and verification](docs/mobile-budget-creation-story.md). Default memory storage loses saved budgets on backend restart; no shared database migration or deployment is part of this delivery.
+
+The mobile frontend now uses focused account-selection, creation, editor, overview, preview and shared-budget features. See the [mobile structure](apps/mobile/README.md#structure) and [maintenance verification](docs/mobile-feature-refactor-story.md). This restructuring does not add new budget functionality.
