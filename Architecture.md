@@ -188,7 +188,7 @@ The current plan is not historical accounting. Closed months, allocation effecti
 
 ## Native mobile shell — first frontend delivery
 
-`apps/mobile` uses Expo SDK 57, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and font/safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget/screens`; demo screens and the navigation bar belong to `features/shell`.
+`apps/mobile` uses Expo SDK 58, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and font/safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget/screens`; demo screens and the navigation bar belong to `features/shell`.
 
 Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. Fonts are local licensed assets. Four tabs open on Budget; Create budget is deliberately disabled. No API client, repository or state library is added before a concrete workflow needs one. Native UI components are not shared with the future web UI.
 

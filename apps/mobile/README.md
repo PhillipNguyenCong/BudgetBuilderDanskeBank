@@ -1,6 +1,6 @@
 # Native mobile app
 
-First frontend delivery: React Native, TypeScript and Expo SDK 57 with Expo Router. Four working tabs open on Budget. Create budget is disabled; Home, Cards and More are explicit demo screens. No banking data, API calls, database, authentication or budget logic is included.
+First frontend delivery: React Native, TypeScript and Expo SDK 58 with Expo Router. Four working tabs open on Budget. Create budget is disabled; Home, Cards and More are explicit demo screens. No banking data, API calls, database, authentication or budget logic is included.
 
 ## Start on iPhone
 
@@ -12,7 +12,9 @@ First frontend delivery: React Native, TypeScript and Expo SDK 57 with Expo Rout
 
 Android uses the same Metro command and Expo Go QR scanner. No Xcode, Android Studio, cloud build or store release is required for Expo Go.
 
-SDK 57 was selected from [Expo's physical-device guidance](https://docs.expo.dev/get-started/create-a-project/) on 9 November 2026: SDK 58 is in transition and Expo Go uses SDK 57. Recheck compatibility when upgrading Expo Go; do not independently upgrade React or React Native.
+The project targets Expo SDK 58 to match the installed iOS Expo Go version. Expo Go on a physical iPhone supports the current SDK only. Follow [Expo's upgrade guide](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/) and align all Expo/React Native dependencies together when upgrading.
+
+After a dependency upgrade, stop Metro and run `npm run start --workspace @budget-builder/mobile -- --clear` from the repository root, then scan the new QR code. The `a` key launches Android through local Android SDK/ADB tooling; it is not needed when opening Expo Go by scanning the QR code on a physical phone.
 
 ## Commands (repository root)
 

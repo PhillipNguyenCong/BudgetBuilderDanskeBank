@@ -1,9 +1,10 @@
 import { Tabs } from 'expo-router';
 import { TabBar } from '../../features/shell/components/TabBar';
+export const unstable_settings = { initialRouteName: 'budget' };
+
 export default function TabsLayout() {
   return (
     <Tabs
-      initialRouteName="budget"
       backBehavior="initialRoute"
       screenOptions={{ headerShown: false, animation: 'none' }}
       tabBar={(props) => <TabBar {...props} />}

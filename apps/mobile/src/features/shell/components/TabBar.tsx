@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { AppText } from '../../../foundation/components/AppText';
 import { colors, spacing } from '../../../foundation/theme/theme';
-export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
+export function TabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps) {
   return (
     <View
       style={[
@@ -25,15 +25,14 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
             accessibilityState={{ selected }}
             style={styles.tab}
             onPress={() => {
-              const event = navigation.emit({
+              const event = emitter.emit({
                 type: 'tabPress',
                 target: route.key,
                 canPreventDefault: true,
               });
-              if (!selected && !event.defaultPrevented)
-                navigation.navigate(route.name, route.params);
+              if (!selected && !event.defaultPrevented) navigateToTab(route.key);
             }}
-            onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
+            onLongPress={() => emitter.emit({ type: 'tabLongPress', target: route.key })}
           >
             <AppText variant="small" style={[styles.label, selected && styles.selected]}>
               {label}
