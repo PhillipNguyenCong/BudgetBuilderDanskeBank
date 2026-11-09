@@ -4,7 +4,13 @@ import { AppText } from '../../../foundation/components/AppText';
 import { Card } from '../../../foundation/components/Card';
 import { Button } from '../../../foundation/components/Button';
 import { colors } from '../../../foundation/theme/theme';
-export function BudgetIntroScreen({ onCreate }: { onCreate: () => void }) {
+export function BudgetIntroScreen({
+  onCreate,
+  onPreview,
+}: {
+  onCreate: () => void;
+  onPreview?: () => void;
+}) {
   return (
     <Screen>
       <AppText variant="heading" accessibilityRole="header">
@@ -25,6 +31,9 @@ export function BudgetIntroScreen({ onCreate }: { onCreate: () => void }) {
       ))}
       <AppText>Pots divide the money in your account. No bank transfer is made.</AppText>
       <Button label="Create budget" onPress={onCreate} />
+      {onPreview ? (
+        <Button label="Preview sample widgets" variant="secondary" onPress={onPreview} />
+      ) : null}
     </Screen>
   );
 }

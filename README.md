@@ -44,13 +44,13 @@ docs/                  # Personas, requirements, stories and delivery plan
 
 Neon is the PostgreSQL database provider. Both clients use the backend API; only the backend accesses Neon and runs authoritative calculations. The native mobile shell is the first frontend delivery. Responsive web implementation is deferred.
 
-Current status: the backend foundation implements normalized account/transaction/payment reads and budget create/edit APIs. Shared contracts and budget-core are initialized. Local development/tests default to memory with a cached synthetic JSON provider; a PostgreSQL budget adapter and generated migration are available by explicit opt-in. No migration was applied, bank dataset uploaded or deployment performed. The native mobile shell provides four tabs and API-backed account selection; web remains a scaffold. See [backend commands](apps/backend/README.md), [OpenAPI](docs/openapi.json) and [foundation acceptance criteria](docs/backend-foundation-story.md).
+Current status: the backend foundation implements normalized account/transaction/payment reads and budget create/edit APIs. Shared contracts and budget-core are initialized. Local development/tests default to memory with a cached synthetic JSON provider; a PostgreSQL budget adapter and generated migration are available by explicit opt-in. No migration was applied, bank dataset uploaded or deployment performed. The native mobile shell provides four tabs, account selection, manual budget creation and a saved-plan overview; web remains a scaffold. See [backend commands](apps/backend/README.md), [OpenAPI](docs/openapi.json) and [foundation acceptance criteria](docs/backend-foundation-story.md).
 
 ## Working with the documentation
 
 Keep requirement and story IDs stable. Update acceptance criteria when a decision changes and link implementation work and tests to the relevant IDs. Record assumptions separately from observed results. Completed unit tests alone do not demonstrate forecast accuracy or usability.
 
-This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. The agreed directory structure is recorded above. The architectural direction is recorded in Architecture.md. Agent working rules are recorded in AGENTS.md. Forecasting, AI algorithms, transaction assignment, monthly history/rollover execution and the interactive budget flow remain subsequent work.
+This is a fresh repository. The previous bachelor-project repository is not an implementation template or source of current requirements. The agreed directory structure is recorded above. The architectural direction is recorded in Architecture.md. Agent working rules are recorded in AGENTS.md. Forecasting, AI algorithms, transaction assignment, saved-plan editing and monthly history/rollover execution remain subsequent work.
 
 ## Run the mobile app
 
@@ -65,4 +65,8 @@ Open the QR code in Expo Go on your iPhone, using the same local network. No bac
 
 The backend now exposes the current demo profile at `GET /api/v1/me`, sharing its source with owner-scoped account, transaction and payment reads. Configure the approved local file through ignored backend settings; no user database or login is introduced. See [demo-user delivery](docs/demo-user-story.md).
 
-Mobile Create budget now opens account selection backed by the existing local API. For physical phones, use the opt-in LAN setup in [mobile instructions](apps/mobile/README.md). The budget editor and saving are not implemented yet.
+Mobile Create budget now follows account selection → manual widget entry → Create budget → saved-plan overview. Initial amounts are blank, savings changes require explicit input/review, and optional rollover preferences are saved without executing month-end movements. Saved budgets are loaded when returning to Budget. AI suggestions will populate the same editor in a later slice; they are not implemented yet.
+
+The editor shows live “left to allocate” guidance while filling the pots, based on entered amounts and clearly marked as provisional when amounts are missing. It does not automatically distribute income. See [allocation guidance](docs/mobile-allocation-guidance-story.md).
+
+The offline **Preview sample widgets** entry remains available. For physical phones, use the opt-in LAN setup in [mobile instructions](apps/mobile/README.md). See [manual creation criteria and verification](docs/mobile-budget-creation-story.md). Default memory storage loses saved budgets on backend restart; no shared database migration or deployment is part of this delivery.

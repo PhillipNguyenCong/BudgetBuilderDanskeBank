@@ -44,7 +44,7 @@ Transaction/payment reads accept `limit` (1–100, default 50), `offset` (0–10
 
 Money is integer øre. Missing imported money is null; zero stays zero. Widget totals and unallocated income are server-derived. Monthly income rows fund typed pots. Color is one of OCEAN, SKY, MINT, LAVENDER, SAND, ROSE. Rows are ordered arrays with stable IDs. Inputs have protective limits (100 pots, 1000 rows per widget, 1 MiB request bodies), not Figma's demonstration limits.
 
-PUT cannot change accountId. It saves exactly the submitted rows and does not silently redistribute savings or regenerate suggestions. Cancel means do not submit PUT. Rollover settings are stored and validated, but are not executed. Defaults in the create example have automation disabled. Sources/explanations attached to rows are user-submitted planning provenance, not trusted proof of a bank movement.
+PUT cannot change accountId. It saves exactly the submitted rows and does not silently redistribute savings or regenerate suggestions. Cancel means do not submit PUT. Rollover settings are stored and validated, but are not executed. Defaults in the create example have automation disabled. Sources/explanations attached to rows are user-submitted planning provenance, not trusted proof of a bank movement. Optional originalSuggestion and adjustedByUser fields preserve original suggested labels/amounts alongside accepted edits; old plans remain valid.
 
 A stale update or occupied account returns 409; invalid structure returns 400; excess allocation or aggregate overflow returns 422. Error responses contain a safe code/message, with request IDs and field paths where applicable. Unexpected internal details and financial payloads are not logged or returned.
 

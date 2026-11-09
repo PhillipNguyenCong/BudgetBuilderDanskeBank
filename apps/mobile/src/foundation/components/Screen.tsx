@@ -1,4 +1,11 @@
-import { ScrollView, StyleSheet, View, type ViewProps } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+  type ViewProps,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BankHeader } from './BankHeader';
 import { colors, spacing } from '../theme/theme';
@@ -7,7 +14,19 @@ export function Screen({ children }: ViewProps) {
     <View style={styles.root}>
       <BankHeader />
       <SafeAreaView edges={['left', 'right']} style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content}>{children}</ScrollView>
+        <KeyboardAvoidingView
+          style={styles.root}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            automaticallyAdjustKeyboardInsets={false}
+            contentContainerStyle={styles.content}
+          >
+            {children}
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );

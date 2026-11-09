@@ -1,6 +1,16 @@
-import { useRouter } from 'expo-router';
-import { BudgetIntroScreen } from '../../../features/budget/screens/BudgetIntroScreen';
+import { useRouter, useIsFocused, useLocalSearchParams } from 'expo-router';
+import { BudgetHomeScreen } from '../../../features/budget/screens/BudgetHomeScreen';
 export default function Budget() {
   const router = useRouter();
-  return <BudgetIntroScreen onCreate={() => router.push('/budget/select-account')} />;
+  const active = useIsFocused();
+  const { budgetId } = useLocalSearchParams<{ budgetId?: string | string[] }>();
+  return (
+    <BudgetHomeScreen
+      active={active}
+      selectedId={typeof budgetId === 'string' ? budgetId : undefined}
+      onSelect={(id) => router.setParams({ budgetId: id })}
+      onCreate={() => router.push('/budget/select-account')}
+      onPreview={() => router.push('/budget/widget-preview')}
+    />
+  );
 }

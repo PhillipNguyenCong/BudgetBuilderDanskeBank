@@ -1977,6 +1977,29 @@
                             "period"
                           ],
                           "additionalProperties": false
+                        },
+                        "originalSuggestion": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "amountOere": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "amountOere"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "adjustedByUser": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
@@ -2105,6 +2128,29 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -2273,6 +2319,47 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "frequency": {
+                                    "type": "string",
+                                    "enum": [
+                                      "MONTHLY",
+                                      "QUARTERLY",
+                                      "HALF_YEARLY",
+                                      "YEARLY"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
+                              },
+                              "frequency": {
+                                "type": "string",
+                                "enum": [
+                                  "MONTHLY",
+                                  "QUARTERLY",
+                                  "HALF_YEARLY",
+                                  "YEARLY"
+                                ]
                               }
                             },
                             "required": [
@@ -2400,6 +2487,29 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -2561,6 +2671,29 @@
                             "period"
                           ],
                           "additionalProperties": false
+                        },
+                        "originalSuggestion": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "amountOere": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "amountOere"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "adjustedByUser": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
@@ -2689,6 +2822,29 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -2857,6 +3013,47 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "frequency": {
+                                    "type": "string",
+                                    "enum": [
+                                      "MONTHLY",
+                                      "QUARTERLY",
+                                      "HALF_YEARLY",
+                                      "YEARLY"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
+                              },
+                              "frequency": {
+                                "type": "string",
+                                "enum": [
+                                  "MONTHLY",
+                                  "QUARTERLY",
+                                  "HALF_YEARLY",
+                                  "YEARLY"
+                                ]
                               }
                             },
                             "required": [
@@ -2984,6 +3181,29 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -3165,6 +3385,29 @@
                             "period"
                           ],
                           "additionalProperties": false
+                        },
+                        "originalSuggestion": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "amountOere": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "amountOere"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "adjustedByUser": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
@@ -3293,6 +3536,29 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -3461,6 +3727,47 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "frequency": {
+                                    "type": "string",
+                                    "enum": [
+                                      "MONTHLY",
+                                      "QUARTERLY",
+                                      "HALF_YEARLY",
+                                      "YEARLY"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
+                              },
+                              "frequency": {
+                                "type": "string",
+                                "enum": [
+                                  "MONTHLY",
+                                  "QUARTERLY",
+                                  "HALF_YEARLY",
+                                  "YEARLY"
+                                ]
                               }
                             },
                             "required": [
@@ -3588,6 +3895,29 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -3829,6 +4159,29 @@
                                   "period"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "originalSuggestion": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "amountOere": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "label",
+                                  "amountOere"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "adjustedByUser": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -3957,6 +4310,29 @@
                                         "period"
                                       ],
                                       "additionalProperties": false
+                                    },
+                                    "originalSuggestion": {
+                                      "type": "object",
+                                      "properties": {
+                                        "label": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 100
+                                        },
+                                        "amountOere": {
+                                          "type": "integer",
+                                          "minimum": 0,
+                                          "maximum": 9007199254740991
+                                        }
+                                      },
+                                      "required": [
+                                        "label",
+                                        "amountOere"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    "adjustedByUser": {
+                                      "type": "boolean"
                                     }
                                   },
                                   "required": [
@@ -4125,6 +4501,47 @@
                                         "period"
                                       ],
                                       "additionalProperties": false
+                                    },
+                                    "originalSuggestion": {
+                                      "type": "object",
+                                      "properties": {
+                                        "label": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 100
+                                        },
+                                        "amountOere": {
+                                          "type": "integer",
+                                          "minimum": 0,
+                                          "maximum": 9007199254740991
+                                        },
+                                        "frequency": {
+                                          "type": "string",
+                                          "enum": [
+                                            "MONTHLY",
+                                            "QUARTERLY",
+                                            "HALF_YEARLY",
+                                            "YEARLY"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "label",
+                                        "amountOere"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    "adjustedByUser": {
+                                      "type": "boolean"
+                                    },
+                                    "frequency": {
+                                      "type": "string",
+                                      "enum": [
+                                        "MONTHLY",
+                                        "QUARTERLY",
+                                        "HALF_YEARLY",
+                                        "YEARLY"
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -4252,6 +4669,29 @@
                                         "period"
                                       ],
                                       "additionalProperties": false
+                                    },
+                                    "originalSuggestion": {
+                                      "type": "object",
+                                      "properties": {
+                                        "label": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 100
+                                        },
+                                        "amountOere": {
+                                          "type": "integer",
+                                          "minimum": 0,
+                                          "maximum": 9007199254740991
+                                        }
+                                      },
+                                      "required": [
+                                        "label",
+                                        "amountOere"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    "adjustedByUser": {
+                                      "type": "boolean"
                                     }
                                   },
                                   "required": [

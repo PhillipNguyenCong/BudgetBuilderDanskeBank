@@ -13,6 +13,22 @@ export const BudgetRowSchema = z.strictObject({
   label: NameSchema,
   amountOere: NonNegativeOereSchema,
   source: SourceSchema.optional(),
+  originalSuggestion: z
+    .strictObject({ label: NameSchema, amountOere: NonNegativeOereSchema })
+    .optional(),
+  adjustedByUser: z.boolean().optional(),
+});
+export const BillFrequencySchema = z.enum(['MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY']);
+export type BillFrequency = z.infer<typeof BillFrequencySchema>;
+export const FixedExpenseRowSchema = BudgetRowSchema.extend({
+  frequency: BillFrequencySchema.optional(),
+  originalSuggestion: z
+    .strictObject({
+      label: NameSchema,
+      amountOere: NonNegativeOereSchema,
+      frequency: BillFrequencySchema.optional(),
+    })
+    .optional(),
 });
 const widget = {
   id: IdSchema,
@@ -28,7 +44,11 @@ export const RolloverSchema = z.strictObject({
 });
 export const PotSchema = z.discriminatedUnion('type', [
   z.strictObject({ ...widget, type: z.literal('SPENDING'), rollover: RolloverSchema }),
-  z.strictObject({ ...widget, type: z.literal('FIXED_EXPENSE') }),
+  z.strictObject({
+    ...widget,
+    type: z.literal('FIXED_EXPENSE'),
+    rows: z.array(FixedExpenseRowSchema).max(1000),
+  }),
   z.strictObject({ ...widget, type: z.literal('SAVINGS') }),
 ]);
 export const BudgetPlanSchema = z

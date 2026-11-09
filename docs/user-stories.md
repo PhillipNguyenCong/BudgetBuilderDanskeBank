@@ -6,22 +6,22 @@ Status: agreed customer-flow baseline with implementation status checked against
 
 | ID | Customer step | Current status |
 | --- | --- | --- |
-| US-01 | Open Budget through Home / Budget / Cards / More | Partial: native tabs and Budget start route; saved-budget routing pending |
-| US-02 | Understand the introduction and start setup | Partial: introduction and active Create budget action; returning-customer flow pending |
-| US-03 | Select one account, review and create a budget | Partial: native account selection and backend create API; native editor/save pending |
-| US-04 | Review initial AI suggestions and edit allocation widgets | Partial: backend rows, colors and totals; suggestion generation and native widgets pending |
+| US-01 | Open Budget through Home / Budget / Cards / More | Implemented navigation and saved-budget routing; device checks pending |
+| US-02 | Understand the introduction and start setup | Implemented empty introduction and returning-customer saved-plan routing |
+| US-03 | Select one account, review and create a budget | Manual native creation/save/reopen implemented; AI-assisted creation remains pending |
+| US-04 | Review initial AI suggestions and edit allocation widgets | Manual widgets and save integration implemented; initial AI suggestions remain pending |
 | US-05 | Understand and plan irregular bills | Planned: schedules and monthly normalization of recurring bills are not implemented by free-form rows |
-| US-06 | View remaining spending and pot details | Planned: saved overview, transaction attribution and allowance calculations pending |
+| US-06 | View remaining spending and pot details | Partial: saved-plan overview; actual spending, attribution and allowances pending |
 | US-07 | View a separate balance forecast | Planned: forecast calculation and native card pending |
 | US-08 | See a relevant shortfall warning | Planned |
 | US-09 | Understand spending changes within the budget | Deferred: no separate insight journey in the active flow |
 | US-10 | Understand data limitations and recover from errors | Partial: normalization, API issues/coverage and native account loading/error states |
-| US-11 | Set optional automatic rollover | Partial: backend preference validation/persistence; native settings and execution pending |
+| US-11 | Set optional automatic rollover | Partial: native setup preferences and backend persistence; execution/month-end decisions pending |
 | US-12 | Review monthly results and rollover history | Planned: month closure, history and fallback decisions pending |
 | US-13 | Edit an existing budget without regenerating suggestions | Partial: revision-controlled backend update; native edit flow pending |
 | US-14 | Save for an item after budget creation | Planned prototype extension: sample proposal only; domain/API and recommendation logic deferred |
 
-US-10 applies throughout. Figma is a design/prototype reference, not evidence of production behavior or device verification. Native code currently ends at account selection: **Create budget is active; Continue is disabled**, and no budget is created from the app. Physical-device checks remain pending in the recorded verification.
+US-10 applies throughout. Figma is a design/prototype reference, not evidence of production behavior or device verification. The native manual flow now goes from **Create budget → account selection → Continue → manual setup → Create budget → saved-plan overview**. The user chose manual creation before AI integration; this staged delivery does not satisfy the initial-suggestion criteria of US-04. The separate offline sample preview still never saves. Physical-device checks remain pending.
 
 ## Agreed flows
 
@@ -80,7 +80,7 @@ Requirements: FR-01, FR-07. Personas: P-01, P-02.
 5. A successful save opens the new budget overview, separate from other budgets. Failed saves preserve inputs and explain the problem; an occupied-account conflict cannot silently switch accounts.
 6. Back/cancel does not persist a budget. Loading requests are cancelled when leaving account selection. Account assignment becomes fixed once created; later edits follow US-13.
 
-Current native slice: criteria 1–2 and back/cancellation are implemented. Continue remains disabled until the editor exists. Backend creation is implemented separately; see [account-selection verification](mobile-account-selection-story.md) and [backend criteria](backend-foundation-story.md).
+Current native delivery: account selection, manual review/edit, explicit creation and saved-plan reopening are implemented. Failed saves retain inputs and uncertain outcomes offer a saved-budget check. Initial AI suggestions remain a separate slice. See [manual creation verification](mobile-budget-creation-story.md), [earlier account selection](mobile-account-selection-story.md) and [backend criteria](backend-foundation-story.md).
 
 ## US-04 — Review an AI-suggested budget and edit widgets
 
@@ -92,8 +92,8 @@ Requirements: FR-02, FR-03, FR-06, FR-07, FR-08. Persona: P-01.
 
 1. After account selection, present “Your suggested budget” and an explanation that the initial suggestion uses available spending history and can be adjusted before creation. This is an AI-suggested allocation, distinct from the future-balance forecast in US-07; no chatbot is introduced.
 2. Use the previous twelve complete months of eligible transactions from the selected account when available. Separate everyday spending and fixed expenses, exclude salary/transfers from spending, and spread quarterly/annual bills into monthly planning amounts without double counting. Show actual coverage and limitations; with no usable history offer manual allocation without invented amounts.
-3. Start with four full-width expandable widgets: Monthly salary, Spending budget, Fixed expenses and Savings. Monthly salary represents income, not a fourth pot type. Each pot has exactly one type: Spending, Fixed expenses or Savings.
-4. Clicking a widget expands inline rows and source explanations: text field on the left, whole-DKK amount field on the right. Show the source period and short calculation descriptions for suggestions. Edited planning amounts are labelled “Adjusted by you” and remain distinguishable from historical evidence.
+3. Start with four full-width compact widgets: Monthly salary, Spending budget, Fixed expenses and Savings. Monthly salary represents income, not a fourth pot type. Each pot has exactly one type: Spending, Fixed expenses or Savings.
+4. Each widget uses two columns and three rows: type / overlay button; editable name / monthly amount; empty / left to allocate. Income, Spending and Savings have one planning amount. Fixed expenses shows its bill total; Edit bills opens a full-screen overlay with compact name/amount rows. Settings opens colour choices for other widgets and rollover preferences for Spending. Closing retains draft edits and the main list stays mounted. Show the source period and short calculation descriptions for suggestions. Edited planning amounts are labelled “Adjusted by you” and remain distinguishable from historical evidence.
 5. Customers can edit widget names, row text and amounts, and add/remove rows. Recalculate each read-only widget total immediately from its rows. Replace the old ±500 controls and separate amount editor with direct input. Financial persistence uses exact integer øre; the server validates and derives totals again.
 6. Customers can add named pots during creation/editing and choose a type when adding. Editing an existing pot changes its name, rows, allocation or color, not its type. Offer six readable color tokens (OCEAN, SKY, MINT, LAVENDER, SAND, ROSE); type is always named in text. Add-row/add-pot controls are repeatable, not limited by the number of Figma demonstration examples.
 7. Names/row labels must be nonblank and amounts non-negative. Require at least one pot. Show income, total allocation and unallocated salary. Over-allocation shows the shortfall and blocks creation/save without discarding inputs; positive unallocated money is allowed.
@@ -106,7 +106,7 @@ Requirements: FR-02, FR-03, FR-06, FR-07, FR-08. Persona: P-01.
 
 - Income DKK 24,000; spending DKK 8,000; fixed expenses DKK 12,000; savings DKK 4,000; unallocated DKK 0.
 - Fixed-expense rows: rent 9,000, utilities 1,500, insurance 900 and subscriptions 600. Explain insurance as 2,700 quarterly divided by three; monthly equivalents are not extra payments.
-- Demonstrate three successive row additions and two additional pots in Figma, plus name/amount/color edits, collapse/expand, over-allocation and failed-save input retention. These are demonstration examples, not product limits.
+- Demonstrate three successive row additions and two additional pots in Figma, plus name/amount/color edits, overlay opening/dismissal, over-allocation and failed-save input retention. These are demonstration examples, not product limits.
 - The twelve-month Figma example is sample data. Native suggestions must disclose the actual shorter local dataset. AI generation is not implemented by the existing normalization or budget-save endpoints.
 
 ## US-05 — Plan for irregular expenses
@@ -255,7 +255,7 @@ Requirements: FR-01, FR-03, FR-09, FR-10. Personas: P-01, P-02.
 
 1. Overview → Edit budget → confirm the existing account → saved widgets → Save changes. Account selection is read-only for an existing budget.
 2. Load saved names, colors, ordered rows, allocations and rollover settings. Do not generate new AI suggestions or overwrite customer edits on entry.
-3. Reuse US-04's inline row editing, add/remove rows, additional pots, color choices, exact totals and validation. Preserve savings unless explicitly edited or an Update savings proposal is confirmed.
+3. Reuse US-04's compact widgets and overlay bill editing, add/remove rows, additional pots, color choices, exact totals and validation. Preserve savings unless explicitly edited or an Update savings proposal is confirmed.
 4. Save changes submits the current revision and accepted plan. A successful save returns to the updated overview; a failed save preserves local inputs. A stale revision produces a conflict, never a silent overwrite; offer reloading the latest saved plan and explain that unsaved edits will be discarded before confirmation.
 5. Cancel leaves the persisted budget unchanged. Over-allocation and invalid rollover destinations block saving; positive unallocated income is permitted.
 6. Current-plan changes must not rewrite closed monthly history. The existing aggregate/revision API does not yet implement historical effective dates or monthly snapshots.
@@ -297,11 +297,15 @@ Stories were reordered to start with navigation and first-time guidance. Existin
 
 - [Backend foundation](backend-foundation-story.md): account-scoped create/update APIs, exact row totals, colors, revision conflicts and memory/PostgreSQL adapters. Income is separate from pots. This does not establish complete US-03/04/13 native flows.
 - [Demo user data](demo-user-story.md): server-controlled profile and cached local source, scoped reads, safe file errors and actual coverage. No production authentication or live banking.
-- [Mobile account selection](mobile-account-selection-story.md): active Create budget, profile/account/eligibility reads, masked identifiers, selection and loading/error/empty states. Continue is still disabled. This supersedes the earlier [shell-only milestone](mobile-shell-story.md), where Create budget was disabled.
+- [Mobile account selection](mobile-account-selection-story.md): active Create budget, profile/account/eligibility reads, masked identifiers, selection and loading/error/empty states. Continue was disabled at that milestone; manual creation now extends it. This supersedes the earlier [shell-only milestone](mobile-shell-story.md), where Create budget was disabled.
+- [Native widget editor](mobile-widget-editor-story.md): an explicitly labelled offline sample preview with expandable rows, additional pots, six colors, exact totals, validation, retained draft source explanations and confirmed savings updates. This was the first partial US-04/13 slice; manual creation now adds save integration and persistent adjustment provenance.
 - The backend stores rollover preferences only. Month closure, actual-spending attribution, accumulated/reserved balances, monthly history and rollover execution remain pending. An initial plan save is not historical accounting.
-- AI suggestions, irregular-bill scheduling, native widgets/editor, forecast/warnings and goal proposals are not implemented by the current API foundation. Separate US-09 insights are deferred from the simplified active flow.
+- [Manual creation](mobile-budget-creation-story.md): real account selection, blank manual amounts, optional rollover settings, atomic accepted-plan creation, saved-plan routing and uncertain-save recovery. This does not implement saved-plan editing or AI.
+- AI suggestions, irregular-bill scheduling, saved-plan editing, forecast/warnings and goal proposals remain pending. Separate US-09 insights are deferred from the simplified active flow.
 - Automated checks and native bundles are recorded in the linked delivery notes; they do not prove physical-device accessibility, usability or forecast accuracy.
 
 ## Flow alignment decisions
 
 Stable US-01–12 identifiers are retained. US-13 makes the existing create/edit distinction explicit; US-14 records the agreed post-creation sample goal flow without claiming implemented goal contracts. The revised baseline adopts expandable spreadsheet-style widgets, initial-only AI suggestions, explicit savings-update confirmation and optional setup rollover with a month-end fallback. Weekly guidance and virtual-allocation invariants remain unchanged. No Figma, API or application code was changed by this documentation alignment.
+
+The subsequent focused-overlay decision supersedes inline expansion for the native editor; see [revised layout and verification](mobile-widget-editor-story.md#revised-widget-layout--focused-overlays). AI suggestions and saved-plan editing remain deferred.

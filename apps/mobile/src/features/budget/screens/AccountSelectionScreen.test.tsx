@@ -36,7 +36,9 @@ const data: AccountSelectionData = {
   usedAccountIds: ['used'],
 };
 it('selects one eligible account and disables accounts with budgets', async () => {
-  await render(<AccountSelectionScreen load={async () => data} onBack={jest.fn()} />);
+  await render(
+    <AccountSelectionScreen onContinue={jest.fn()} load={async () => data} onBack={jest.fn()} />,
+  );
   const available = await screen.findByRole('radio', { name: 'Everyday, ••1234' });
   expect(screen.getByText('Available balance unknown')).toBeVisible();
   expect(screen.getByText(/2 complete months/)).toBeVisible();
@@ -46,14 +48,14 @@ it('selects one eligible account and disables accounts with budgets', async () =
   expect(available).toBeChecked();
   await fireEvent.press(used);
   expect(available).toBeChecked();
-  expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
 });
 it('shows errors and retries instead of showing a false empty list', async () => {
   const load = jest
     .fn()
     .mockRejectedValueOnce(new Error('Could not load accounts.'))
     .mockResolvedValueOnce(data);
-  await render(<AccountSelectionScreen load={load} onBack={jest.fn()} />);
+  await render(<AccountSelectionScreen onContinue={jest.fn()} load={load} onBack={jest.fn()} />);
   await screen.findByText('Could not load accounts.');
   await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
   expect(await screen.findByText('Everyday')).toBeVisible();
@@ -64,7 +66,9 @@ it('shows loading then an explicit empty state', async () => {
   const pending = new Promise<AccountSelectionData>((r) => {
     resolve = r;
   });
-  await render(<AccountSelectionScreen load={() => pending} onBack={jest.fn()} />);
+  await render(
+    <AccountSelectionScreen onContinue={jest.fn()} load={() => pending} onBack={jest.fn()} />,
+  );
   expect(screen.getByText('Loading your accounts…')).toBeVisible();
   resolve({ ...data, accounts: { ...data.accounts, items: [] } });
   expect(await screen.findByText('No accounts available')).toBeVisible();
@@ -74,6 +78,7 @@ it('explains when every account is already allocated and supports back', async (
   const onBack = jest.fn();
   await render(
     <AccountSelectionScreen
+      onContinue={jest.fn()}
       load={async () => ({ ...data, usedAccountIds: ['available', 'used'] })}
       onBack={onBack}
     />,
@@ -90,6 +95,7 @@ it('cancels requests when the screen unmounts', async () => {
   let signal: AbortSignal | undefined;
   const view = await render(
     <AccountSelectionScreen
+      onContinue={jest.fn()}
       onBack={jest.fn()}
       load={(value) => {
         signal = value;

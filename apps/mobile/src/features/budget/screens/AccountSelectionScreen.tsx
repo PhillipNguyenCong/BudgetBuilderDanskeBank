@@ -11,9 +11,11 @@ type State =
   | { status: 'ready'; data: AccountSelectionData };
 export function AccountSelectionScreen({
   onBack,
+  onContinue,
   load = loadAccountSelection,
 }: {
   onBack: () => void;
+  onContinue: (accountId: string) => void;
   load?: typeof loadAccountSelection;
 }) {
   const [state, setState] = useState<State>({ status: 'loading' });
@@ -97,11 +99,15 @@ export function AccountSelectionScreen({
               ) : null}
               <Button
                 label="Continue"
-                disabled
-                accessibilityHint="The budget editor is not available in this demo yet."
+                disabled={!selectedId || state.data.usedAccountIds.includes(selectedId)}
+                onPress={() => {
+                  if (selectedId && !state.data.usedAccountIds.includes(selectedId))
+                    onContinue(selectedId);
+                }}
+                accessibilityHint="Open manual budget setup for the selected account."
               />
               <AppText variant="small">
-                The budget editor is coming next. You can try account selection now.
+                Next, enter and review your monthly plan before creating your budget.
               </AppText>
             </>
           )}

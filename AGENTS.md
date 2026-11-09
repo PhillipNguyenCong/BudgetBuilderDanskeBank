@@ -40,7 +40,7 @@ For product or UX decisions, also read [Personas](docs/personas.md). These are h
 | --- | --- |
 | apps/web | Responsive React, TypeScript and Vite web application |
 | apps/backend | TypeScript HTTP backend intended for Vercel; authoritative workflows and calculations |
-| apps/mobile | React Native / Expo client; shell implemented, API integration deferred |
+| apps/mobile | React Native / Expo client; account selection, manual creation, saved-plan overview and offline preview implemented; AI suggestions and saved-plan editing deferred |
 | packages/budget-core | Framework-independent normalisation, categorisation, reconciliation and forecasting |
 | packages/contracts | Shared API request/response types, errors and runtime validation schemas |
 | database/migrations | Version-controlled PostgreSQL schema changes for Neon |
@@ -111,4 +111,4 @@ A completion report should state what changed, which story or requirement it add
 
 ## Mobile shell commands
 
-The first frontend delivery is now `apps/mobile`, using Expo Router and React Native StyleSheet. Its theme folder is `foundation/theme`. Run `npm run dev:mobile`, `npm run test:mobile`, `npm run typecheck:mobile`, `npm run check:mobile`, `npm run bundle:mobile:ios` and `npm run bundle:mobile:android` from the root. These do not start the backend. Root `npm test` remains backend/shared Node tests; `npm run typecheck` includes mobile. Native device verification is separate from bundling. See apps/mobile/README.md.
+The first frontend delivery is now `apps/mobile`, using Expo Router and React Native StyleSheet. Its theme folder is `foundation/theme`. Run `npm run dev:mobile`, `npm run test:mobile`, `npm run test:mobile:api`, `npm run typecheck:mobile`, `npm run check:mobile`, `npm run bundle:mobile:ios` and `npm run bundle:mobile:android` from the root. Development and bundle commands do not start the backend; `test:mobile:api` starts an isolated synthetic loopback test server. Mobile development builds contracts and budget-core first; fresh-checkout tests/exports require those shared builds too. Root `npm test` remains backend/shared Node tests; `npm run typecheck` includes mobile. Native device verification is separate from bundling. See apps/mobile/README.md.

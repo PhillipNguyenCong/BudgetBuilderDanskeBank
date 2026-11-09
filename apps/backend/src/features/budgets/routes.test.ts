@@ -31,6 +31,25 @@ function fixture() {
   };
 }
 const body = () => structuredClone(createBudgetExample);
+test('creation and reopen preserve original suggestion evidence alongside customer adjustments', async () => {
+  const f = fixture();
+  const input = body();
+  const row = input.plan.pots[0]!.rows[0]!;
+  row.source = {
+    kind: 'SUGGESTED',
+    explanation: 'Synthetic monthly average.',
+    recordIds: ['synthetic-record'],
+    period: { from: '2026-07-01', to: '2026-08-31' },
+  };
+  row.originalSuggestion = { label: row.label, amountOere: row.amountOere };
+  row.amountOere = 700000;
+  row.adjustedByUser = true;
+  const created = await request(f.app).post('/api/v1/budgets').send(input).expect(201);
+  const reopened = await request(f.app)
+    .get('/api/v1/budgets/' + created.body.id)
+    .expect(200);
+  assert.deepEqual(reopened.body.plan.pots[0].rows[0], row);
+});
 test('create and reopen derives totals, preserves savings, rows and colors', async () => {
   const f = fixture();
   const created = await request(f.app).post('/api/v1/budgets').send(body()).expect(201);
@@ -217,4 +236,26 @@ test('internal failures return safe errors without exposing database details', a
   const response = await request(app).get('/api/v1/budgets').expect(500);
   ErrorSchema.parse(response.body);
   assert.ok(!JSON.stringify(response.body).includes('secret-password'));
+});
+
+test('fixed bill frequency survives save/reopen and backend totals use monthly allocations', async () => {
+  const f = fixture();
+  const input = body();
+  const fixed = input.plan.pots.find((p) => p.type === 'FIXED_EXPENSE')!;
+  fixed.rows = [
+    { id: 'annual-insurance', label: 'Insurance', amountOere: 360000, frequency: 'YEARLY' },
+  ];
+  const created = await request(f.app).post('/api/v1/budgets').send(input).expect(201);
+  assert.equal(
+    created.body.totals.pots.find((p: { id: string }) => p.id === fixed.id).allocationOere,
+    30000,
+  );
+  const reopened = await request(f.app)
+    .get('/api/v1/budgets/' + created.body.id)
+    .expect(200);
+  assert.deepEqual(
+    reopened.body.plan.pots.find((p: { id: string }) => p.id === fixed.id).rows,
+    fixed.rows,
+  );
+  assert.deepEqual(reopened.body.totals, created.body.totals);
 });

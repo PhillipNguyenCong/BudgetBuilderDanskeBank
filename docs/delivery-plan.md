@@ -4,7 +4,7 @@ Status: proposed plan, not a record of completed work.
 
 ## Frontend priority — 9 November 2026
 
-Native mobile is the first frontend delivery. The [mobile shell](mobile-shell-story.md) has been followed by [API-backed account selection](mobile-account-selection-story.md): Create budget is active, while Continue awaits the editor. Next are editable allocation widgets and native create/edit saving; initial AI generation remains a separate implementation task. The responsive web client is deferred. Bundling does not constitute a physical device or usability test.
+Native mobile is the first frontend delivery. The [mobile shell](mobile-shell-story.md) has been followed by [API-backed account selection](mobile-account-selection-story.md): Create budget is active and Continue opens manual setup. Editable allocation widgets, manual creation and a saved-plan overview are now implemented; see [manual creation](mobile-budget-creation-story.md). Next are saved-plan editing and initial AI generation, which will reuse the existing draft editor. The responsive web client is deferred. Bundling does not constitute a physical device or usability test.
 
 ## Delivery order
 

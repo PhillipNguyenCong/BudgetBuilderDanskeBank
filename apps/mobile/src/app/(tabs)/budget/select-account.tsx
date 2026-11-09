@@ -5,6 +5,7 @@ export default function SelectAccount() {
   return (
     <AccountSelectionScreen
       onBack={() => (router.canGoBack() ? router.back() : router.replace('/budget'))}
+      onContinue={(accountId) => router.push({ pathname: '/budget/create', params: { accountId } })}
     />
   );
 }

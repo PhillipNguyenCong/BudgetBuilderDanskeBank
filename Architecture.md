@@ -12,7 +12,7 @@ Use [requirements](docs/requirements.md), [user stories](docs/user-stories.md) a
 
 - `apps/web`: React, TypeScript and Vite; one responsive application for desktop and mobile browsers.
 - `apps/backend`: TypeScript HTTP backend intended for Vercel. It validates requests, enforces access, coordinates workflows and performs authoritative calculations.
-- `apps/mobile`: React Native / Expo client with native screens and navigation; API integration deferred.
+- `apps/mobile`: React Native / Expo client with native screens, API-backed account selection, manual budget creation, a saved-plan overview and an offline allocation-widget preview; AI suggestions and saved-plan editing pending.
 - `packages/budget-core`: framework-independent calculation and data-processing logic.
 - `packages/contracts`: shared API request/response types and runtime validation schemas.
 - `database/migrations`: version-controlled PostgreSQL schema changes.
@@ -21,7 +21,7 @@ Use [requirements](docs/requirements.md), [user stories](docs/user-stories.md) a
 ```mermaid
 flowchart LR
   W[Responsive web app] --> B[TypeScript backend on Vercel]
-  M[React Native app - integration deferred] -.-> B
+  M[React Native app] --> B
   B --> C[Budget core]
   B --> D[(Neon PostgreSQL)]
 ```
@@ -190,7 +190,7 @@ The current plan is not historical accounting. Closed months, allocation effecti
 
 `apps/mobile` uses Expo SDK 58, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and font/safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget/screens`; demo screens and the navigation bar belong to `features/shell`.
 
-Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. Fonts are local licensed assets. Four tabs open on Budget; Create budget is deliberately disabled. No API client, repository or state library is added before a concrete workflow needs one. Native UI components are not shared with the future web UI.
+Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. Fonts are local licensed assets. Four tabs open on Budget. The initial shell had Create budget disabled; account selection and the sample-widget preview now extend that shell as described below. Native UI components are not shared with the future web UI.
 
 Native Jest/Expo tests run separately from the backend Node runner. Root dev dependencies pin shared React/native test peers to the SDK-compatible versions so npm does not hoist newer incompatible peers into Expo Router. Backend runtime and its memory default are unchanged.
 
@@ -202,6 +202,28 @@ A configured file failure maps to safe HTTP 503 BANK_DATA_UNAVAILABLE and remain
 
 ## Native account selection
 
-The Budget tab contains a nested stack for introduction and account selection. The feature screen owns request/selection state; AccountOption receives presentation props. A small `lib/api` client handles cancellation, timeout and safe transport errors. The feature API validates /me, /accounts and /budgets against shared contracts before returning selection data. No global store or financial calculations are added. Selection is transient; persistence remains a future slice.
+The Budget tab contains a nested stack for introduction and account selection. The feature screen owns request/selection state; AccountOption receives presentation props. A small `lib/api` client handles cancellation, timeout and safe transport errors. The feature API validates /me, /accounts and /budgets against shared contracts before returning selection data. No global store or financial calculations are added. Selection is transient; Continue now opens the manual creation slice below. Only explicit creation persists a plan.
 
 Physical phones use an explicit public API URL and the opt-in backend LAN command. Loopback remains the default. Existing API contracts and server-side exclusivity checks remain authoritative; disabling an account in the app does not replace atomic checks when budget creation is implemented.
+
+## Native widget editor — partial US-04 / US-13
+
+The offline sample-preview route composes a feature screen and owns navigation/discard confirmation. `BudgetEditor` owns its local draft and expansion state; widget, row and savings-review components receive props/callbacks. `features/budget/editor` separates raw input strings and original row evidence from validated plans. Foundation adds a domain-agnostic labelled TextField and keyboard-aware Screen behavior. No global business store is introduced.
+
+Mobile imports `@budget-builder/budget-core/allocations`, a native-safe entry point without the Node crypto normalization module. Core derives totals and the explicit single-row savings proposal; the UI only parses and formats money. Whole-DKK user input becomes exact integer øre. Existing fractional amounts remain exact unless explicitly changed. Savings changes only through a direct edit or confirmed review, preserving every other row.
+
+The sample entry remains separate from account creation and makes no requests or writes. Manual creation below now adds persistent adjustment provenance, rollover controls and save/reopen integration. Initial AI suggestions and immutable-type backend validation for saved-plan editing remain subsequent work. This does not complete US-04/13 or historical accounting; see [criteria and limitations](docs/mobile-widget-editor-story.md).
+
+## Manual native creation — staged before AI
+
+The customer chose manual creation first. `app/(tabs)/budget/create` owns route parameters and discard/pending-save navigation protection. `CreateBudgetScreen` composes the account context and existing editor; `useBudgetCreation` coordinates eligibility reads, creation, pending/error state and uncertain-outcome recovery. `features/budget/api/budgets` validates requests/responses. The technical HTTP client supports JSON writes, safe error codes, timeout and cancellation; no owner ID or derived totals are submitted.
+
+The editor starts with blank amount text over a structural four-widget template. Template zero values are never shown as confirmed amounts or submitted before explicit input. Optional spending rollover controls validate saved preferences without claiming execution. Source adjustment metadata uses backward-compatible optional contract fields. No database migration is needed for these fields in the existing validated JSONB plan.
+
+On save success, navigation dismisses setup and selects the new plan on Budget. Budget entry refreshes the server list and distinguishes loading/error from an empty list. The read-only overview shows saved rows, colors, allocations and rollover preferences; unavailable actual-spending and forecast features do not undo a save. Unknown write outcomes and occupied-account conflicts retain the draft and offer a saved-budget lookup rather than silent resubmission or replacement.
+
+The supplied account history is disclosed but is not used to generate manual amounts. Future AI supplies an initial draft to this same editor; subsequent saved-plan editing must never regenerate it. US-13 editing, type-immutability enforcement on updates, financial history and month-end execution remain separate work. Default memory storage resets on backend restart. See [manual creation criteria](docs/mobile-budget-creation-story.md).
+
+Live allocation guidance is derived independently of full-plan validity: the native draft adapter maps amount text to integer øre, missing or invalid values, and budget-core calculates the provisional global remainder. Summary/widget components render the same result and identify unfinished pots. No per-keystroke API call or persisted progress field is introduced. Blank amounts still block saving; backend validation remains authoritative. See [guidance criteria](docs/mobile-allocation-guidance-story.md).
+
+Fixed-expense frequency is optional row data in the existing plan JSON. Budget-core owns conversion from per-payment amounts to monthly allocations (rounding each bill up to integer oere). Native partial guidance, completed-plan totals and backend validation share that conversion; clients do not persist authoritative derived monthly amounts. Missing frequency preserves existing monthly semantics.

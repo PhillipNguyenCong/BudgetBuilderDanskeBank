@@ -42,3 +42,23 @@ test('published user profile example validates and does not expose account field
   );
   assert.equal(UserProfileSchema.safeParse({ ...profile, displayName: ' ' }).success, false);
 });
+
+test('frequency is optional and valid only on fixed-expense rows', () => {
+  const legacy = structuredClone(createBudgetExample);
+  assert.deepEqual(CreateBudgetSchema.parse(legacy), legacy);
+  for (const frequency of ['MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY']) {
+    const input = structuredClone(legacy);
+    const fixed = input.plan.pots.find((p) => p.type === 'FIXED_EXPENSE')!;
+    Object.assign(fixed.rows[0]!, { frequency });
+    assert.equal(CreateBudgetSchema.safeParse(input).success, true);
+  }
+  for (const target of ['income', 'SPENDING', 'SAVINGS', 'FIXED_EXPENSE']) {
+    const input = structuredClone(legacy);
+    const rows =
+      target === 'income'
+        ? input.plan.income.rows
+        : input.plan.pots.find((p) => p.type === target)!.rows;
+    Object.assign(rows[0]!, { frequency: target === 'FIXED_EXPENSE' ? 'WEEKLY' : 'YEARLY' });
+    assert.equal(CreateBudgetSchema.safeParse(input).success, false);
+  }
+});

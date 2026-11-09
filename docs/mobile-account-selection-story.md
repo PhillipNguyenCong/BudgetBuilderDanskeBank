@@ -20,3 +20,7 @@ The actual mobile feature API was exercised from the development machine against
 Physical iPhone/Android rendering and Wi-Fi reachability from the device remain unverified; a working LAN request from the Mac and successful native exports do not establish these. Test Create budget → account selection → Back in Expo Go. Budget saving, suggestions and widgets remain subsequent work. The existing dependency-audit findings are unchanged; no dependency upgrades were attempted.
 
 Review confirmed no owner IDs or credentials are sent by the client, no API work lives in foundation, failed eligibility lookup blocks selection, and no budget mutation is performed. Local .env files are ignored.
+
+## Subsequent delivery
+
+The [manual creation slice](mobile-budget-creation-story.md) supersedes the disabled-Continue boundary: Continue now opens manual setup for the selected eligible account. The original verification above records the earlier read-only milestone.

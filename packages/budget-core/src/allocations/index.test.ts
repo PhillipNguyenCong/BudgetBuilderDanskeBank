@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { BudgetPlanSchema } from '@budget-builder/contracts';
-import { calculatePlan } from './index.js';
+import { calculatePlan, proposeSavingsUpdate } from './index.js';
 const row = (id: string, amountOere: number) => ({ id, label: id, amountOere });
 export const plan = {
   name: 'My budget',
@@ -55,4 +55,17 @@ test('aggregate overflow is rejected rather than rounded', () => {
     income: { ...plan.income, rows: [row('one', Number.MAX_SAFE_INTEGER), row('two', 1)] },
   });
   assert.throws(() => calculatePlan(input), /AMOUNT_OVERFLOW/);
+});
+
+test('US-04: a savings review changes only the chosen row and does not mutate the plan', () => {
+  const input = BudgetPlanSchema.parse(plan);
+  const proposal = proposeSavingsUpdate(input, 'savings', 'rainy');
+  assert.equal(proposal.beforeOere, 400000);
+  assert.equal(proposal.afterOere, 1600000);
+  assert.equal(input.pots[1]!.rows[0]!.amountOere, 400000);
+  input.income.rows[0]!.amountOere = 1000000;
+  assert.equal(proposeSavingsUpdate(input, 'savings', 'rainy').afterOere, 200000);
+  input.income.rows[0]!.amountOere = 700000;
+  assert.throws(() => proposeSavingsUpdate(input, 'savings', 'rainy'), /INSUFFICIENT_CAPACITY/);
+  assert.throws(() => proposeSavingsUpdate(input, 'spend', 'groceries'), /INVALID_SAVINGS_ROW/);
 });

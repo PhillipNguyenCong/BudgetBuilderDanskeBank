@@ -6,8 +6,15 @@ type Props = {
   disabled?: boolean;
   onPress?: () => void;
   accessibilityHint?: string;
+  variant?: 'primary' | 'secondary';
 };
-export function Button({ label, disabled = false, onPress, accessibilityHint }: Props) {
+export function Button({
+  label,
+  disabled = false,
+  onPress,
+  accessibilityHint,
+  variant = 'primary',
+}: Props) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -18,11 +25,19 @@ export function Button({ label, disabled = false, onPress, accessibilityHint }: 
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        variant === 'secondary' && styles.secondary,
         disabled && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}
     >
-      <AppText variant="label" style={[styles.label, disabled && styles.disabledLabel]}>
+      <AppText
+        variant="label"
+        style={[
+          styles.label,
+          variant === 'secondary' && styles.secondaryLabel,
+          disabled && styles.disabledLabel,
+        ]}
+      >
         {label}
       </AppText>
     </Pressable>
@@ -42,4 +57,6 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.8 },
   label: { color: colors.white, textAlign: 'center' },
   disabledLabel: { color: colors.muted },
+  secondary: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
+  secondaryLabel: { color: colors.blue },
 });

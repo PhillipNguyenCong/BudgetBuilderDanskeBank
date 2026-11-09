@@ -9,3 +9,7 @@ Build with `npm run build --workspace @budget-builder/contracts`. From the root,
 Future AI, forecast and rollover execution contracts are intentionally not invented in this foundation.
 
 `UserProfileSchema` and inferred `UserProfile` describe `GET /api/v1/me`: stable internal `id`, nullable nonblank `displayName`, and boolean `isDemo`. The profile contains no bank identifiers or authentication credentials. `userProfileExample` is independently authored synthetic data and is validated when generating API artifacts.
+
+Planning rows optionally preserve `originalSuggestion` (original label and exact amount) and `adjustedByUser`. Existing rows without these fields remain valid. These fields preserve editable planning evidence across save/reopen; they do not authenticate source transactions or implement AI generation.
+
+Fixed-expense rows optionally carry `frequency`: `MONTHLY`, `QUARTERLY`, `HALF_YEARLY` or `YEARLY`. Missing frequency means monthly. `amountOere` is the amount per payment; totals contain monthly allocations. Income, spending and savings rows reject frequency. Fixed-expense original-suggestion metadata may also preserve the original frequency. Older monthly plans remain valid without changes.
