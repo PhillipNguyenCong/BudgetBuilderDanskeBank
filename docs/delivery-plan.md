@@ -4,16 +4,17 @@ Status: proposed plan, not a record of completed work.
 
 ## Frontend priority — 9 November 2026
 
-Native mobile is the first frontend delivery. Start with the [mobile shell](mobile-shell-story.md): four tabs, local fonts and a disabled budget introduction. Budget setup and backend integration follow in separate slices. The responsive web client is deferred. Bundling does not constitute a physical device or usability test.
+Native mobile is the first frontend delivery. The [mobile shell](mobile-shell-story.md) has been followed by [API-backed account selection](mobile-account-selection-story.md): Create budget is active, while Continue awaits the editor. Next are editable allocation widgets and native create/edit saving; initial AI generation remains a separate implementation task. The responsive web client is deferred. Bundling does not constitute a physical device or usability test.
 
 ## Delivery order
 
 | Stage | Stories | Intended outcome |
 | --- | --- | --- |
-| 1. Budget setup and data foundation | US-01, US-02, US-03, US-04, US-11, planning portion of US-05, US-10 | Select one account, configure typed virtual pots and salary allocations, offer optional automatic rollover and expose input problems. |
+| 1. Budget setup and data foundation | US-01, US-02, US-03, US-04, US-13, US-11, planning portion of US-05, US-10 | Select one account, configure typed virtual pots and salary allocations, offer optional automatic rollover and expose input problems. |
 | 2. Actual spending and monthly continuity | US-06, US-12 | Show remaining monthly/weekly spending and supplementary daily guidance; preserve history and apply rollover exactly once with transfer and duplicate handling. |
 | 3. Forecasting and warnings | US-07, US-08, forecast portion of US-05 | Explain a baseline forecast and identify daily shortfalls, including irregular bills. |
-| 4. Spending insights | US-09 | Explain category changes using defensible comparison periods. |
+| Later optional extension | US-09 | Contextual spending explanations within the overview/pots; separate insight journeys are excluded from the active flow. |
+| Post-creation prototype extension | US-14 | Review an explicitly sample item-goal allocation proposal; real recommendation logic and persistence require separate decisions. |
 
 US-05 and US-10 span stages. Do not mark a story complete until all of its acceptance criteria pass. A Budget Health Score is deferred until its meaning, calculation and usefulness are validated.
 
