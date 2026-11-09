@@ -5,7 +5,12 @@ export function createDatabase(connectionString: string | undefined, signal?: Ab
   if (!connectionString?.trim()) throw new Error('DATABASE_URL is required.');
   try {
     const url = new URL(connectionString);
-    if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname || !url.username || url.pathname.length < 2) {
+    if (
+      !['postgres:', 'postgresql:'].includes(url.protocol) ||
+      !url.hostname ||
+      !url.username ||
+      url.pathname.length < 2
+    ) {
       throw new Error('Invalid connection string');
     }
   } catch {

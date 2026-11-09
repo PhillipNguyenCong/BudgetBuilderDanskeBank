@@ -1,0 +1,102 @@
+{
+  "id": "budget-example",
+  "accountId": "demo-account",
+  "revision": 1,
+  "createdAt": "2026-09-03T12:00:00.000Z",
+  "updatedAt": "2026-09-03T12:00:00.000Z",
+  "plan": {
+    "name": "My budget",
+    "income": {
+      "id": "income",
+      "name": "Monthly salary",
+      "color": "OCEAN",
+      "rows": [
+        {
+          "id": "salary",
+          "label": "Take-home salary",
+          "amountOere": 2400000
+        }
+      ]
+    },
+    "pots": [
+      {
+        "id": "spending",
+        "name": "Spending budget",
+        "color": "SKY",
+        "rows": [
+          {
+            "id": "groceries",
+            "label": "Groceries",
+            "amountOere": 800000
+          }
+        ],
+        "type": "SPENDING",
+        "rollover": {
+          "enabled": false,
+          "destination": null,
+          "targetPotId": null
+        }
+      },
+      {
+        "id": "bills",
+        "name": "Fixed expenses",
+        "color": "SAND",
+        "rows": [
+          {
+            "id": "rent",
+            "label": "Rent",
+            "amountOere": 900000
+          },
+          {
+            "id": "utilities",
+            "label": "Utilities",
+            "amountOere": 150000
+          },
+          {
+            "id": "insurance",
+            "label": "Insurance",
+            "amountOere": 90000
+          },
+          {
+            "id": "subscriptions",
+            "label": "Subscriptions",
+            "amountOere": 60000
+          }
+        ],
+        "type": "FIXED_EXPENSE"
+      },
+      {
+        "id": "savings",
+        "name": "Savings",
+        "color": "MINT",
+        "rows": [
+          {
+            "id": "rainy-day",
+            "label": "Rainy day",
+            "amountOere": 400000
+          }
+        ],
+        "type": "SAVINGS"
+      }
+    ]
+  },
+  "totals": {
+    "incomeOere": 2400000,
+    "allocatedOere": 2400000,
+    "unallocatedOere": 0,
+    "pots": [
+      {
+        "id": "spending",
+        "allocationOere": 800000
+      },
+      {
+        "id": "bills",
+        "allocationOere": 1200000
+      },
+      {
+        "id": "savings",
+        "allocationOere": 400000
+      }
+    ]
+  }
+}

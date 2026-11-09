@@ -1,6 +1,6 @@
 # Architecture
 
-Status: agreed architectural direction for the prototype. The backend workspace now implements Express health routing and a read-only Neon connection check; other application directories remain scaffolds. The structures below describe where implementation will go; create subdirectories only when they have a responsibility and content.
+Status: modular monolith with feature-based layers and ports/adapters at banking and persistence boundaries. Accounts, transactions, planned payments and budget create/edit APIs are implemented, with shared schemas and deterministic normalization/allocation logic. Default local/test runtime is memory; PostgreSQL is explicit opt-in. No shared migrations or deployment were performed.
 
 ## Goals and scope
 
@@ -150,7 +150,7 @@ Before implementing month closure, specify the budget timezone/cutoff, the trigg
 
 Store schema changes under database/migrations and select a migration tool before creating executable migrations. Keep migration history and synthetic fixtures separate. Do not commit database credentials, raw banking datasets or database dumps.
 
-The agreed hosting direction is Vercel for the backend and Neon for PostgreSQL. Neon is provisioned with production and development branches in Frankfurt. The backend uses npm workspaces, Express and Drizzle with the Neon HTTP driver. The local connection is stored in an ignored apps/backend/.env file. Deployment and domain migrations are not implemented yet. Before deployment, document database connection management, regions, secrets, access control and permitted data use. Confirm approval before uploading the supplied bank dataset to cloud services.
+The agreed hosting direction is Vercel for the backend and Neon for PostgreSQL. Neon is provisioned with production and development branches in Frankfurt. The backend uses npm workspaces, Express and Drizzle with the Neon HTTP driver. The local connection is stored in an ignored apps/backend/.env file. A domain migration is generated but not applied; deployment is not implemented. Before deployment, document database connection management, regions, secrets, access control and permitted data use. Confirm approval before uploading the supplied bank dataset to cloud services.
 
 No production banking connection or payment execution is in the initial scope.
 
@@ -175,3 +175,13 @@ Use stable FR, NFR and US identifiers to connect tests and implementation with t
 7. Effective dates for allocation changes and how reserved fixed-expense amounts evolve after bill payments; retain closed monthly results.
 
 Keep AGENTS.md commands aligned with the implemented workspace workflow. Update this document when a decision changes rather than letting implementation and documentation diverge.
+
+## Implemented foundation decisions — 9 November 2026
+
+The application factory injects identity, bank provider, budget repository and clock. Bank source and budget storage are independent. JSON data is normalized once and cached; only the bank adapter reads the raw file. The bank-provider port supports account listing and owner/account-scoped snapshots. Memory tests make no external requests.
+
+The current plan is an atomic budget aggregate with income rows, ordered typed pot rows, color tokens and optional source explanations. Salary is derived from income rows, and monthly allocations from pot rows. Savings is never automatically redistributed; the client explicitly submits an accepted change. Client totals and owner IDs are rejected. Existing account assignment is immutable. Schema limits prevent oversized requests, not arbitrary Figma demo limits.
+
+PostgreSQL persists indexed identity/owner/account fields, revision/timestamps and a validated JSONB plan. A unique account constraint and revision-conditioned update protect concurrent writes. Public API responses omit owner IDs and database internals. Normalization exposes unknown amounts/directions and actual coverage. An initial suggestion must not rerun during edits; AI, savings-goal recommendations and forecasts remain unimplemented.
+
+The current plan is not historical accounting. Closed months, allocation effective dates and month-close policy must be implemented separately before execution; current-plan updates cannot be represented as preserved monthly history. See [backend foundation story](docs/backend-foundation-story.md) and [API specification](docs/openapi.json).

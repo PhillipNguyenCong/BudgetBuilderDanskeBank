@@ -242,3 +242,9 @@ Stories were reordered to start with navigation and first-time guidance. Existin
 ## Domain-model alignment — 5 November 2026
 
 US-03 now selects exactly one account. US-04 defines typed virtual pots and salary allocation. US-06 adds carried-in money and weekly guidance while retaining the supplementary daily guide. US-11 and US-12 add preference management and month-end rollover. Existing story IDs are preserved; these revisions describe intended behaviour, not completed implementation. Supporting categories, recurring bills and forecast data remain in scope despite being omitted from the simplified diagram.
+
+## Foundation implementation — 9 November 2026
+
+US-03/04 now have validated account-scoped create/edit APIs, exact row totals, editable names/colors, revision conflicts and memory/PostgreSQL repository adapters. Income is a separate income widget; each pot's monthly allocation is the sum of its rows. Savings changes only when explicitly submitted. AI is initial-only in the intended flow; generation and item-goal AI remain deferred.
+
+US-10 has conservative data normalization and explicit issues; categorization, assignment and forecast reconciliation remain deferred. US-11 has validated preference persistence, not month-end execution. US-05 scheduling is not implemented by free-form monthly rows. These stories are partially implemented, not fully accepted end-to-end. See [foundation criteria](backend-foundation-story.md).

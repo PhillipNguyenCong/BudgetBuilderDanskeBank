@@ -1,9 +1,9 @@
 # Shared API contracts
 
-Status: directory scaffold; no package or validation library has been initialised.
+Zod runtime schemas and inferred TypeScript types used by backend, web and future mobile clients. This package contains no database drivers or UI framework dependencies.
 
-Shared TypeScript request and response types, error formats and runtime validation schemas belong here. These contracts connect `apps/web`, `apps/backend` and the future `apps/mobile`.
+Public exports cover exact integer øre, ISO dates, accounts, transactions, planned payments, quality metadata, budget plans, typed pots, editable rows, rollover settings and safe errors. Request objects are strict; derived totals and owner identity cannot be supplied by the client. Row provenance is descriptive data, not an authorization mechanism.
 
-Planned contracts must represent one account per budget, named typed subaccounts, salary allocations, optional transaction assignment, saved rollover choices and their savings targets, monthly history and separate forecast results. The [domain model](../../domain-model-notes.md) omits IDs and metadata for readability; API contracts must still define the identifiers and validation needed for safe operations.
+Build with `npm run build --workspace @budget-builder/contracts`. From the root, `npm run docs:api` generates [OpenAPI](../../docs/openapi.json) and examples; `npm run check:contracts` checks drift. Cross-field refinements (unique IDs and valid savings targets) are enforced at runtime in addition to the JSON schema. Allocation limits are authoritative budget-core/service checks.
 
-Keep this package independent of database drivers, server credentials and UI frameworks. Database entities are not automatically public API responses. Client-side validation improves feedback; the backend must still validate requests and enforce access.
+Future AI, forecast and rollover execution contracts are intentionally not invented in this foundation.

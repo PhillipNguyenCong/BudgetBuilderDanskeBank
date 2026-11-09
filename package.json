@@ -2,6 +2,8 @@
   "name": "budget-builder-danske-bank",
   "private": true,
   "workspaces": [
+    "packages/contracts",
+    "packages/budget-core",
     "apps/backend"
   ],
   "engines": {
@@ -9,9 +11,17 @@
   },
   "scripts": {
     "dev:backend": "npm run dev --workspace @budget-builder/backend",
-    "test": "npm test --workspace @budget-builder/backend",
-    "typecheck": "npm run typecheck --workspace @budget-builder/backend",
-    "build": "npm run build --workspace @budget-builder/backend",
-    "check:db": "npm run check:db --workspace @budget-builder/backend"
+    "test": "npm run build && node scripts/test.mjs",
+    "typecheck": "npm run build && npm run typecheck --workspaces",
+    "build": "npm run build --workspace @budget-builder/contracts && npm run build --workspace @budget-builder/budget-core && npm run build --workspace @budget-builder/backend",
+    "check:db": "npm run check:db --workspace @budget-builder/backend",
+    "docs:api": "npm run build && node apps/backend/dist/openapi.js",
+    "migrations:generate": "npm exec --workspace @budget-builder/backend -- drizzle-kit generate --config ../../database/drizzle.config.ts",
+    "migrations:apply": "node --env-file-if-exists=apps/backend/.env --import tsx apps/backend/scripts/migrate.ts",
+    "check:contracts": "npm run build && node apps/backend/dist/openapi.js --check",
+    "format:check": "prettier --check \"apps/backend/**/*.ts\" \"packages/*/src/**/*.ts\" \"database/drizzle.config.ts\" \"scripts/*.mjs\""
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
   }
 }

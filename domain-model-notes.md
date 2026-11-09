@@ -29,3 +29,9 @@ A simplified conceptual model of the agreed design, not an implemented database 
 ## Relationship to existing requirements
 
 The [requirements](docs/requirements.md), [user stories](docs/user-stories.md), [architecture](Architecture.md) and [delivery plan](docs/delivery-plan.md) are aligned with this model as of 5 November 2026. FR-01 / US-03 require exactly one account; FR-03 / US-04 define typed pots and salary allocations; FR-04 / US-06 cover monthly and weekly spending guidance with a supplementary daily guide. FR-09–10 / US-11–12 cover saved rollover preferences and completed transfers. This alignment describes intended behaviour, not implemented or tested features. Month-close scheduling and correction policies remain explicit implementation decisions in the delivery plan.
+
+## Backend contract refinement — 9 November 2026
+
+The API represents take-home income as an editable income widget and typed subaccounts as colored widgets containing ordered planning rows. Widget totals are derived, not separate client-authoritative amounts. These rows and display colors support the conceptual domain without creating additional bank accounts. Source explanations distinguish initial suggestions from user planning changes; suggestion generation remains deferred and edits never trigger it.
+
+The backend stores a current plan with a revision and timestamps. It does not yet implement actual-spending assignments, accumulated/reserved balances, monthly history or rollover execution. Stored rollover preferences alone do not imply automated execution. Savings updates require explicit submitted rows. See [contracts](packages/contracts/README.md).

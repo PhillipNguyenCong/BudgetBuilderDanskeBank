@@ -99,7 +99,7 @@ For documentation-only changes, verify content, relative links and consistency r
 
 ## Commands and current setup
 
-The repository uses npm workspaces. Only apps/backend is initialised. From the repository root, use npm ci, npm run dev:backend, npm test, npm run typecheck, npm run build and npm run check:db. The database check reads apps/backend/.env and requires the Neon development connection. See apps/backend/README.md for exact commands. Lint, migration and deployment commands are not configured yet; do not invent them.
+The repository uses npm workspaces. apps/backend, packages/contracts and packages/budget-core are initialised. From the repository root, use npm ci, npm run dev:backend, npm test, npm run typecheck, npm run build and npm run check:db. The database check reads apps/backend/.env and requires the Neon development connection. See apps/backend/README.md for exact commands. Formatting and contract drift checks are npm run format:check and npm run check:contracts. Migration generation is npm run migrations:generate; application is an explicit ALLOW_DATABASE_MIGRATIONS=true npm run migrations:apply action, never part of startup/tests. Deployment and lint are not configured.
 
 Inspect the actual manifests and lockfiles before choosing commands or a package manager. Do not claim that npm test, lint or build scripts exist without checking. When initialising a workspace, document its exact development, test, typecheck, lint and build commands in that workspace's README and update this section. Run the relevant checks once available. If a check cannot run, report the specific reason rather than reporting success.
 

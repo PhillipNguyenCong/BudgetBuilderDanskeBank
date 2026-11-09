@@ -1,15 +1,14 @@
 # Database migrations
 
-Status: directory scaffold; no domain schema or executable migrations have been added. Neon development and production branches are documented in the [backend setup](../../docs/backend-setup.md).
+Drizzle-generated PostgreSQL migrations for the current budget aggregate. The initial table has an owner index, unique account constraint, positive revision constraint and JSON-object plan. Detailed plan validity is enforced by the service's shared schemas and allocation rules before persistence.
 
-Version-controlled PostgreSQL schema migrations will live here. Select the migration tool and document its commands before adding executable migrations.
+From the repository root:
 
-- Review schema changes against the requirements and [domain model](../../domain-model-notes.md).
-- Enforce one account per budget, account exclusivity, typed virtual pots and valid same-account savings targets.
-- Preserve monthly results and completed rollover destinations. Enforce uniqueness per source spending pot and month and apply virtual amount updates atomically with the rollover record.
-- Apply changes through a documented migration process.
-- Preserve already-applied migration history; make subsequent changes in new migrations.
-- Keep source transactions separate from customer budget corrections.
-- Do not store credentials, database dumps or banking datasets in this directory.
+```sh
+npm run migrations:generate
+ALLOW_DATABASE_MIGRATIONS=true npm run migrations:apply
+```
 
-Before cloud import, confirm that the supplied dataset is approved for that destination. Synthetic fixtures and migrations must remain distinct.
+Generation needs no database. Application reads the ignored development DATABASE_URL and must be an explicit action against the intended database. Neither startup nor tests apply migrations. Preserve applied migrations and add subsequent files instead of rewriting history. Raw banking data and synthetic fixtures are not migrations.
+
+This task generated the migration only. Live database application and integration have not been verified. Monthly history/rollover tables are deferred; the current-plan aggregate is not a month-end ledger.

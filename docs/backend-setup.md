@@ -14,3 +14,7 @@ As a developer, I want a testable HTTP backend and an isolated development datab
 6. Tests, typecheck and build commands are documented and runnable from the repository root.
 
 This task does not add domain tables, import the bank dataset, provision authentication or deploy to Vercel. Database schema and budget endpoints are subsequent work. Web/native directories remain scaffolds and are not yet npm workspaces.
+
+## Foundation update — 9 November 2026
+
+The current backend defaults to memory storage and a cached synthetic bank provider. Neon remains provisioned but is not contacted during default development/tests. PostgreSQL budget persistence is available by explicit configuration; its generated migration was not applied. Use [current backend instructions](../apps/backend/README.md) and [OpenAPI](openapi.json) rather than treating the original health-only setup as current feature status.
