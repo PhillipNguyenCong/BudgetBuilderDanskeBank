@@ -44,7 +44,7 @@ docs/                  # Personas, requirements, stories and delivery plan
 
 Neon is the PostgreSQL database provider. Both clients use the backend API; only the backend accesses Neon and runs authoritative calculations. The native mobile shell is the first frontend delivery. Responsive web implementation is deferred.
 
-Current status: the backend foundation implements normalized account/transaction/payment reads and budget create/edit APIs. Shared contracts and budget-core are initialized. Local development/tests default to memory with a cached synthetic JSON provider; a PostgreSQL budget adapter and generated migration are available by explicit opt-in. No migration was applied, bank dataset uploaded or deployment performed. The native mobile shell provides four tabs and a disabled budget introduction; web remains a scaffold. See [backend commands](apps/backend/README.md), [OpenAPI](docs/openapi.json) and [foundation acceptance criteria](docs/backend-foundation-story.md).
+Current status: the backend foundation implements normalized account/transaction/payment reads and budget create/edit APIs. Shared contracts and budget-core are initialized. Local development/tests default to memory with a cached synthetic JSON provider; a PostgreSQL budget adapter and generated migration are available by explicit opt-in. No migration was applied, bank dataset uploaded or deployment performed. The native mobile shell provides four tabs and API-backed account selection; web remains a scaffold. See [backend commands](apps/backend/README.md), [OpenAPI](docs/openapi.json) and [foundation acceptance criteria](docs/backend-foundation-story.md).
 
 ## Working with the documentation
 
@@ -64,3 +64,5 @@ npm run dev:mobile
 Open the QR code in Expo Go on your iPhone, using the same local network. No backend is started or needed. See [mobile setup and verification](apps/mobile/README.md) and [shell acceptance criteria](docs/mobile-shell-story.md).
 
 The backend now exposes the current demo profile at `GET /api/v1/me`, sharing its source with owner-scoped account, transaction and payment reads. Configure the approved local file through ignored backend settings; no user database or login is introduced. See [demo-user delivery](docs/demo-user-story.md).
+
+Mobile Create budget now opens account selection backed by the existing local API. For physical phones, use the opt-in LAN setup in [mobile instructions](apps/mobile/README.md). The budget editor and saving are not implemented yet.

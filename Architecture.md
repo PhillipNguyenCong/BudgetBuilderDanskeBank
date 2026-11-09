@@ -199,3 +199,9 @@ Native Jest/Expo tests run separately from the backend Node runner. Root dev dep
 The users feature exposes GET /api/v1/me through a route and service. Its bank-provider port supports owner-scoped profile lookup alongside account reads. The local JSON adapter caches a profile and normalized dataset from one source load; its owner is explicitly configured as the trusted demo identity. Source names and transaction account strings cannot authenticate or create users. This read-only source needs no new user repository or database migration.
 
 A configured file failure maps to safe HTTP 503 BANK_DATA_UNAVAILABLE and remains cached until restart; it never switches to the fixture. Unknown display names are null. Future authenticated adapters must supply truthful profile provenance and the trusted owner association. Local demo identity remains forbidden in deployed environments.
+
+## Native account selection
+
+The Budget tab contains a nested stack for introduction and account selection. The feature screen owns request/selection state; AccountOption receives presentation props. A small `lib/api` client handles cancellation, timeout and safe transport errors. The feature API validates /me, /accounts and /budgets against shared contracts before returning selection data. No global store or financial calculations are added. Selection is transient; persistence remains a future slice.
+
+Physical phones use an explicit public API URL and the opt-in backend LAN command. Loopback remains the default. Existing API contracts and server-side exclusivity checks remain authoritative; disabling an account in the app does not replace atomic checks when budget creation is implemented.

@@ -21,12 +21,13 @@
     "migrations:apply": "node --env-file-if-exists=apps/backend/.env --import tsx apps/backend/scripts/migrate.ts",
     "check:contracts": "npm run build && node apps/backend/dist/openapi.js --check",
     "format:check": "prettier --check \"apps/backend/**/*.ts\" \"packages/*/src/**/*.ts\" \"database/drizzle.config.ts\" \"scripts/*.mjs\" \"apps/mobile/src/**/*.{ts,tsx}\"",
-    "dev:mobile": "npm run start --workspace @budget-builder/mobile",
+    "dev:mobile": "npm run build --workspace @budget-builder/contracts && npm run start --workspace @budget-builder/mobile",
     "test:mobile": "npm run test --workspace @budget-builder/mobile",
     "typecheck:mobile": "npm run typecheck --workspace @budget-builder/mobile",
     "bundle:mobile:ios": "npm run bundle:ios --workspace @budget-builder/mobile",
     "bundle:mobile:android": "npm run bundle:android --workspace @budget-builder/mobile",
-    "check:mobile": "npm run check --workspace @budget-builder/mobile"
+    "check:mobile": "npm run check --workspace @budget-builder/mobile",
+    "dev:backend:lan": "HOST=0.0.0.0 npm run dev:backend"
   },
   "devDependencies": {
     "@testing-library/react-native": "^14.1.0",

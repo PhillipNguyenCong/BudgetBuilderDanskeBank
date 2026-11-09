@@ -256,3 +256,7 @@ US-01/02 now have a native navigation/introduction slice, with creation delibera
 ## Demo-user data foundation
 
 US-03 ownership and US-10 transparency now have a current-profile API linked to the configured local dataset. This is a server-controlled demo identity, not completed authentication or mobile integration. See [acceptance criteria and verification](demo-user-story.md).
+
+## Native account-selection slice
+
+US-03 now starts from Create budget and reads owned accounts through the local API, with masked identifiers, coverage, selection and already-used-account blocking. Loading/error/retry and empty states are implemented. The budget editor and saving in the native UI are still deferred. See [criteria and verification](mobile-account-selection-story.md).
