@@ -53,8 +53,10 @@ async function enterPlan() {
     const field = screen.getByLabelText(`${name} row 1 amount in DKK`);
     expect(field).toHaveDisplayValue('');
     await fireEvent.changeText(field, amount);
-    if (name === 'Fixed expenses')
+    if (name === 'Fixed expenses') {
+      await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Rent');
       await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+    }
   }
 }
 function props(api = services()) {
@@ -175,7 +177,10 @@ it('US-04: More info discloses guidance without changing the draft or hiding err
   await render(<CreateBudgetScreen {...props()} />);
   await screen.findByLabelText('Budget name');
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'Keep my draft');
-  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '-1');
+  await fireEvent.changeText(
+    screen.getByLabelText('Monthly salary row 1 amount in DKK'),
+    '90071992547410',
+  );
   expect(screen.queryByText(/No bank transfer/)).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'More info' }));
   expect(screen.getByRole('header', { name: 'About your budget' })).toBeVisible();
@@ -184,8 +189,10 @@ it('US-04: More info discloses guidance without changing the draft or hiding err
   expect(screen.queryByLabelText('Budget name')).toBeNull();
   await fireEvent(screen.getByTestId('budget-info-overlay'), 'requestClose');
   expect(screen.getByLabelText('Budget name')).toHaveDisplayValue('Keep my draft');
-  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('-1');
-  expect(screen.getByText('Use a non-negative whole-DKK amount.')).toBeVisible();
+  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue(
+    '90071992547410',
+  );
+  expect(screen.getByText('This amount is too large.')).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'More info' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
   expect(screen.getByLabelText('Budget name')).toHaveDisplayValue('Keep my draft');

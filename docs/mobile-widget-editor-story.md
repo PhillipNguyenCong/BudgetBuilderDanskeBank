@@ -6,9 +6,9 @@ Scope: the reusable editor and an explicitly labelled, offline sample preview. T
 
 ## Acceptance criteria
 
-1. Four full-width widgets start collapsed: Monthly salary, Spending budget, Fixed expenses and Savings. Expanding reveals inline labels, whole-DKK amount inputs and read-only totals (US-04 AC-3–5).
+1. Four full-width widgets start collapsed: Monthly salary, Spending budget, Fixed expenses and Savings. Expanding reveals inline labels, DKK amount inputs with up to two decimal places and read-only totals (US-04 AC-3–5).
 2. Rename widgets, edit/add/remove rows, add named pots with a chosen type, and select the six contract colors. Existing types cannot be changed. Repeated additions are supported within contract safety limits (US-04 AC-6).
-3. Blank/negative/fractional/unsafe inputs are invalid, not zero. Names and labels must be nonblank. Show exact income, allocation and unallocated amounts using budget-core. Over-allocation shows the shortfall and preserves input; positive unallocated money is valid (US-04 AC-7, US-10).
+3. Blank amounts remain incomplete without an inline error and never become zero. Reject negative input, grouping separators and more than two decimal places while retaining the previous text; unsafe amounts remain invalid. Names and labels must be nonblank. Show exact income, allocation and unallocated amounts using budget-core. Over-allocation shows the shortfall and preserves input; positive unallocated money is valid (US-04 AC-7, US-10).
 4. Changes never automatically redistribute savings. Update savings requires selecting a savings row, shows its before/after amount and pot total, and changes only that row after confirmation. Cancel preserves the draft. An impossible negative target is explained (US-04 AC-9).
 5. Original source explanation/period remain visible after an edit; show “Adjusted by you”. Draft provenance is retained locally. No preview edits are persisted (US-04 AC-4/11).
 6. Controls have accessible names, expansion/selection states, text-based errors and generous touch targets. Inline rows wrap at narrow widths or large font sizes. The keyboard must not obscure the form (NFR-02).
@@ -17,10 +17,12 @@ Scope: the reusable editor and an explicitly labelled, offline sample preview. T
 ## Decisions and subsequent integration
 
 - The explicit savings review assigns the unallocated amount (positive or negative) to one customer-selected existing savings row. It preserves every other row/pot and never chooses a funding priority. Add a savings row first if none exists. This is ordinary allocation editing, not US-14 goal recommendations.
-- The draft retains raw input text separately from validated contract data. Legacy fractional-øre values are preserved unchanged until explicitly replaced with a whole-DKK amount; opening a saved plan must never round it silently.
+- The draft retains raw input text separately from validated contract data. Existing exact øre values are preserved unchanged until explicitly edited; opening a saved plan must never round it silently.
 - Before save integration, extend row provenance with an optional original suggested label/amount and explicit user-adjustment marker; retain source explanation, period and record references. Existing plans must remain readable. The preview's draft metadata alone is not persistent provenance.
 - Before US-13 integration, reject type changes for existing pot IDs at the backend boundary as well as in the editor. Add revision-conflict and save/reopen tests.
 - US-11 rollover controls, live suggestions, irregular-bill schedules, persistence/overview routing and historical effective dates remain subsequent slices. Existing rollover values are preserved by the editor.
+
+Decimal-entry decision — 10 November 2026: accept comma or dot, allow clearing and a trailing separator during editing, and convert decimal text exactly to integer øre. This updates the original whole-DKK restriction for US-04/US-10.
 
 ## Verification
 
@@ -69,3 +71,8 @@ Each bill exposes Monthly, Quarterly, Every 6 months or Yearly inside its overla
 The optional frequency contract field belongs only to fixed-expense rows; missing values preserve historical monthly behaviour. Budget-core divides payment oere by 1/3/6/12 with BigInt and rounds each bill up to the nearest oere. Draft guidance, totals, savings proposals and authoritative backend validation use the same monthly allocations. Blank/invalid values remain incomplete. More info explains rounding and that this is neither a payment schedule nor catch-up funding. Frequency and payment amount persist in existing plan JSON; no migration or deployment is required.
 
 Frequency verification: 41 native tests and 46 backend/shared tests passed. Coverage includes equal monthly equivalents across all four frequencies, exact rounding, zero and overflow, legacy monthly totals, rejected frequency on non-fixed rows, live guidance, retained payment text, saved overview and backend save/reopen. All-workspace TypeScript, contract drift, formatting, whitespace checks and iOS/Android exports passed. No database migration was applied. Physical-device frequency-selector, keyboard and enlarged-text verification remains pending.
+
+
+## Bill-entry focus flow — 10 November 2026
+
+For US-04 and NFR-02, Add bill focuses the new row's name and reveals it in the scroll view. Name submission/Next focuses that same row's amount without dismissing the keyboard. Amount submission/OK clears focus and dismisses the keyboard while preserving the overlay and draft. Done closes the overlay only when no bill input is focused and the keyboard is hidden; header Close remains available. Removing an active row or dismissing the keyboard clears the active field. Existing validation and two-decimal entry remain unchanged.

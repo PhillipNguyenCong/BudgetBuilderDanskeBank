@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type Ref, type ComponentRef } from 'react';
 import {
   TextInput,
   View,
@@ -11,6 +11,7 @@ import { AppText } from './AppText';
 import { colors, fonts, spacing } from '../theme/theme';
 
 export function TextField({
+  ref,
   label,
   error,
   style,
@@ -21,6 +22,7 @@ export function TextField({
   onBlur,
   ...props
 }: TextInputProps & {
+  ref?: Ref<ComponentRef<typeof TextInput>>;
   label: string;
   error?: string;
   containerStyle?: StyleProp<ViewStyle>;
@@ -33,6 +35,7 @@ export function TextField({
       {!hideLabel ? <AppText variant="small">{label}</AppText> : null}
       <TextInput
         {...props}
+        ref={ref}
         accessibilityLabel={props.accessibilityLabel ?? label}
         accessibilityHint={error ?? props.accessibilityHint}
         onFocus={(event) => {

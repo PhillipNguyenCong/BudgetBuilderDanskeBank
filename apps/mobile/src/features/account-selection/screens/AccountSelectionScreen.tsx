@@ -1,5 +1,5 @@
 import { AppText } from '../../../foundation/components/AppText';
-import { Button } from '../../../foundation/components/Button';
+import { BackButton } from '../../../foundation/components/BackButton';
 import { Screen } from '../../../foundation/components/Screen';
 import { loadAccountSelection } from '../api/accounts';
 import { AccountSelectionReady } from '../components/AccountSelectionReady';
@@ -18,7 +18,7 @@ export function AccountSelectionScreen({
   const { state, selectedId, setSelectedId, retry } = useAccountSelection(load);
   return (
     <Screen>
-      <Button label="Back" onPress={onBack} />
+      <BackButton onPress={onBack} />
       <AppText variant="title" accessibilityRole="header">
         Select an account
       </AppText>

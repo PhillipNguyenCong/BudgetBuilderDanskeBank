@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { TabBar } from '../../features/shell';
-export const unstable_settings = { initialRouteName: 'budget' };
+export const unstable_settings = { anchor: 'budget' };
 
 export default function TabsLayout() {
   return (

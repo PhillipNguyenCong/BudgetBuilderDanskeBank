@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { TextField } from '../../../foundation/components/TextField';
 import { colors, fonts, spacing } from '../../../foundation/theme/theme';
-import { parseAmount, widgetTotal, type DraftWidget } from '../editor/draft';
+import { isAmountInput, parseAmount, widgetTotal, type DraftWidget } from '../editor/draft';
 
 export function WidgetAmount({
   widget,
@@ -27,10 +27,12 @@ export function WidgetAmount({
           label="DKK / month"
           accessibilityLabel={`${name} row 1 amount in DKK`}
           value={row.input}
-          keyboardType="number-pad"
+          keyboardType="decimal-pad"
           maxLength={24}
           error={parseAmount(row).error}
-          onChangeText={(input) => onChange({ ...widget, rows: [{ ...row, input }] })}
+          onChangeText={(input) => {
+            if (isAmountInput(input)) onChange({ ...widget, rows: [{ ...row, input }] });
+          }}
         />
       ) : (
         <View style={styles.cell}>

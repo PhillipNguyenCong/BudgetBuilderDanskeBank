@@ -77,7 +77,7 @@ Use Create budget → Select an account → Continue → enter the monthly plan 
 
 ## Try the widget editor offline
 
-Open Budget → **Preview sample widgets**. Edit widget names and amounts directly. Top-right Settings opens colour choices and spending rollover preferences; Edit bills opens compact fixed-expense rows with add/remove controls. The fixed-expense amount remains tappable after entering bills. Overlays retain draft edits when closed. Widgets use transparent underlined fields; More info beside the creation title holds the setup explanations and source-history details. Amount inputs accept non-negative whole DKK without grouping separators. Add pots by type; existing types are fixed. The summary shows exact totals and over-allocation, and invalid input remains editable. Update savings lets you choose one existing savings row and review before/after amounts before applying. Cancelling keeps the draft unchanged.
+Open Budget → **Preview sample widgets**. Edit widget names and amounts directly. Top-right Settings opens colour choices and spending rollover preferences; Edit bills opens compact fixed-expense rows with add/remove controls. The fixed-expense amount remains tappable after entering bills. Overlays retain draft edits when closed. Widgets use transparent underlined fields; More info beside the creation title holds the setup explanations and source-history details. Amount inputs accept non-negative DKK with up to two decimal places, using a comma or dot without grouping separators. Add pots by type; existing types are fixed. The summary shows exact totals and over-allocation, and invalid input remains editable. Update savings lets you choose one existing savings row and review before/after amounts before applying. Cancelling keeps the draft unchanged.
 
 The sample amounts are fictional, not generated from an account. Review draft validates locally; nothing is saved. Back/swipe removal asks before discarding edited drafts. The preview remains separate from the account-backed manual creation flow. It never saves sample values automatically.
 
@@ -85,7 +85,7 @@ Device verification still needs keyboard avoidance, narrow layouts, large text, 
 
 ## Manual budget creation
 
-The customer confirms blank income and allocation amounts in whole DKK, including explicit zero where appropriate. Optional spending-pot rollover settings validate a destination and savings target; only preferences are saved. Month closure and rollover execution remain unavailable.
+The customer confirms blank income and allocation amounts in DKK with up to two decimal places, including explicit zero where appropriate. Optional spending-pot rollover settings validate a destination and savings target; only preferences are saved. Month closure and rollover execution remain unavailable.
 
 Live guidance above the widgets and in each widget and the fixed-expense overlay shows income minus all entered allocations. Blank pot amounts remain incomplete and the counter says “Based on amounts entered so far”; invalid nonblank amounts suspend it. Complete income is required. Nothing is filled or redistributed automatically, and saving still requires valid complete inputs. See [allocation-guidance criteria](../../docs/mobile-allocation-guidance-story.md).
 
@@ -94,3 +94,8 @@ Saving freezes the draft until the response arrives. Failures retain inputs; acc
 The saved overview shows planning rows and amounts. It does not invent actual spending, weekly allowances, accumulated savings or forecasts. Default backend memory storage lasts until server restart; durable PostgreSQL storage remains explicit opt-in outside this task. Physical-device checks are still pending. See [manual creation verification](../../docs/mobile-budget-creation-story.md).
 
 Fixed-expense bill rows offer Monthly, Quarterly, Every 6 months and Yearly inside the overlay. Enter the amount per payment; the row shows its monthly equivalent and the header shows Set aside per month. Choosing frequency never replaces the payment amount. Saved plans display both frequency and monthly allocation. More info explains rounding and the absence of payment scheduling/catch-up funding.
+
+Account selection, manual creation and the sample preview use a compact back-arrow control with a 44 × 44 touch target and the screen-reader label “Back”. Existing discard confirmation remains in the routes; the control is disabled while creation is saving.
+
+
+Inside Fixed expenses, Add bill focuses the new bill name and scrolls it into view. Next (or the keyboard submit action) moves to its amount. OK dismisses the keyboard without closing the overlay; Done becomes available once editing and the keyboard have ended. Close remains available in the header. Physical-device keyboard, scrolling and accessibility verification is still pending.

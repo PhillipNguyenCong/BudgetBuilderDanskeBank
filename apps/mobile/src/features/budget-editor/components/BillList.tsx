@@ -2,16 +2,19 @@ import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { colors, spacing } from '../../../foundation/theme/theme';
 import { type DraftWidget } from '../editor/draft';
+import type { BillFocus } from '../hooks/useBillFocus';
 import { BudgetRowEditor } from './BudgetRowEditor';
 
 export function BillList({
   widget,
   onChange,
   onAddRow,
+  focus,
 }: {
   widget: DraftWidget;
   onChange: (widget: DraftWidget) => void;
   onAddRow: () => void;
+  focus: BillFocus;
 }) {
   const { fontScale } = useWindowDimensions();
   const name = widget.name || 'Unnamed widget';
@@ -44,6 +47,7 @@ export function BillList({
           <BudgetRowEditor
             key={row.id}
             row={row}
+            focus={focus}
             prefix={`${name} row ${index + 1}`}
             onChange={(value) =>
               onChange({
@@ -64,7 +68,7 @@ export function BillList({
           accessibilityLabel={`Add bill to ${name}`}
           accessibilityState={{ disabled: widget.rows.length >= 1000 }}
           disabled={widget.rows.length >= 1000}
-          onPress={onAddRow}
+          onPress={() => focus.add(onAddRow)}
           style={styles.addBill}
         >
           <AppText variant="label">＋ Add bill</AppText>

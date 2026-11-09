@@ -2,7 +2,7 @@ import type { Budget } from '@budget-builder/contracts';
 import { useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
-import { Button } from '../../../foundation/components/Button';
+import { BackButton } from '../../../foundation/components/BackButton';
 import { Screen } from '../../../foundation/components/Screen';
 import { spacing } from '../../../foundation/theme/theme';
 import { BudgetEditor } from '../../budget-editor';
@@ -42,7 +42,7 @@ export function CreateBudgetScreen({
           accessibilityElementsHidden={infoOpen}
           importantForAccessibility={infoOpen ? 'no-hide-descendants' : 'auto'}
         >
-          <Button label="Back" variant="secondary" disabled={flow.busy} onPress={onBack} />
+          <BackButton disabled={flow.busy} onPress={onBack} />
           <CreationHeader
             busy={flow.busy}
             onInfo={() => {

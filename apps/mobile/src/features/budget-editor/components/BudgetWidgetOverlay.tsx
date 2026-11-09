@@ -2,7 +2,6 @@ import type { AllocationProgress } from '@budget-builder/budget-core/allocations
 import { useRef, type ComponentRef } from 'react';
 import {
   AccessibilityInfo,
-  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -15,6 +14,7 @@ import { Button } from '../../../foundation/components/Button';
 import { colors, spacing } from '../../../foundation/theme/theme';
 import { widgetPalette } from '../../budget-shared';
 import { widgetTotal, type DraftWidget } from '../editor/draft';
+import { useBillFocus } from '../hooks/useBillFocus';
 import { AllocationGuidance } from './AllocationGuidance';
 import { BillList } from './BillList';
 import { RolloverSettings } from './RolloverSettings';
@@ -38,6 +38,7 @@ export function BudgetWidgetOverlay({
   onClose: () => void;
 }) {
   const fixed = widget.type === 'FIXED_EXPENSE';
+  const billFocus = useBillFocus(widget.rows, fixed);
   const heading = useRef<ComponentRef<typeof View>>(null);
   const name = widget.name || 'Unnamed widget';
   const total =
@@ -45,7 +46,7 @@ export function BudgetWidgetOverlay({
       ? 'No amounts entered'
       : widgetTotal(widget);
   const close = () => {
-    Keyboard.dismiss();
+    billFocus.dismiss();
     onClose();
   };
   return (
@@ -73,13 +74,20 @@ export function BudgetWidgetOverlay({
           <WidgetOverlayHeader name={name} heading={heading} onClose={close} />
           <WidgetOverlayTotal widget={widget} total={total} />
           <ScrollView
+            ref={billFocus.scroll}
+            onContentSizeChange={billFocus.reveal}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             contentContainerStyle={styles.content}
           >
             {widget.type === 'FIXED_EXPENSE' ? (
               <>
-                <BillList widget={widget} onChange={onChange} onAddRow={onAddRow} />
+                <BillList
+                  widget={widget}
+                  onChange={onChange}
+                  onAddRow={onAddRow}
+                  focus={billFocus}
+                />
                 <View style={styles.guidance}>
                   <AllocationGuidance progress={progress} announce />
                 </View>
@@ -89,7 +97,16 @@ export function BudgetWidgetOverlay({
             <RolloverSettings widget={widget} savings={savings} onChange={onChange} />
           </ScrollView>
           <View style={styles.footer}>
-            <Button label="Done" onPress={close} />
+            {fixed && billFocus.active?.field === 'name' ? (
+              <Button
+                label="Next"
+                onPress={() => billFocus.focus(billFocus.active!.rowId, 'amount')}
+              />
+            ) : fixed && (billFocus.active || billFocus.keyboardVisible) ? (
+              <Button label="OK" onPress={billFocus.dismiss} />
+            ) : (
+              <Button label="Done" onPress={close} />
+            )}
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>

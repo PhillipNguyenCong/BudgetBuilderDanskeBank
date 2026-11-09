@@ -37,19 +37,28 @@ export function createDraft(plan: BudgetPlan): Draft {
     })),
   };
 }
+export function isAmountInput(input: string): boolean {
+  return /^(?:\d+(?:[.,]\d{0,2})?)?$/.test(input);
+}
+
 export function parseAmount(
   row: DraftRow,
-): { amount: number; error?: never } | { error: string; amount?: never } {
+):
+  | { amount: number; error?: never }
+  | { error: string; amount?: never }
+  | { amount?: never; error?: never } {
   // Preserve existing exact amounts until explicitly edited; never round on load.
   if (row.input === row.originalInput && row.originalInput !== '')
     return { amount: row.amountOere };
   if (row.confirmedAmount !== undefined && row.input === amountText(row.confirmedAmount))
     return { amount: row.confirmedAmount };
   const text = row.input.trim();
-  if (!text) return { error: 'Enter a whole-DKK amount.' };
-  if (!/^\d+$/.test(text)) return { error: 'Use a non-negative whole-DKK amount.' };
-  if (text.length > 16) return { error: 'This amount is too large.' };
-  const amount = BigInt(text) * 100n;
+  if (!text) return {};
+  if (!isAmountInput(text))
+    return { error: 'Use a non-negative DKK amount with up to two decimals.' };
+  const [whole, fraction = ''] = text.split(/[.,]/);
+  if (whole!.length > 16) return { error: 'This amount is too large.' };
+  const amount = BigInt(whole!) * 100n + BigInt(fraction.padEnd(2, '0'));
   if (amount > BigInt(Number.MAX_SAFE_INTEGER)) return { error: 'This amount is too large.' };
   return { amount: Number(amount) };
 }
@@ -71,8 +80,10 @@ export function validateDraft(draft: Draft): {
     return {
       error: 'Add an income row and enter your monthly income, including zero if applicable.',
     };
-  if (draft.widgets.some((widget) => widget.rows.some((row) => parseAmount(row).error))) {
-    return { error: 'Complete the highlighted amounts to calculate the plan.' };
+  if (
+    draft.widgets.some((widget) => widget.rows.some((row) => parseAmount(row).amount === undefined))
+  ) {
+    return { error: 'Complete the amounts to calculate the plan.' };
   }
   const widgets = draft.widgets.map(({ type, rollover, rows, ...widget }) => ({
     ...widget,
@@ -127,7 +138,7 @@ export function validateDraft(draft: Draft): {
 }
 
 export function widgetTotal(widget: DraftWidget): string {
-  if (widget.rows.some((row) => parseAmount(row).error)) return 'Amount incomplete';
+  if (widget.rows.some((row) => parseAmount(row).amount === undefined)) return 'Amount incomplete';
   const plan: BudgetPlan = {
     name: 'Total',
     income: {

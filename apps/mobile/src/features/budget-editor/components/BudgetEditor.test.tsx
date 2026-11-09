@@ -32,7 +32,7 @@ it('US-04: edits inline and retains values when closing a colour-only income ove
 it('US-04/10: distinguishes blank from zero and preserves invalid and over-allocated drafts', async () => {
   await render(<BudgetEditor initialPlan={createBudgetExample.plan} />);
   await edit('Monthly salary row 1 amount in DKK', '');
-  expect(screen.getByText('Enter a whole-DKK amount.')).toBeVisible();
+  expect(screen.queryByText('Enter a whole-DKK amount.')).toBeNull();
   expect(screen.queryByText('Income: DKK 0')).toBeNull();
   expect(screen.getByRole('button', { name: 'Review draft' })).toBeDisabled();
   await edit('Monthly salary row 1 amount in DKK', '0');
@@ -41,7 +41,7 @@ it('US-04/10: distinguishes blank from zero and preserves invalid and over-alloc
   ).toBeVisible();
   expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('0');
   await edit('Monthly salary row 1 amount in DKK', '-1');
-  expect(screen.getByText('Use a non-negative whole-DKK amount.')).toBeVisible();
+  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('0');
   await edit('Monthly salary row 1 amount in DKK', '24000');
   expect(screen.getByRole('button', { name: 'Review draft' })).toBeEnabled();
 });
@@ -134,5 +134,28 @@ it('US-04/13: parent rerenders preserve the draft; an intentional key change sta
   expect(screen.queryByText('Draft valid. This preview does not save a budget.')).toBeNull();
   await rerender(<BudgetEditor key="second" initialPlan={createBudgetExample.plan} startBlank />);
   expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('');
+  expect(screen.getByRole('button', { name: 'Review draft' })).toBeDisabled();
+});
+
+it('accepts decimal amounts in every widget and bill field while rejecting invalid edits', async () => {
+  await render(<BudgetEditor initialPlan={createBudgetExample.plan} />);
+  for (const name of ['Monthly salary', 'Spending budget', 'Savings', 'Fixed expenses']) {
+    if (name === 'Fixed expenses') await open(name);
+    const label = `${name} row 1 amount in DKK`;
+    expect(screen.getByLabelText(label).props.keyboardType).toBe('decimal-pad');
+    await edit(label, '1250,50');
+    for (const invalid of ['1250,501', '1,250.50', '1.250,50', '-12', 'abc']) {
+      await edit(label, invalid);
+      expect(screen.getByLabelText(label)).toHaveDisplayValue('1250,50');
+    }
+    await edit(label, '1250.5');
+    expect(screen.getByLabelText(label)).toHaveDisplayValue('1250.5');
+    await edit(label, '1250.');
+    expect(screen.getByLabelText(label)).toHaveDisplayValue('1250.');
+    await edit(label, '');
+    expect(screen.getByLabelText(label)).toHaveDisplayValue('');
+    if (name === 'Fixed expenses')
+      await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+  }
   expect(screen.getByRole('button', { name: 'Review draft' })).toBeDisabled();
 });

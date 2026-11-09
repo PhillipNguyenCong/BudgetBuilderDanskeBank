@@ -30,6 +30,7 @@ it('US-04: guides 17000 → 9000 → 7000 → 0 without filling amounts, includi
   await bills();
   remaining('7,000');
   await amount('Fixed expenses', '7000');
+  await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Rent');
   remaining('0');
   await done();
   expect(screen.queryByText(/Based on amounts entered so far/)).toBeNull();
@@ -38,7 +39,7 @@ it('US-04: guides 17000 → 9000 → 7000 → 0 without filling amounts, includi
   expect(screen.getByRole('button', { name: 'Create budget' })).toBeEnabled();
 });
 
-it('US-10: clearing restores partial guidance; invalid input suspends it; zero is entered', async () => {
+it('US-10: clearing restores partial guidance; invalid edits retain it; zero is entered', async () => {
   await render(<BudgetEditor initialPlan={manualPlan()} startBlank />);
   await amount('Monthly salary', '17000');
   await amount('Spending budget', '8000');
@@ -46,10 +47,8 @@ it('US-10: clearing restores partial guidance; invalid input suspends it; zero i
   remaining('17,000');
   expect(screen.getAllByText('Not entered yet')).toHaveLength(3);
   await amount('Spending budget', '-10');
-  expect(screen.queryByText(/left to allocate$/)).toBeNull();
-  expect(
-    screen.getAllByText('Correct invalid amounts to see what is left to allocate.'),
-  ).toHaveLength(1);
+  remaining('17,000');
+  expect(screen.getByLabelText('Spending budget row 1 amount in DKK')).toHaveDisplayValue('');
   await amount('Spending budget', '0');
   remaining('17,000');
   expect(screen.getAllByText('Not entered yet')).toHaveLength(2);

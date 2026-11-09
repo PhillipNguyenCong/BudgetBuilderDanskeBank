@@ -1,3 +1,5 @@
+import { createRef, type ComponentRef } from 'react';
+import { TextInput } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { TextField } from './TextField';
 
@@ -22,4 +24,12 @@ it('strengthens underlined fields on focus, forwards callbacks and preserves err
   );
   expect(screen.getByLabelText('Amount')).toHaveStyle({ borderBottomWidth: 2 });
   expect(screen.getByRole('alert')).toHaveTextContent('Check the amount.');
+});
+
+it('exposes the native input ref for focus management', async () => {
+  const ref = createRef<ComponentRef<typeof TextInput>>();
+  await render(<TextField ref={ref} label="Bill name" />);
+  expect(ref.current).not.toBeNull();
+  expect(typeof ref.current?.focus).toBe('function');
+  expect(typeof ref.current?.blur).toBe('function');
 });

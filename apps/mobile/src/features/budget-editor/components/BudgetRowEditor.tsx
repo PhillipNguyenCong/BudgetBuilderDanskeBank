@@ -2,7 +2,8 @@ import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { TextField } from '../../../foundation/components/TextField';
 import { colors, spacing } from '../../../foundation/theme/theme';
-import { parseAmount, type DraftRow } from '../editor/draft';
+import { isAmountInput, parseAmount, type DraftRow } from '../editor/draft';
+import type { BillFocus } from '../hooks/useBillFocus';
 import { BillFrequencyPicker } from './BillFrequencyPicker';
 import { RowSourceDetails } from './RowSourceDetails';
 
@@ -11,11 +12,13 @@ export function BudgetRowEditor({
   prefix,
   onChange,
   onRemove,
+  focus,
 }: {
   row: DraftRow;
   prefix: string;
   onChange: (row: DraftRow) => void;
   onRemove: () => void;
+  focus: BillFocus;
 }) {
   const { fontScale } = useWindowDimensions();
   const stacked = fontScale > 1.3;
@@ -23,6 +26,12 @@ export function BudgetRowEditor({
     <View style={styles.row}>
       <View style={[styles.fields, stacked && styles.stacked]}>
         <TextField
+          ref={(input) => focus.register(row.id, 'name', input)}
+          onFocus={() => focus.onFocus(row.id, 'name')}
+          onBlur={() => focus.onBlur(row.id, 'name')}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => focus.focus(row.id, 'amount')}
           label="Bill"
           placeholder="Bill name"
           hideLabel={!stacked}
@@ -35,6 +44,12 @@ export function BudgetRowEditor({
           error={!row.label.trim() ? 'Enter an item name.' : undefined}
         />
         <TextField
+          ref={(input) => focus.register(row.id, 'amount', input)}
+          onFocus={() => focus.onFocus(row.id, 'amount')}
+          onBlur={() => focus.onBlur(row.id, 'amount')}
+          returnKeyType="done"
+          submitBehavior="submit"
+          onSubmitEditing={focus.dismiss}
           label="DKK / payment"
           placeholder="0"
           hideLabel={!stacked}
@@ -43,8 +58,10 @@ export function BudgetRowEditor({
           containerStyle={!stacked && styles.field}
           accessibilityLabel={`${prefix} amount in DKK`}
           value={row.input}
-          onChangeText={(input) => onChange({ ...row, input })}
-          keyboardType="number-pad"
+          onChangeText={(input) => {
+            if (isAmountInput(input)) onChange({ ...row, input });
+          }}
+          keyboardType="decimal-pad"
           maxLength={24}
           error={parseAmount(row).error}
         />

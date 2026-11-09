@@ -2,7 +2,15 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { manualPlan } from '../../budget-creation/api';
 import { BudgetEditor } from './BudgetEditor';
 
-const press = (name: string) => fireEvent.press(screen.getByRole('button', { name }));
+const press = async (name: string) => {
+  if (name === 'Done') {
+    const next = screen.queryByRole('button', { name: 'Next' });
+    if (next) await fireEvent.press(next);
+    const ok = screen.queryByRole('button', { name: 'OK' });
+    if (ok) await fireEvent.press(ok);
+  }
+  await fireEvent.press(screen.getByRole('button', { name }));
+};
 const amount = (value: string, row = 1) =>
   fireEvent.changeText(screen.getByLabelText(`Fixed expenses row ${row} amount in DKK`), value);
 
@@ -28,10 +36,9 @@ it('US-04: switches Add bills to a total, preserves incomplete input, and restor
   await press('Edit bills to Fixed expenses');
   await amount('-1', 2);
   await press('Done');
-  expect(screen.getByText('Amount incomplete')).toBeVisible();
-  expect(screen.getAllByText('Check amounts')).toHaveLength(4);
+  expect(screen.getByText('DKK 1,500')).toBeVisible();
   await press('Edit bills to Fixed expenses');
-  expect(screen.getByLabelText('Fixed expenses row 2 amount in DKK')).toHaveDisplayValue('-1');
+  expect(screen.getByLabelText('Fixed expenses row 2 amount in DKK')).toHaveDisplayValue('500');
   await amount('');
   await amount('', 2);
   await press('Done');
@@ -49,6 +56,7 @@ it('US-04: frequency changes preserve payment text and update the monthly total 
   const submit = jest.fn();
   const plan = manualPlan();
   plan.name = 'Frequency plan';
+  plan.pots.find((pot) => pot.type === 'FIXED_EXPENSE')!.rows[0]!.label = 'Rent';
   plan.income.rows[0]!.amountOere = 100000;
   await render(<BudgetEditor initialPlan={plan} onSubmit={submit} />);
   await press('Edit bills to Fixed expenses');
@@ -64,9 +72,10 @@ it('US-04: frequency changes preserve payment text and update the monthly total 
   await press('Done');
   expect(screen.getByText('DKK 300')).toBeVisible();
   await press('Create budget');
-  expect(submit.mock.calls[0][0].pots[1].rows[0]).toEqual(
-    expect.objectContaining({ amountOere: 360000, frequency: 'YEARLY' }),
-  );
+  expect(
+    submit.mock.calls[0][0].pots.find((pot: { type: string }) => pot.type === 'FIXED_EXPENSE')
+      .rows[0],
+  ).toEqual(expect.objectContaining({ amountOere: 360000, frequency: 'YEARLY' }));
   await press('Edit bills to Fixed expenses');
   expect(
     screen.getByRole('button', { name: 'Fixed expenses row 1 frequency: Yearly' }),
@@ -74,5 +83,5 @@ it('US-04: frequency changes preserve payment text and update the monthly total 
   await amount('');
   expect(screen.queryByText('DKK 300/month')).toBeNull();
   await amount('-1');
-  expect(screen.getByText('Check amount')).toBeVisible();
+  expect(screen.getByText('Amount not entered')).toBeVisible();
 });

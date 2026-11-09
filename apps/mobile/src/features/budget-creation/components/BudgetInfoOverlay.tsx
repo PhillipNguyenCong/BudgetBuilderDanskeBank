@@ -41,8 +41,9 @@ export function BudgetInfoOverlay({
         <ScrollView contentContainerStyle={styles.content}>
           <AppText variant="heading">Manual setup</AppText>
           <AppText>
-            Enter your monthly income and allocations in whole DKK. No amounts have been suggested.
-            Enter zero explicitly where appropriate; blank amounts are incomplete.
+            Enter your monthly income and allocations in DKK with up to two decimal places. No
+            amounts have been suggested. Enter zero explicitly where appropriate; blank amounts are
+            incomplete.
           </AppText>
           <AppText variant="heading">Your pots</AppText>
           <AppText>

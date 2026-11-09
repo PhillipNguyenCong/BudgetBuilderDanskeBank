@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppText } from '../../../foundation/components/AppText';
-import { Button } from '../../../foundation/components/Button';
+import { BackButton } from '../../../foundation/components/BackButton';
 import { Screen } from '../../../foundation/components/Screen';
 import { BudgetEditor } from '../../budget-editor';
 import { samplePlan } from '../model/samplePlan';
@@ -15,7 +15,7 @@ export function WidgetPreviewScreen({
   const [initialPlan] = useState(samplePlan);
   return (
     <Screen>
-      <Button label="Back" variant="secondary" onPress={onBack} />
+      <BackButton onPress={onBack} />
       <AppText variant="title" accessibilityRole="header">
         Sample widget editor
       </AppText>

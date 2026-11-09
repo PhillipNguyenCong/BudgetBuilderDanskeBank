@@ -12,19 +12,19 @@ export function manualPlan(): BudgetPlan {
     },
     pots: [
       {
+        id: 'fixed',
+        name: 'Fixed expenses',
+        type: 'FIXED_EXPENSE',
+        color: 'SAND',
+        rows: [],
+      },
+      {
         id: 'spending',
         name: 'Spending budget',
         type: 'SPENDING',
         color: 'SKY',
         rows: [{ id: 'spending-row', label: 'Everyday spending', amountOere: 0 }],
         rollover: { enabled: false, destination: null, targetPotId: null },
-      },
-      {
-        id: 'fixed',
-        name: 'Fixed expenses',
-        type: 'FIXED_EXPENSE',
-        color: 'SAND',
-        rows: [{ id: 'fixed-row', label: 'Rent', amountOere: 0 }],
       },
       {
         id: 'savings',

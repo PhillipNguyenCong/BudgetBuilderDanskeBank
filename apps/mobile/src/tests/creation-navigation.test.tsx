@@ -125,16 +125,18 @@ it('US-03: routes account selection through manual creation to the saved plan wi
     expect(await screen.findByLabelText('Budget name')).toBeVisible();
     await fireEvent.changeText(screen.getByLabelText('Budget name'), 'November plan');
     for (const [name, amount] of [
-      ['Monthly salary', '24000'],
-      ['Spending budget', '8000'],
-      ['Fixed expenses', '12000'],
-      ['Savings', '4000'],
+      ['Monthly salary', '24000,55'],
+      ['Spending budget', '8000.10'],
+      ['Fixed expenses', '12000,20'],
+      ['Savings', '4000.25'],
     ]) {
       if (name === 'Fixed expenses')
         await fireEvent.press(screen.getByRole('button', { name: 'Add bills to Fixed expenses' }));
       await fireEvent.changeText(screen.getByLabelText(`${name} row 1 amount in DKK`), amount);
-      if (name === 'Fixed expenses')
+      if (name === 'Fixed expenses') {
+        await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Rent');
         await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+      }
     }
     await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
     expect(await screen.findByText('Saved monthly plan')).toBeVisible();
@@ -142,6 +144,9 @@ it('US-03: routes account selection through manual creation to the saved plan wi
     expect(screen.getByRole('header', { name: 'November plan' })).toBeVisible();
     expect(screen.getByRole('tab', { name: 'Budget' })).toBeSelected();
     expect(createBudget).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Income: DKK 24,000.55')).toBeVisible();
+    expect(mockSaved[0]!.plan.income.rows[0]!.amountOere).toBe(2400055);
+    expect(mockSaved[0]!.totals.unallocatedOere).toBe(0);
     expect(alert).not.toHaveBeenCalled();
   } finally {
     alert.mockRestore();
