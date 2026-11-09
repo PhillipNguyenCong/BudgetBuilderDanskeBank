@@ -62,3 +62,5 @@ npm run dev:mobile
 ```
 
 Open the QR code in Expo Go on your iPhone, using the same local network. No backend is started or needed. See [mobile setup and verification](apps/mobile/README.md) and [shell acceptance criteria](docs/mobile-shell-story.md).
+
+The backend now exposes the current demo profile at `GET /api/v1/me`, sharing its source with owner-scoped account, transaction and payment reads. Configure the approved local file through ignored backend settings; no user database or login is introduced. See [demo-user delivery](docs/demo-user-story.md).

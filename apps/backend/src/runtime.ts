@@ -2,7 +2,7 @@ import { createApp } from './app.js';
 import { MemoryBudgetRepository } from './features/budgets/memory-repository.js';
 import { PostgresBudgetRepository } from './features/budgets/postgres-repository.js';
 import { JsonBankDataProvider } from './infrastructure/banking/json-bank-data-provider.js';
-import { demoIdentity } from './infrastructure/identity/demo-identity.js';
+import { demoIdentity, DEMO_USER_ID } from './infrastructure/identity/demo-identity.js';
 export function createLocalRuntime(environment: NodeJS.ProcessEnv = process.env) {
   const identity = demoIdentity(environment);
   const mode = environment.BUDGET_STORAGE ?? 'memory';
@@ -11,6 +11,7 @@ export function createLocalRuntime(environment: NodeJS.ProcessEnv = process.env)
   if (mode === 'postgres' && !environment.DATABASE_URL)
     throw new Error('DATABASE_URL is required for PostgreSQL mode.');
   const bank = new JsonBankDataProvider({
+    ownerId: DEMO_USER_ID,
     ...(environment.BANK_DATA_FILE ? { path: environment.BANK_DATA_FILE } : {}),
     ...(environment.DATA_AS_OF ? { asOf: new Date(environment.DATA_AS_OF) } : {}),
   });

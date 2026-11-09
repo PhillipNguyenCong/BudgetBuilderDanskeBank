@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+export const DEMO_USER_ID = 'demo-user';
 export interface Identity {
   userId: string;
 }
@@ -8,5 +9,5 @@ export function demoIdentity(environment: NodeJS.ProcessEnv = process.env): Iden
     throw new Error(
       'Demo identity is disabled for deployed environments. Inject an authenticated identity provider.',
     );
-  return () => ({ userId: 'demo-user' });
+  return () => ({ userId: DEMO_USER_ID });
 }

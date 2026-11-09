@@ -193,3 +193,9 @@ The current plan is not historical accounting. Closed months, allocation effecti
 Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. Fonts are local licensed assets. Four tabs open on Budget; Create budget is deliberately disabled. No API client, repository or state library is added before a concrete workflow needs one. Native UI components are not shared with the future web UI.
 
 Native Jest/Expo tests run separately from the backend Node runner. Root dev dependencies pin shared React/native test peers to the SDK-compatible versions so npm does not hoist newer incompatible peers into Expo Router. Backend runtime and its memory default are unchanged.
+
+## Demo profile and account data
+
+The users feature exposes GET /api/v1/me through a route and service. Its bank-provider port supports owner-scoped profile lookup alongside account reads. The local JSON adapter caches a profile and normalized dataset from one source load; its owner is explicitly configured as the trusted demo identity. Source names and transaction account strings cannot authenticate or create users. This read-only source needs no new user repository or database migration.
+
+A configured file failure maps to safe HTTP 503 BANK_DATA_UNAVAILABLE and remains cached until restart; it never switches to the fixture. Unknown display names are null. Future authenticated adapters must supply truthful profile provenance and the trusted owner association. Local demo identity remains forbidden in deployed environments.

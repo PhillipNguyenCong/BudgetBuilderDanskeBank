@@ -1,4 +1,6 @@
 import express from 'express';
+import { UserService } from './features/users/service.js';
+import { userRoutes } from './features/users/routes.js';
 import { randomUUID } from 'node:crypto';
 import { healthRouter } from './features/health/routes.js';
 import { AccountService } from './features/accounts/service.js';
@@ -48,6 +50,7 @@ export function createApp(dependencies: AppDependencies) {
       res.locals.userId = identity.userId;
       next();
     },
+    userRoutes(new UserService(dependencies.bank)),
     accountRoutes(accounts),
     transactionsRoutes(accounts),
     paymentsRoutes(accounts),

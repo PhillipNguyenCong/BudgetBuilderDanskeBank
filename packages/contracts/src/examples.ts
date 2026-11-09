@@ -1,3 +1,4 @@
+import { UserProfileSchema } from './users.js';
 import { CreateBudgetSchema } from './budgets.js';
 export const createBudgetExample = CreateBudgetSchema.parse({
   accountId: 'demo-account',
@@ -39,4 +40,10 @@ export const createBudgetExample = CreateBudgetSchema.parse({
       },
     ],
   },
+});
+
+export const userProfileExample = UserProfileSchema.parse({
+  id: 'demo-user',
+  displayName: 'Demo Customer',
+  isDemo: true,
 });

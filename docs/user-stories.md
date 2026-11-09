@@ -252,3 +252,7 @@ US-10 has conservative data normalization and explicit issues; categorization, a
 ## Mobile shell delivery slice
 
 US-01/02 now have a native navigation/introduction slice, with creation deliberately disabled. This does not complete saved-budget, request-state or creation criteria. See [mobile shell acceptance criteria](mobile-shell-story.md).
+
+## Demo-user data foundation
+
+US-03 ownership and US-10 transparency now have a current-profile API linked to the configured local dataset. This is a server-controlled demo identity, not completed authentication or mobile integration. See [acceptance criteria and verification](demo-user-story.md).

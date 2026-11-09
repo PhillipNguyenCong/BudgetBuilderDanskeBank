@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { readFileSync, writeFileSync } from 'node:fs';
 import {
+  UserProfileSchema,
+  userProfileExample,
   AccountListSchema,
   TransactionPageSchema,
   PaymentPageSchema,
@@ -13,6 +15,7 @@ import {
 } from '@budget-builder/contracts';
 import { calculatePlan } from '@budget-builder/budget-core';
 const schemas = {
+  UserProfile: UserProfileSchema,
   AccountList: AccountListSchema,
   TransactionPage: TransactionPageSchema,
   PaymentPage: PaymentPageSchema,
@@ -34,6 +37,7 @@ const errors = {
   '409': response('ApiError', 'Account in use or stale revision'),
   '413': response('ApiError', 'Request exceeds 1 MiB'),
   '422': response('ApiError', 'Over-allocation or monetary overflow'),
+  '503': response('ApiError', 'Bank data unavailable; no fallback dataset is used'),
   '500': response('ApiError', 'Safe internal error'),
 };
 const id = {
@@ -74,6 +78,7 @@ export const openapi = {
   },
   servers: [{ url: 'http://127.0.0.1:3001' }],
   paths: {
+    '/api/v1/me': { get: read('UserProfile', 'getCurrentUser') },
     '/api/v1/accounts': { get: read('AccountList', 'listAccounts') },
     '/api/v1/accounts/{id}/transactions': {
       get: read('TransactionPage', 'listTransactions', [id, ...pagination]),
@@ -130,6 +135,7 @@ const budgetExample = BudgetSchema.parse({
 });
 const files = {
   'docs/openapi.json': openapi,
+  'docs/examples/user-profile-response.json': UserProfileSchema.parse(userProfileExample),
   'docs/examples/create-budget.json': createBudgetExample,
   'docs/examples/budget-response.json': budgetExample,
 };

@@ -30,6 +30,7 @@ See [OpenAPI](../../docs/openapi.json), [create request](../../docs/examples/cre
 
 | Method | Path | Behavior |
 | --- | --- | --- |
+| GET | /api/v1/me | Current server-owned profile: id, nullable displayName, isDemo |
 | GET | /health | Liveness, independent of provider/database readiness |
 | GET | /api/v1/accounts | Owned accounts, masked identifiers, data quality |
 | GET | /api/v1/accounts/:id/transactions | Normalized records and quality metadata |
@@ -86,3 +87,13 @@ All default tests use memory and synthetic fixtures. HTTP tests bind ephemeral l
 ## Dependency review
 
 Compatible updates removed the runtime body-parser/qs advisories. npm audit still reports four moderate entries in the development-only Drizzle Kit → esbuild-kit → esbuild chain. The reported fix downgrades Drizzle Kit incompatibly; it was not applied. This project uses migration generation, not the affected esbuild development server. Revisit the tooling dependency when its upstream release resolves the advisory.
+
+## Demo user and local source
+
+`GET /api/v1/me` returns the profile for the trusted server identity. In the local runtime this is `demo-user`. The JSON adapter derives the display name only from `account.ownerName`; missing, blank or non-string values become null. It marks this synthetic profile `isDemo: true`. The name is descriptive data, not authentication. No login or user database is implemented.
+
+The user service depends on the bank-provider interface. Profile and normalized account data share one cached load, including concurrent requests. Returned objects are copies. The configured file belongs to the server-configured demo owner: transaction `ownAccount` values do not create identities or extra accounts. Other identities cannot read its profile or banking data.
+
+Set `BANK_DATA_FILE` in the ignored local `.env` to use your approved dataset. Without a configured path, the independently authored fixture is used. A configured unreadable, invalid JSON or structurally invalid file returns HTTP 503 `BANK_DATA_UNAVAILABLE`; no fallback fixture, path, raw payload or parser details are exposed. The failed load is cached too: correct the file/configuration and restart the backend. `/health` is liveness only and can still return 200.
+
+See the [profile example](../../docs/examples/user-profile-response.json) and [delivery verification](../../docs/demo-user-story.md). No dataset is uploaded or committed. Transaction counts include normalized records of various directions/statuses and are not unique purchase counts. Coverage metadata describes the source period, not twelve months of usable spending.
