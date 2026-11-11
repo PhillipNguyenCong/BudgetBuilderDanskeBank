@@ -45,7 +45,7 @@ Root `npm test` still runs only backend/shared Node tests. `npm run typecheck` c
 - `src/features/budget-shared`: budget list/create requests, DKK formatting, labels and widget palette; no workflow or React Native imports.
 - `src/features/shell`: demo screens, navigation bar and colocated navigation tests.
 - `src/tests`: cross-feature creation/navigation tests, outside the Expo Router route directory.
-- `assets/fonts`: local Open Sans Regular/SemiBold and OFL license, sourced from `@expo-google-fonts/open-sans@0.4.2`. No runtime font downloads.
+- `assets/fonts`: retained Open Sans assets and OFL license. The current interface uses platform system typography with no font-loading gate or runtime font downloads.
 
 Each feature exposes its supported interface through `index.ts`. Routes and other features use these public exports; internal modules import local files directly. The account-selection and budget-creation features also expose `api.ts` as a small React Native-free public entry for setup orchestration and the Node integration harness. Only test mocks target implementation modules directly. Do not export every component from a feature or import another feature's private files.
 
@@ -61,7 +61,7 @@ Physical iPhone and Android testing has not been performed. No simulator is inst
 - Test Create budget → account selection → manual entry → save → saved plan; also test cancelling, invalid amounts and failed saves without losing inputs.
 - Check portrait/landscape, home indicator/notch, scrolling and the largest accessibility text size.
 - Check header wrapping, tab labels, at least 44 × 44 touch areas and all text contrast.
-- Reopen with Metro serving the bundle; fonts must come from bundled assets, not a font CDN.
+- Reopen with Metro serving the bundle; system typography must render immediately with no font download.
 
 Automated results and remaining limitations are recorded in `docs/mobile-shell-verification.md` at the repository root.
 
@@ -99,3 +99,7 @@ Account selection, manual creation and the sample preview use a compact back-arr
 
 
 Inside Fixed expenses, Add bill focuses the new bill name and scrolls it into view. Next (or the keyboard submit action) moves to its amount. OK dismisses the keyboard without closing the overlay; Done becomes available once editing and the keyboard have ended. Close remains available in the header. Physical-device keyboard, scrolling and accessibility verification is still pending.
+
+## Visual design
+
+The native interface now uses Apple-inspired system typography, light surfaces, rounded tinted tiles, blue capsule actions and an inset icon tab bar, drawing on MobilePay’s simpler tile-based design. See [visual refresh criteria and verification](../../docs/mobile-visual-refresh-story.md). Existing workflows and money semantics are preserved; physical-device visual and accessibility checks remain pending.

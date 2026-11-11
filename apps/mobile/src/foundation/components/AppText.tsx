@@ -8,7 +8,13 @@ const styles = StyleSheet.create({
   base: { color: colors.ink, fontFamily: fonts.regular, flexShrink: 1 },
   body: { fontSize: 16, lineHeight: 24 },
   small: { fontSize: 14, lineHeight: 20 },
-  label: { fontSize: 16, lineHeight: 24, fontFamily: fonts.semibold },
-  heading: { fontSize: 20, lineHeight: 28, fontFamily: fonts.semibold },
-  title: { fontSize: 28, lineHeight: 36, fontFamily: fonts.semibold },
+  label: { fontSize: 16, lineHeight: 24, fontFamily: fonts.semibold, fontWeight: '600' },
+  heading: { fontSize: 22, lineHeight: 30, fontFamily: fonts.semibold, fontWeight: '600' },
+  title: {
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.8,
+    fontFamily: fonts.semibold,
+    fontWeight: '600',
+  },
 });

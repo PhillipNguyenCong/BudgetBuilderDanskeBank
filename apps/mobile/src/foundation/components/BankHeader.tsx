@@ -9,7 +9,7 @@ export function BankHeader() {
         <AppText variant="heading" style={styles.text}>
           Danske Bank
         </AppText>
-        <AppText variant="small" style={styles.text}>
+        <AppText variant="small" style={styles.badge}>
           Demo
         </AppText>
       </View>
@@ -17,15 +17,24 @@ export function BankHeader() {
   );
 }
 const styles = StyleSheet.create({
-  safe: { backgroundColor: colors.navy },
+  safe: { backgroundColor: colors.canvas },
   row: {
-    minHeight: 64,
-    padding: spacing.large,
+    minHeight: 56,
+    paddingHorizontal: spacing.screen,
+    paddingVertical: spacing.medium,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.large,
     flexWrap: 'wrap',
   },
-  text: { color: colors.white },
+  text: { color: colors.navy, fontSize: 17, letterSpacing: -0.3 },
+  badge: {
+    color: colors.muted,
+    backgroundColor: colors.white,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
 });

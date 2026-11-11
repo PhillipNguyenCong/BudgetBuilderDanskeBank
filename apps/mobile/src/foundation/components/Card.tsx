@@ -6,8 +6,8 @@ export function Card({ style, ...props }: ViewProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
-    borderRadius: 8,
-    padding: spacing.medium,
-    gap: spacing.small,
+    borderRadius: 24,
+    padding: spacing.screen,
+    gap: spacing.medium,
   },
 });

@@ -5,10 +5,10 @@ export const typeLabels = {
   SAVINGS: 'Savings',
 };
 export const widgetPalette = {
-  OCEAN: { name: 'Ocean', background: '#dceaf0' },
-  SKY: { name: 'Sky', background: '#e5f2fb' },
-  MINT: { name: 'Mint', background: '#e2f3e9' },
-  LAVENDER: { name: 'Lavender', background: '#eee8f5' },
-  SAND: { name: 'Sand', background: '#f4eedc' },
-  ROSE: { name: 'Rose', background: '#f8e7ea' },
+  OCEAN: { name: 'Ocean', background: '#E1E7FA' },
+  SKY: { name: 'Sky', background: '#E4EDFF' },
+  MINT: { name: 'Mint', background: '#DFF2E6' },
+  LAVENDER: { name: 'Lavender', background: '#EAE4FA' },
+  SAND: { name: 'Sand', background: '#F7EDCF' },
+  ROSE: { name: 'Rose', background: '#F9E2EB' },
 };

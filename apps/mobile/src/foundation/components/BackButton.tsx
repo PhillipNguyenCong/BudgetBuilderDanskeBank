@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 22,
+    backgroundColor: colors.white,
   },
   pressed: { backgroundColor: colors.disabled },
   disabled: { opacity: 0.4 },

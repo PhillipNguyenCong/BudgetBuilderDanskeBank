@@ -33,5 +33,5 @@ export function Screen({ children }: ViewProps) {
 }
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.canvas },
-  content: { padding: spacing.screen, gap: spacing.medium, flexGrow: 1 },
+  content: { padding: spacing.screen, gap: spacing.large, paddingBottom: 32, flexGrow: 1 },
 });

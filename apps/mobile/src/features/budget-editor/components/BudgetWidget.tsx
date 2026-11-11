@@ -55,7 +55,7 @@ export function BudgetWidget({
   );
 }
 const styles = StyleSheet.create({
-  card: { borderRadius: 12, padding: spacing.large, gap: spacing.medium },
+  card: { borderRadius: 24, padding: spacing.screen, gap: spacing.medium },
   row: { flexDirection: 'row', gap: spacing.medium, alignItems: 'flex-start' },
   mainInput: { fontSize: 20, lineHeight: 28, fontFamily: fonts.semibold, minHeight: 54 },
   cell: { flex: 1, minWidth: 0, gap: spacing.small },

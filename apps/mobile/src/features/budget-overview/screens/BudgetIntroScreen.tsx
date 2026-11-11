@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { Button } from '../../../foundation/components/Button';
 import { Card } from '../../../foundation/components/Card';
@@ -13,22 +13,27 @@ export function BudgetIntroScreen({
 }) {
   return (
     <Screen>
-      <AppText variant="heading" accessibilityRole="header">
+      <AppText variant="title" accessibilityRole="header">
         Your money, organised
       </AppText>
-      <AppText variant="title">A simple plan for your monthly salary.</AppText>
-      {[
-        ['Spending', 'Know what you can spend'],
-        ['Savings', 'Build up money over time'],
-        ['Fixed expenses', 'Keep money ready for bills'],
-      ].map(([name, description]) => (
-        <Card key={name} style={styles.card}>
-          <AppText variant="small" style={styles.muted}>
-            {name}
-          </AppText>
-          <AppText variant="label">{description}</AppText>
+      <AppText style={styles.subtitle}>A simple plan for your monthly salary.</AppText>
+      <View style={styles.tiles}>
+        <Card style={styles.spending}>
+          <AppText variant="heading">Spending</AppText>
+          <AppText style={styles.hero}>Make room for everyday life.</AppText>
+          <AppText>Know what you can spend</AppText>
         </Card>
-      ))}
+        <View style={styles.pair}>
+          <Card style={[styles.smallTile, styles.savings]}>
+            <AppText variant="heading">Savings</AppText>
+            <AppText>Build up money over time</AppText>
+          </Card>
+          <Card style={[styles.smallTile, styles.bills]}>
+            <AppText variant="heading">Fixed expenses</AppText>
+            <AppText>Keep money ready for bills</AppText>
+          </Card>
+        </View>
+      </View>
       <AppText>Pots divide the money in your account. No bank transfer is made.</AppText>
       <Button label="Create budget" onPress={onCreate} />
       {onPreview ? (
@@ -38,6 +43,23 @@ export function BudgetIntroScreen({
   );
 }
 const styles = StyleSheet.create({
-  card: { minHeight: 90 },
-  muted: { color: colors.muted },
+  subtitle: { color: colors.muted, fontSize: 18, lineHeight: 26 },
+  tiles: { gap: 12, marginVertical: 12 },
+  spending: {
+    backgroundColor: '#E4EDFF',
+    gap: 16,
+    minHeight: 200,
+    justifyContent: 'space-between',
+  },
+  hero: { fontSize: 30, lineHeight: 36, fontWeight: '600', letterSpacing: -0.6, maxWidth: 270 },
+  pair: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  smallTile: {
+    flexGrow: 1,
+    flexBasis: 140,
+    minHeight: 160,
+    padding: 20,
+    justifyContent: 'space-between',
+  },
+  savings: { backgroundColor: '#EAE4FA' },
+  bills: { backgroundColor: '#DFF2E6' },
 });

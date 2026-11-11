@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { AppText } from '../../../foundation/components/AppText';
+import { TabIcon } from './TabIcon';
 import { colors, spacing } from '../../../foundation/theme/theme';
 export function TabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps) {
   return (
@@ -23,7 +24,11 @@ export function TabBar({ state, descriptors, emitter, navigateToTab, insets }: B
             accessibilityRole="tab"
             accessibilityLabel={label}
             accessibilityState={{ selected }}
-            style={styles.tab}
+            style={({ pressed }) => [
+              styles.tab,
+              selected && styles.activeTab,
+              pressed && styles.pressed,
+            ]}
             onPress={() => {
               const event = emitter.emit({
                 type: 'tabPress',
@@ -34,6 +39,7 @@ export function TabBar({ state, descriptors, emitter, navigateToTab, insets }: B
             }}
             onLongPress={() => emitter.emit({ type: 'tabLongPress', target: route.key })}
           >
+            <TabIcon name={route.name} selected={selected} />
             <AppText variant="small" style={[styles.label, selected && styles.selected]}>
               {label}
             </AppText>
@@ -47,18 +53,23 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.line,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 32,
+    paddingTop: 6,
+    gap: 4,
   },
   tab: {
     flex: 1,
     minWidth: 44,
-    minHeight: 72,
-    paddingVertical: spacing.large,
+    minHeight: 60,
+    paddingVertical: spacing.small,
     paddingHorizontal: 4,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  label: { color: colors.muted, textAlign: 'center' },
-  selected: { color: colors.blue, textDecorationLine: 'underline' },
+  label: { color: colors.muted, textAlign: 'center', fontSize: 12, lineHeight: 18 },
+  activeTab: { backgroundColor: colors.tint, borderRadius: 26 },
+  pressed: { opacity: 0.65 },
+  selected: { color: colors.blue, fontWeight: '600' },
 });

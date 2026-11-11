@@ -45,18 +45,18 @@ export function Button({
 }
 const styles = StyleSheet.create({
   button: {
-    minHeight: 52,
+    minHeight: 56,
     minWidth: 44,
-    borderRadius: 8,
+    borderRadius: 28,
     backgroundColor: colors.blue,
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.medium,
   },
   disabled: { backgroundColor: colors.disabled },
-  pressed: { opacity: 0.8 },
+  pressed: { opacity: 0.75, transform: [{ scale: 0.98 }] },
   label: { color: colors.white, textAlign: 'center' },
   disabledLabel: { color: colors.muted },
-  secondary: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
+  secondary: { backgroundColor: colors.tint },
   secondaryLabel: { color: colors.blue },
 });
