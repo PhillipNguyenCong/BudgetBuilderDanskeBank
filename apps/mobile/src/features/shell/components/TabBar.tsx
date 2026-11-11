@@ -68,8 +68,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  label: { color: colors.muted, textAlign: 'center', fontSize: 12, lineHeight: 18 },
+  label: {
+    color: colors.muted,
+    textAlign: 'center',
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: '600',
+  },
   activeTab: { backgroundColor: colors.tint, borderRadius: 26 },
   pressed: { opacity: 0.65 },
-  selected: { color: colors.blue, fontWeight: '600' },
+  selected: { color: colors.blue, fontWeight: '800' },
 });

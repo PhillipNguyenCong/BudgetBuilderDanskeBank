@@ -41,13 +41,17 @@ export function WidgetAmount({
           </AppText>
           {fixed ? (
             <Pressable
-              style={styles.amountSurface}
+              style={({ pressed }) => [
+                styles.amountSurface,
+                styles.actionSurface,
+                pressed && styles.pressed,
+              ]}
               accessibilityRole="button"
               accessibilityLabel={`${hasBillInput ? 'Edit bills' : 'Add bills'} to ${name}`}
               accessibilityHint="Opens the bill list"
               onPress={onOpen}
             >
-              <AppText variant="heading" style={styles.amountText}>
+              <AppText variant="heading" style={[styles.amountText, styles.actionText]}>
                 {hasBillInput ? widgetTotal(widget) : 'Add bills'}
               </AppText>
               <AppText variant="small" accessible={false} importantForAccessibility="no">
@@ -71,6 +75,15 @@ export function WidgetAmount({
 }
 const styles = StyleSheet.create({
   alignRight: { textAlign: 'right' },
+  actionSurface: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.blue,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+  },
+  actionText: { color: colors.blue },
+  pressed: { opacity: 0.65 },
   amountText: { flexShrink: 1, textAlign: 'right' },
   mainInput: { fontSize: 20, lineHeight: 28, fontFamily: fonts.semibold, minHeight: 54 },
   amountSurface: {

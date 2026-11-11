@@ -32,7 +32,11 @@ export function TextField({
   const [focused, setFocused] = useState(false);
   return (
     <View style={[styles.field, containerStyle]}>
-      {!hideLabel ? <AppText variant="small">{label}</AppText> : null}
+      {!hideLabel ? (
+        <AppText variant="small" style={styles.label}>
+          {label}
+        </AppText>
+      ) : null}
       <TextInput
         {...props}
         ref={ref}
@@ -64,6 +68,7 @@ export function TextField({
 }
 const styles = StyleSheet.create({
   field: { gap: spacing.small },
+  label: { fontWeight: '600' },
   input: {
     minHeight: 48,
     borderWidth: 1,
@@ -71,6 +76,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: spacing.medium,
     fontSize: 16,
+    fontWeight: '600',
     fontFamily: fonts.regular,
     color: colors.ink,
     backgroundColor: colors.white,
@@ -78,8 +84,8 @@ const styles = StyleSheet.create({
   underline: {
     backgroundColor: 'transparent',
     borderWidth: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.muted,
+    borderBottomWidth: 1.5,
+    borderBottomColor: colors.ink,
     borderRadius: 0,
     paddingHorizontal: 0,
   },

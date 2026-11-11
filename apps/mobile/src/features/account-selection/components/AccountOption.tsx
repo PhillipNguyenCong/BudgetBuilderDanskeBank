@@ -28,7 +28,12 @@ export function AccountOption({
       }
       disabled={unavailable}
       onPress={onSelect}
-      style={[styles.card, selected && styles.selected]}
+      style={({ pressed }) => [
+        styles.card,
+        selected && styles.selected,
+        unavailable && styles.unavailable,
+        pressed && !unavailable && styles.pressed,
+      ]}
     >
       <AppText variant="label">{account.name}</AppText>
       <AppText variant="small">{identifier}</AppText>
@@ -36,8 +41,14 @@ export function AccountOption({
       {unavailable ? (
         <AppText variant="small">Already used by a budget</AppText>
       ) : selected ? (
-        <AppText variant="label">Selected</AppText>
-      ) : null}
+        <AppText variant="label" style={styles.action}>
+          Selected
+        </AppText>
+      ) : (
+        <AppText variant="label" style={styles.action}>
+          Select account
+        </AppText>
+      )}
       {account.issues.length > 0 ? (
         <AppText variant="small">Some account details are incomplete or uncertain.</AppText>
       ) : null}
@@ -51,8 +62,11 @@ const styles = StyleSheet.create({
     gap: spacing.small,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: colors.white,
+    borderColor: colors.line,
     backgroundColor: colors.white,
   },
+  action: { color: colors.blue, marginTop: 8 },
+  pressed: { backgroundColor: colors.tint },
+  unavailable: { backgroundColor: colors.disabled },
   selected: { borderColor: colors.blue, backgroundColor: colors.tint },
 });

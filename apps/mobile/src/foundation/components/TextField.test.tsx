@@ -10,14 +10,14 @@ it('strengthens underlined fields on focus, forwards callbacks and preserves err
     <TextField label="Amount" appearance="underline" value="123" onFocus={focus} onBlur={blur} />,
   );
   expect(screen.getByLabelText('Amount')).toHaveStyle({
-    borderBottomWidth: 1,
+    borderBottomWidth: 1.5,
     backgroundColor: 'transparent',
   });
   await fireEvent(screen.getByLabelText('Amount'), 'focus', { nativeEvent: {} });
   expect(screen.getByLabelText('Amount')).toHaveStyle({ borderBottomWidth: 2 });
   expect(focus).toHaveBeenCalledTimes(1);
   await fireEvent(screen.getByLabelText('Amount'), 'blur', { nativeEvent: {} });
-  expect(screen.getByLabelText('Amount')).toHaveStyle({ borderBottomWidth: 1 });
+  expect(screen.getByLabelText('Amount')).toHaveStyle({ borderBottomWidth: 1.5 });
   expect(blur).toHaveBeenCalledTimes(1);
   await view.rerender(
     <TextField label="Amount" appearance="underline" value="invalid" error="Check the amount." />,

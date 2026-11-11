@@ -23,3 +23,9 @@ Reference: [MobilePay's August 2026 redesign announcement](https://mobilepay.dk/
 - iOS and Android exports: passed.
 - Native component suite: 39 passed, 10 failed; failures concern existing fixed-expense row labels and tests expecting an initial bill row. An isolated copy of the unchanged HEAD source produced the same 4 failed suites / 10 failed tests / 39 passed tests, confirming these failures predate the visual refresh.
 - Physical-device visual review, large-text layout, VoiceOver/TalkBack and keyboard testing remain pending. This host has no iOS simulator; exports and component checks do not establish visual quality on a device.
+
+## Interaction clarity follow-up
+
+User feedback: typography and actions were too subtle. Acceptance criteria for this refinement: bold titles and section headings; semibold field labels and input values; visibly bounded secondary/settings/frequency controls; explicit account selection labels and pressed feedback. Static explanatory text remains regular weight so it stays distinct from controls. Existing accessibility labels, disabled states and financial behaviour remain unchanged.
+
+Follow-up verification: mobile TypeScript, formatting and diff checks passed. Updated the existing field-focus regression to expect the stronger resting underline while preserving focus/error checks. The full mobile suite reports 39 passing tests and the same 10 previously recorded fixed-expense failures. Device visual and accessibility review remains pending.

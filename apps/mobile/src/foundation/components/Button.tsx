@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
   },
   disabled: { backgroundColor: colors.disabled },
   pressed: { opacity: 0.75, transform: [{ scale: 0.98 }] },
-  label: { color: colors.white, textAlign: 'center' },
+  label: { color: colors.white, textAlign: 'center', fontWeight: '700' },
   disabledLabel: { color: colors.muted },
-  secondary: { backgroundColor: colors.tint },
+  secondary: { backgroundColor: colors.tint, borderWidth: 1, borderColor: colors.blue },
   secondaryLabel: { color: colors.blue },
 });

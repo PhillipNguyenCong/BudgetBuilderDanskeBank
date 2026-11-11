@@ -26,10 +26,12 @@ export function BillFrequencyPicker({
           accessibilityRole="button"
           accessibilityLabel={`${prefix} frequency: ${billFrequencyLabels[frequency]}`}
           accessibilityState={{ expanded: choosingFrequency }}
-          style={styles.frequencyButton}
+          style={({ pressed }) => [styles.frequencyButton, pressed && styles.pressed]}
           onPress={() => setChoosingFrequency(!choosingFrequency)}
         >
-          <AppText variant="small">{billFrequencyLabels[frequency]} ▾</AppText>
+          <AppText variant="small" style={styles.action}>
+            {billFrequencyLabels[frequency]} ▾
+          </AppText>
         </Pressable>
         <AppText variant="small" style={styles.monthly}>
           {parsed.amount !== undefined
@@ -47,13 +49,13 @@ export function BillFrequencyPicker({
               accessibilityRole="radio"
               accessibilityLabel={`${prefix}: ${billFrequencyLabels[choice]}`}
               accessibilityState={{ checked: choice === frequency }}
-              style={styles.frequencyButton}
+              style={({ pressed }) => [styles.frequencyButton, pressed && styles.pressed]}
               onPress={() => {
                 onChange({ ...row, frequency: choice });
                 setChoosingFrequency(false);
               }}
             >
-              <AppText variant="small">
+              <AppText variant="small" style={styles.action}>
                 {choice === frequency ? '✓ ' : ''}
                 {billFrequencyLabels[choice]}
               </AppText>
@@ -66,7 +68,17 @@ export function BillFrequencyPicker({
 }
 const styles = StyleSheet.create({
   frequencyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.medium },
-  frequencyButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.small },
+  frequencyButton: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.blue,
+    backgroundColor: colors.tint,
+  },
+  action: { color: colors.blue, fontWeight: '600' },
+  pressed: { opacity: 0.65 },
   monthly: { flex: 1, textAlign: 'right', marginRight: 44 + spacing.medium },
   choices: {
     flexDirection: 'row',

@@ -9,12 +9,12 @@ const styles = StyleSheet.create({
   body: { fontSize: 16, lineHeight: 24 },
   small: { fontSize: 14, lineHeight: 20 },
   label: { fontSize: 16, lineHeight: 24, fontFamily: fonts.semibold, fontWeight: '600' },
-  heading: { fontSize: 22, lineHeight: 30, fontFamily: fonts.semibold, fontWeight: '600' },
+  heading: { fontSize: 22, lineHeight: 30, fontFamily: fonts.semibold, fontWeight: '700' },
   title: {
     fontSize: 34,
     lineHeight: 40,
     letterSpacing: -0.8,
     fontFamily: fonts.semibold,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
