@@ -18,9 +18,15 @@ export function RowSourceDetails({ row }: { row: DraftRow }) {
               Source period: {row.source.period.from} – {row.source.period.to}
             </AppText>
           ) : null}
+          {row.sourceFrequencyKnown === false ? (
+            <AppText variant="small">Original payment frequency was not established.</AppText>
+          ) : null}
           {row.source.kind === 'SUGGESTED' ? (
             <AppText variant="small">
-              Original suggestion: {row.original.label}, {formatDkk(row.original.amountOere)}
+              Original suggestion: {row.original.label},{' '}
+              {row.sourceAmountKnown === false
+                ? 'amount unavailable'
+                : formatDkk(row.original.amountOere)}
             </AppText>
           ) : null}
         </View>

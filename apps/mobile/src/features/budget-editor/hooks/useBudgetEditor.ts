@@ -1,5 +1,6 @@
-import type { BudgetPlan } from '@budget-builder/contracts';
-import { useState } from 'react';
+import type { BillSuggestion, BudgetPlan } from '@budget-builder/contracts';
+import { insertSuggestedBills } from '../editor/suggestedBills';
+import { useMemo, useState } from 'react';
 import { typeLabels } from '../../budget-shared';
 import type { proposeSavingsUpdate } from '@budget-builder/budget-core/allocations';
 import { allocationProgress } from '../editor/allocationProgress';
@@ -23,7 +24,7 @@ export function useBudgetEditor({
   busy: boolean;
   onDirty?: () => void;
 }) {
-  const [draft, setDraft] = useState(() => {
+  const initialDraft = () => {
     const value = createDraft(initialPlan);
     if (startBlank)
       value.widgets.forEach((widget) =>
@@ -33,13 +34,33 @@ export function useBudgetEditor({
         }),
       );
     return value;
-  });
+  };
+  const [draft, setDraft] = useState(initialDraft);
+  const [committedAmounts, setCommittedAmounts] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      initialDraft().widgets.flatMap((widget) => widget.rows.map((row) => [row.id, row.input])),
+    ),
+  );
   const [overlayId, setOverlayId] = useState<string>();
   const overlay = draft.widgets.find((widget) => widget.id === overlayId);
   const [reviewSavings, setReviewSavings] = useState(false);
   const [reviewed, setReviewed] = useState(false);
   const result = validateDraft(draft);
-  const progress = allocationProgress(draft);
+  const progress = allocationProgress(
+    useMemo(
+      () => ({
+        ...draft,
+        widgets: draft.widgets.map((widget) => ({
+          ...widget,
+          rows: widget.rows.map((row) => ({
+            ...row,
+            input: committedAmounts[row.id] ?? '',
+          })),
+        })),
+      }),
+      [committedAmounts, draft],
+    ),
+  );
   function update(value: Draft) {
     if (busy) return;
     setDraft(value);
@@ -86,10 +107,33 @@ export function useBudgetEditor({
           : widget,
       ),
     });
+    setCommittedAmounts((amounts) => ({
+      ...amounts,
+      [proposal.rowId]: amountText(proposal.afterOere),
+    }));
     setReviewSavings(false);
   }
   function addRow() {
     if (overlay) changeWidget({ ...overlay, rows: [...overlay.rows, newRow(nextId(draft))] });
+  }
+  function addSuggestedBills(targetId: string, suggestions: BillSuggestion[], onlyIfEmpty = false) {
+    if (busy || !suggestions.length) return;
+    setDraft((current) => {
+      const next = insertSuggestedBills(current, targetId, suggestions, onlyIfEmpty);
+      setCommittedAmounts((amounts) => ({
+        ...amounts,
+        ...Object.fromEntries(
+          next.widgets.flatMap((widget) => widget.rows.map((row) => [row.id, row.input])),
+        ),
+      }));
+      return next;
+    });
+    setReviewed(false);
+    onDirty?.();
+  }
+  function commitAmount(rowId: string) {
+    const row = draft.widgets.flatMap((widget) => widget.rows).find((item) => item.id === rowId);
+    if (row) setCommittedAmounts((amounts) => ({ ...amounts, [rowId]: row.input }));
   }
   return {
     draft,
@@ -102,6 +146,8 @@ export function useBudgetEditor({
     changeWidget,
     addPot,
     addRow,
+    addSuggestedBills,
+    commitAmount,
     applySavings,
     setOverlayId,
     setReviewSavings,

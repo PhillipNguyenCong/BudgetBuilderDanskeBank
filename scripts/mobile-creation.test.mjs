@@ -7,6 +7,12 @@ import { JsonBankDataProvider } from '../apps/backend/dist/infrastructure/bankin
 import { loadAccountSelection } from '../apps/mobile/src/features/account-selection/api.ts';
 import { createBudget, listBudgets } from '../apps/mobile/src/features/budget-shared/index.ts';
 import { manualPlan, loadBudgetSetup } from '../apps/mobile/src/features/budget-creation/api.ts';
+import { loadAccountBillSuggestions } from '../apps/mobile/src/features/budget-creation/api/billSuggestions.ts';
+import {
+  getSpendingSummary,
+  getBudgetActivity,
+  correctBudgetTransaction,
+} from '../apps/mobile/src/features/budget-overview/api.ts';
 
 test('native feature API creates and reopens a manual budget against an isolated synthetic HTTP backend', async () => {
   const app = createApp({
@@ -25,16 +31,50 @@ test('native feature API creates and reopens a manual budget against an isolated
     const account = selection.accounts.items[0];
     const setup = await loadBudgetSetup(account.id);
     assert.equal(setup.quality.coverage.completeMonths, 2);
+    const bills = await loadAccountBillSuggestions(account.id);
+    assert.equal(bills.accountId, account.id);
+    assert.equal(bills.snapshotDate, '2026-09-03');
+    assert.equal(bills.suggestions.find((bill) => bill.label === 'Rent').confidence, 'POSSIBLE');
+    assert.equal((await listBudgets()).length, 0);
     const plan = manualPlan();
     plan.name = 'Synthetic manual plan';
     plan.income.rows[0].amountOere = 2400000;
-    plan.pots[0].rows[0].amountOere = 800000;
-    plan.pots[1].rows[0].amountOere = 1200000;
-    plan.pots[2].rows[0].amountOere = 400000;
-    plan.pots[0].rollover = { enabled: true, destination: 'TO_SAVINGS', targetPotId: 'savings' };
+    const spending = plan.pots.find((pot) => pot.type === 'SPENDING');
+    const fixed = plan.pots.find((pot) => pot.type === 'FIXED_EXPENSE');
+    const savings = plan.pots.find((pot) => pot.type === 'SAVINGS');
+    spending.rows[0].amountOere = 800000;
+    fixed.rows.push({
+      id: 'synthetic-rent',
+      label: 'Rent',
+      amountOere: 1200000,
+      frequency: 'MONTHLY',
+    });
+    savings.rows[0].amountOere = 400000;
+    spending.rollover = { enabled: true, destination: 'TO_SAVINGS', targetPotId: savings.id };
     const saved = await createBudget(account.id, plan);
     assert.deepEqual(saved.plan, plan);
     assert.equal(saved.totals.unallocatedOere, 0);
+    assert.deepEqual((await listBudgets())[0], saved);
+    const summary = await getSpendingSummary(saved.id);
+    assert.equal(summary.snapshotDate, '2026-09-03');
+    assert.equal(summary.overall.remainingOere, 800000);
+    assert.equal(summary.overall.weeklyGuideDkk, 2000);
+    const activity = await getBudgetActivity(saved.id);
+    const rent = activity.items.find((item) => item.kind === 'EXPENSE');
+    assert.equal(rent.potId, fixed.id);
+    const correction = await correctBudgetTransaction(
+      saved.id,
+      rent.transaction.id,
+      0,
+      saved.revision,
+      { kind: 'EXPENSE', potId: spending.id },
+    );
+    assert.equal(correction.revision, 1);
+    const overspent = await getSpendingSummary(saved.id);
+    assert.equal(overspent.overall.overspentOere, 100000);
+    assert.equal(overspent.overall.weeklyGuideDkk, 0);
+    await correctBudgetTransaction(saved.id, rent.transaction.id, 1, saved.revision, null);
+    assert.equal((await getSpendingSummary(saved.id)).overall.remainingOere, 800000);
     assert.deepEqual((await listBudgets())[0], saved);
     assert.deepEqual((await loadAccountSelection()).usedAccountIds, [account.id]);
     await assert.rejects(

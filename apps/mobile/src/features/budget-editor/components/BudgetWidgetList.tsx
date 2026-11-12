@@ -7,11 +7,13 @@ export function BudgetWidgetList({
   progress,
   onOpen,
   onChange,
+  onAmountBlur,
 }: {
   widgets: DraftWidget[];
   progress: ReturnType<typeof allocationProgress>;
   onOpen: (id: string) => void;
   onChange: (widget: DraftWidget) => void;
+  onAmountBlur: (rowId: string) => void;
 }) {
   return (
     <>
@@ -22,6 +24,7 @@ export function BudgetWidgetList({
           progress={progress}
           onOpen={() => onOpen(widget.id)}
           onChange={onChange}
+          onAmountBlur={onAmountBlur}
         />
       ))}
     </>

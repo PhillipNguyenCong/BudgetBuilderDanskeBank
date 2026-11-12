@@ -10,11 +10,13 @@ export function BillList({
   onChange,
   onAddRow,
   focus,
+  onAmountBlur,
 }: {
   widget: DraftWidget;
   onChange: (widget: DraftWidget) => void;
   onAddRow: () => void;
   focus: BillFocus;
+  onAmountBlur: (rowId: string) => void;
 }) {
   const { fontScale } = useWindowDimensions();
   const name = widget.name || 'Unnamed widget';
@@ -49,6 +51,7 @@ export function BillList({
             row={row}
             focus={focus}
             prefix={`${name} row ${index + 1}`}
+            onAmountBlur={onAmountBlur}
             onChange={(value) =>
               onChange({
                 ...widget,

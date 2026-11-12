@@ -13,12 +13,20 @@ import type { BankDataProvider } from './infrastructure/banking/bank-data-provid
 import type { BudgetRepository } from './features/budgets/repository.js';
 import type { IdentityProvider } from './infrastructure/identity/demo-identity.js';
 import { errorHandler } from './shared/error-handler.js';
+import {
+  MemoryCorrectionRepository,
+  type CorrectionRepository,
+} from './features/spending/repository.js';
+import { SpendingService } from './features/spending/service.js';
+import { MemoryBudgetRepository } from './features/budgets/memory-repository.js';
+import { spendingRoutes } from './features/spending/routes.js';
 export interface AppDependencies {
   bank: BankDataProvider;
   budgets: BudgetRepository;
   identity: IdentityProvider;
   clock?: () => Date;
   id?: () => string;
+  corrections?: CorrectionRepository;
 }
 export function createApp(dependencies: AppDependencies) {
   const app = express();
@@ -55,6 +63,19 @@ export function createApp(dependencies: AppDependencies) {
     transactionsRoutes(accounts),
     paymentsRoutes(accounts),
     budgetRoutes(budgets),
+    spendingRoutes(
+      new SpendingService(
+        budgets,
+        accounts,
+        dependencies.corrections ??
+          new MemoryCorrectionRepository((ownerId, budgetId) =>
+            dependencies.budgets instanceof MemoryBudgetRepository
+              ? dependencies.budgets.currentRevision(ownerId, budgetId)
+              : null,
+          ),
+        dependencies.clock,
+      ),
+    ),
   );
   app.use((_req, res) => {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found.' } });

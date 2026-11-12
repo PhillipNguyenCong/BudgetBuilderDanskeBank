@@ -24,21 +24,23 @@ export function BillFrequencyPicker({
       <View style={styles.frequencyRow}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${prefix} frequency: ${billFrequencyLabels[frequency]}`}
+          accessibilityLabel={`${prefix} frequency: ${row.needsFrequencyReview ? 'Needs confirmation' : billFrequencyLabels[frequency]}`}
           accessibilityState={{ expanded: choosingFrequency }}
           style={({ pressed }) => [styles.frequencyButton, pressed && styles.pressed]}
           onPress={() => setChoosingFrequency(!choosingFrequency)}
         >
           <AppText variant="small" style={styles.action}>
-            {billFrequencyLabels[frequency]} ▾
+            {row.needsFrequencyReview ? 'Confirm frequency' : billFrequencyLabels[frequency]} ▾
           </AppText>
         </Pressable>
         <AppText variant="small" style={styles.monthly}>
-          {parsed.amount !== undefined
-            ? `${formatDkk(monthlyBillAllocation(parsed.amount, frequency))}/month`
-            : row.input.trim()
-              ? 'Check amount'
-              : 'Amount not entered'}
+          {row.needsFrequencyReview
+            ? 'Confirm frequency to calculate monthly amount'
+            : parsed.amount !== undefined
+              ? `${formatDkk(monthlyBillAllocation(parsed.amount, frequency))}/month`
+              : row.input.trim()
+                ? 'Check amount'
+                : 'Amount not entered'}
         </AppText>
       </View>
       {choosingFrequency ? (
@@ -48,15 +50,15 @@ export function BillFrequencyPicker({
               key={choice}
               accessibilityRole="radio"
               accessibilityLabel={`${prefix}: ${billFrequencyLabels[choice]}`}
-              accessibilityState={{ checked: choice === frequency }}
+              accessibilityState={{ checked: !row.needsFrequencyReview && choice === frequency }}
               style={({ pressed }) => [styles.frequencyButton, pressed && styles.pressed]}
               onPress={() => {
-                onChange({ ...row, frequency: choice });
+                onChange({ ...row, frequency: choice, needsFrequencyReview: false });
                 setChoosingFrequency(false);
               }}
             >
               <AppText variant="small" style={styles.action}>
-                {choice === frequency ? '✓ ' : ''}
+                {!row.needsFrequencyReview && choice === frequency ? '✓ ' : ''}
                 {billFrequencyLabels[choice]}
               </AppText>
             </Pressable>

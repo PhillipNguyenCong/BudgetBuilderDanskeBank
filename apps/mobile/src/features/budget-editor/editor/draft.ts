@@ -8,6 +8,9 @@ export type DraftRow = Row & {
   original: Row;
   originalInput: string;
   confirmedAmount?: number;
+  sourceAmountKnown?: boolean;
+  sourceFrequencyKnown?: boolean;
+  needsFrequencyReview?: boolean;
 };
 export type DraftWidget = Omit<BudgetPlan['income'], 'rows'> & {
   type: 'INCOME' | BudgetPlan['pots'][number]['type'];
@@ -21,11 +24,19 @@ export function amountText(amountOere: number): string {
   return `${amount / 100n}${amount % 100n ? `.${String(amount % 100n).padStart(2, '0')}` : ''}`;
 }
 export function draftRow(row: Row): DraftRow {
+  const suggested = row.originalSuggestion;
   return {
     ...row,
-    original: { ...row, ...row.originalSuggestion },
+    original: {
+      ...row,
+      ...(suggested ? { label: suggested.label } : {}),
+      ...(suggested?.amountOere != null ? { amountOere: suggested.amountOere } : {}),
+      ...(suggested?.frequency != null ? { frequency: suggested.frequency } : {}),
+    },
     input: amountText(row.amountOere),
     originalInput: amountText(row.amountOere),
+    ...(suggested?.amountOere === null ? { sourceAmountKnown: false } : {}),
+    ...(suggested?.frequency === null ? { sourceFrequencyKnown: false } : {}),
   };
 }
 export function createDraft(plan: BudgetPlan): Draft {
@@ -65,6 +76,8 @@ export function parseAmount(
 export function isAdjusted(row: DraftRow): boolean {
   const value = parseAmount(row);
   return (
+    (row.sourceAmountKnown === false && row.input.trim() !== '') ||
+    (row.sourceFrequencyKnown === false && !row.needsFrequencyReview) ||
     (!row.originalSuggestion && !!row.adjustedByUser) ||
     row.label !== row.original.label ||
     (row.frequency ?? 'MONTHLY') !== (row.original.frequency ?? 'MONTHLY') ||
@@ -81,6 +94,15 @@ export function validateDraft(draft: Draft): {
       error: 'Add an income row and enter your monthly income, including zero if applicable.',
     };
   if (
+    draft.widgets.some(
+      (widget) =>
+        widget.type === 'FIXED_EXPENSE' && widget.rows.some((row) => row.needsFrequencyReview),
+    )
+  )
+    return {
+      error: 'Confirm the payment frequency for suggested bills before creating the budget.',
+    };
+  if (
     draft.widgets.some((widget) => widget.rows.some((row) => parseAmount(row).amount === undefined))
   ) {
     return { error: 'Complete the amounts to calculate the plan.' };
@@ -94,6 +116,7 @@ export function validateDraft(draft: Draft): {
       label: row.label,
       amountOere: parseAmount(row).amount,
       ...(type === 'FIXED_EXPENSE' && row.frequency ? { frequency: row.frequency } : {}),
+      ...(type === 'FIXED_EXPENSE' && row.match ? { match: row.match } : {}),
       ...(row.source ? { source: row.source } : {}),
       ...(row.source?.kind === 'SUGGESTED'
         ? {
@@ -138,6 +161,8 @@ export function validateDraft(draft: Draft): {
 }
 
 export function widgetTotal(widget: DraftWidget): string {
+  if (widget.type === 'FIXED_EXPENSE' && widget.rows.some((row) => row.needsFrequencyReview))
+    return 'Frequency needs review';
   if (widget.rows.some((row) => parseAmount(row).amount === undefined)) return 'Amount incomplete';
   const plan: BudgetPlan = {
     name: 'Total',

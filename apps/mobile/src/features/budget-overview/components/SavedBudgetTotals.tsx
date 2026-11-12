@@ -6,9 +6,9 @@ import { formatDkk } from '../../budget-shared';
 export function SavedBudgetTotals({ totals }: { totals: Budget['totals'] }) {
   return (
     <Card>
-      <AppText>Income: {formatDkk(totals.incomeOere)}</AppText>
+      <AppText variant="label">Income: {formatDkk(totals.incomeOere)}</AppText>
       <AppText>Allocated: {formatDkk(totals.allocatedOere)}</AppText>
-      <AppText>Unallocated: {formatDkk(totals.unallocatedOere)}</AppText>
+      <AppText variant="heading">Left to allocate: {formatDkk(totals.unallocatedOere)}</AppText>
     </Card>
   );
 }

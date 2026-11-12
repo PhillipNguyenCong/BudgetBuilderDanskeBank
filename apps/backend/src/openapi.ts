@@ -12,6 +12,12 @@ import {
   BudgetListSchema,
   ErrorSchema,
   createBudgetExample,
+  SpendingSummarySchema,
+  BudgetActivitySchema,
+  ClassifiedTransactionSchema,
+  CorrectTransactionSchema,
+  TransactionCorrectionSchema,
+  BillSuggestionsSchema,
 } from '@budget-builder/contracts';
 import { calculatePlan } from '@budget-builder/budget-core';
 const schemas = {
@@ -24,6 +30,12 @@ const schemas = {
   Budget: BudgetSchema,
   BudgetList: BudgetListSchema,
   ApiError: ErrorSchema,
+  SpendingSummary: SpendingSummarySchema,
+  BudgetActivity: BudgetActivitySchema,
+  ClassifiedTransaction: ClassifiedTransactionSchema,
+  CorrectTransaction: CorrectTransactionSchema,
+  TransactionCorrection: TransactionCorrectionSchema,
+  BillSuggestions: BillSuggestionsSchema,
 };
 const ref = (name: string) => ({ $ref: '#/components/schemas/' + name });
 const response = (name: string, description: string) => ({
@@ -78,8 +90,57 @@ export const openapi = {
   },
   servers: [{ url: 'http://127.0.0.1:3001' }],
   paths: {
+    '/api/v1/budgets/{id}/spending': { get: read('SpendingSummary', 'getSpendingSummary', [id]) },
+    '/api/v1/budgets/{id}/activity': {
+      get: read('BudgetActivity', 'getBudgetActivity', [
+        id,
+        {
+          name: 'limit',
+          in: 'query',
+          schema: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+        },
+        {
+          name: 'offset',
+          in: 'query',
+          schema: { type: 'integer', minimum: 0, maximum: 100000, default: 0 },
+        },
+        { name: 'potId', in: 'query', schema: { type: 'string' } },
+        { name: 'month', in: 'query', schema: { type: 'string', pattern: '^\\d{4}-\\d{2}$' } },
+        {
+          name: 'expectedSnapshotVersion',
+          in: 'query',
+          schema: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+        },
+      ]),
+    },
+    '/api/v1/budgets/{id}/transactions/{transactionId}': {
+      get: read('ClassifiedTransaction', 'getBudgetTransaction', [
+        id,
+        { ...id, name: 'transactionId' },
+      ]),
+    },
+    '/api/v1/budgets/{id}/transactions/{transactionId}/correction': {
+      put: {
+        operationId: 'correctBudgetTransaction',
+        parameters: [id, { ...id, name: 'transactionId' }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: ref('CorrectTransaction') } },
+        },
+        responses: {
+          '200': response(
+            'TransactionCorrection',
+            'Correction saved independently of the budget plan',
+          ),
+          ...errors,
+        },
+      },
+    },
     '/api/v1/me': { get: read('UserProfile', 'getCurrentUser') },
     '/api/v1/accounts': { get: read('AccountList', 'listAccounts') },
+    '/api/v1/accounts/{id}/bill-suggestions': {
+      get: read('BillSuggestions', 'getBillSuggestions', [id]),
+    },
     '/api/v1/accounts/{id}/transactions': {
       get: read('TransactionPage', 'listTransactions', [id, ...pagination]),
     },

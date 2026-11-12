@@ -8,6 +8,14 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./bill-matching": {
+      "types": "./dist/bills/matching.d.ts",
+      "default": "./dist/bills/matching.js"
+    },
+    "./live-budget": {
+      "types": "./dist/live-budget/index.d.ts",
+      "default": "./dist/live-budget/index.js"
+    },
     "./allocations": {
       "types": "./dist/allocations/index.d.ts",
       "default": "./dist/allocations/index.js"

@@ -20,13 +20,17 @@ export const BudgetRowSchema = z.strictObject({
 });
 export const BillFrequencySchema = z.enum(['MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY']);
 export type BillFrequency = z.infer<typeof BillFrequencySchema>;
+export const BillMatchSchema = z.strictObject({
+  merchantKeys: z.array(z.string().trim().min(1).max(200)).min(1).max(20),
+});
 export const FixedExpenseRowSchema = BudgetRowSchema.extend({
+  match: BillMatchSchema.optional(),
   frequency: BillFrequencySchema.optional(),
   originalSuggestion: z
     .strictObject({
       label: NameSchema,
-      amountOere: NonNegativeOereSchema,
-      frequency: BillFrequencySchema.optional(),
+      amountOere: NonNegativeOereSchema.nullable(),
+      frequency: BillFrequencySchema.nullable().optional(),
     })
     .optional(),
 });

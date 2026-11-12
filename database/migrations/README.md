@@ -12,3 +12,5 @@ ALLOW_DATABASE_MIGRATIONS=true npm run migrations:apply
 Generation needs no database. Application reads the ignored development DATABASE_URL and must be an explicit action against the intended database. Neither startup nor tests apply migrations. Preserve applied migrations and add subsequent files instead of rewriting history. Raw banking data and synthetic fixtures are not migrations.
 
 This task generated the migration only. Live database application and integration have not been verified. Monthly history/rollover tables are deferred; the current-plan aggregate is not a month-end ledger.
+
+`0001_breezy_shotgun.sql` adds independent transaction corrections with a budget foreign key, source identity, owner scope, positive revision and nullable decision (reset to automatic). It does not import bank transactions or implement monthly history. The migration was generated locally and has not been applied. The adapter guards accepted plan and correction revisions in the same write statement.

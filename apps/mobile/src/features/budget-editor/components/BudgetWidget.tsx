@@ -13,11 +13,13 @@ export function BudgetWidget({
   widget,
   onOpen,
   onChange,
+  onAmountBlur,
   progress,
 }: {
   widget: DraftWidget;
   onOpen: () => void;
   onChange: (widget: DraftWidget) => void;
+  onAmountBlur: (rowId: string) => void;
   progress: AllocationProgress;
 }) {
   const name = widget.name || 'Unnamed widget';
@@ -48,7 +50,12 @@ export function BudgetWidget({
             })
           }
         />
-        <WidgetAmount widget={widget} onOpen={onOpen} onChange={onChange} />
+        <WidgetAmount
+          widget={widget}
+          onOpen={onOpen}
+          onChange={onChange}
+          onAmountBlur={onAmountBlur}
+        />
       </View>
       <WidgetAllocationStatus progress={progress} widgetId={widget.id} />
     </Card>

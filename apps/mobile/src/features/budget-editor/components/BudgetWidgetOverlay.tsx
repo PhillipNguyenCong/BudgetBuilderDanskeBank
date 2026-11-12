@@ -1,5 +1,5 @@
 import type { AllocationProgress } from '@budget-builder/budget-core/allocations';
-import { useRef, type ComponentRef } from 'react';
+import { useRef, type ComponentRef, type ReactNode } from 'react';
 import {
   AccessibilityInfo,
   KeyboardAvoidingView,
@@ -29,6 +29,8 @@ export function BudgetWidgetOverlay({
   onChange,
   onAddRow,
   onClose,
+  suggestionPanel,
+  onAmountBlur,
 }: {
   widget: DraftWidget;
   savings: DraftWidget[];
@@ -36,6 +38,8 @@ export function BudgetWidgetOverlay({
   onChange: (widget: DraftWidget) => void;
   onAddRow: () => void;
   onClose: () => void;
+  suggestionPanel?: ReactNode;
+  onAmountBlur: (rowId: string) => void;
 }) {
   const fixed = widget.type === 'FIXED_EXPENSE';
   const billFocus = useBillFocus(widget.rows, fixed);
@@ -82,11 +86,13 @@ export function BudgetWidgetOverlay({
           >
             {widget.type === 'FIXED_EXPENSE' ? (
               <>
+                {suggestionPanel}
                 <BillList
                   widget={widget}
                   onChange={onChange}
                   onAddRow={onAddRow}
                   focus={billFocus}
+                  onAmountBlur={onAmountBlur}
                 />
                 <View style={styles.guidance}>
                   <AllocationGuidance progress={progress} announce />

@@ -3,12 +3,18 @@ import { manualPlan } from '../../budget-creation/api';
 import { BudgetEditor } from './BudgetEditor';
 
 async function amount(name: string, value: string, row = 1) {
-  await fireEvent.changeText(screen.getByLabelText(`${name} row ${row} amount in DKK`), value);
+  const input = screen.getByLabelText(`${name} row ${row} amount in DKK`);
+  await fireEvent.changeText(input, value);
+  await fireEvent(input, 'blur');
 }
 async function bills() {
   await fireEvent.press(screen.getByRole('button', { name: 'Add bills to Fixed expenses' }));
 }
 async function done() {
+  const next = screen.queryByRole('button', { name: 'Next' });
+  if (next) await fireEvent.press(next);
+  const ok = screen.queryByRole('button', { name: 'OK' });
+  if (ok) await fireEvent.press(ok);
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
 }
 function remaining(value: string) {
@@ -17,8 +23,11 @@ function remaining(value: string) {
 
 it('US-04: guides 17000 → 9000 → 7000 → 0 without filling amounts, including inside the bill overlay', async () => {
   await render(<BudgetEditor initialPlan={manualPlan()} startBlank onSubmit={jest.fn()} />);
-  expect(screen.getAllByText('Not entered yet')).toHaveLength(3);
-  await amount('Monthly salary', '17000');
+  expect(screen.getAllByText('Not entered yet')).toHaveLength(2);
+  const income = screen.getByLabelText('Monthly salary row 1 amount in DKK');
+  await fireEvent.changeText(income, '17000');
+  expect(screen.queryByText(/17,000 left to allocate$/)).toBeNull();
+  await fireEvent(income, 'blur');
   remaining('17,000');
   expect(screen.getAllByText(/Based on amounts entered so far/).length).toBeGreaterThan(0);
   expect(screen.getByRole('button', { name: 'Create budget' })).toBeDisabled();
@@ -29,6 +38,7 @@ it('US-04: guides 17000 → 9000 → 7000 → 0 without filling amounts, includi
   remaining('7,000');
   await bills();
   remaining('7,000');
+  await fireEvent.press(screen.getByRole('button', { name: 'Add bill to Fixed expenses' }));
   await amount('Fixed expenses', '7000');
   await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Rent');
   remaining('0');
@@ -45,13 +55,13 @@ it('US-10: clearing restores partial guidance; invalid edits retain it; zero is 
   await amount('Spending budget', '8000');
   await amount('Spending budget', '');
   remaining('17,000');
-  expect(screen.getAllByText('Not entered yet')).toHaveLength(3);
+  expect(screen.getAllByText('Not entered yet')).toHaveLength(2);
   await amount('Spending budget', '-10');
   remaining('17,000');
   expect(screen.getByLabelText('Spending budget row 1 amount in DKK')).toHaveDisplayValue('');
   await amount('Spending budget', '0');
   remaining('17,000');
-  expect(screen.getAllByText('Not entered yet')).toHaveLength(2);
+  expect(screen.getAllByText('Not entered yet')).toHaveLength(1);
   await amount('Monthly salary', '');
   expect(screen.queryByText(/left to allocate$/)).toBeNull();
 });
@@ -62,6 +72,7 @@ it('US-04: adding and removing bills updates progress without redistributing sav
   await amount('Spending budget', '8000');
   await amount('Monthly salary', '17000');
   await bills();
+  await fireEvent.press(screen.getByRole('button', { name: 'Add bill to Fixed expenses' }));
   await amount('Fixed expenses', '7000');
   await fireEvent.press(screen.getByRole('button', { name: 'Add bill to Fixed expenses' }));
   remaining('0');

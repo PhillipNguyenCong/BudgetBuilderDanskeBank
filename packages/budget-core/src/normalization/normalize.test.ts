@@ -73,6 +73,13 @@ test('FX conversion, original amounts, cancelled payments and unknown direction 
             originalAmount: { value: 13, currency: 'EUR' },
             status: 'BOOKED',
           },
+          {
+            id: 'released',
+            bookedOn: '2026-09-02',
+            direction: 'debit',
+            amount: { value: 100, currency: 'DKK' },
+            status: 'RELEASED',
+          },
         ],
       },
       payments: {
@@ -98,6 +105,7 @@ test('FX conversion, original amounts, cancelled payments and unknown direction 
   assert.equal(out.transactions[1]!.direction, 'UNKNOWN');
   assert.ok(out.transactions[1]!.issues.some((i) => i.code === 'FUTURE_DATE'));
   assert.deepEqual(out.transactions[2]!.original, { amount: '13', currency: 'EUR' });
+  assert.equal(out.transactions[3]!.status, 'CANCELLED');
   assert.equal(out.payments[0]!.status, 'CANCELLED');
   assert.equal(out.payments[0]!.direction, 'UNKNOWN');
   assert.equal(out.payments[0]!.recurring, false);

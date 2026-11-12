@@ -11,6 +11,12 @@ export default function Budget() {
       onSelect={(id) => router.setParams({ budgetId: id })}
       onCreate={() => router.push('/budget/select-account')}
       onPreview={() => router.push('/budget/widget-preview')}
+      onOpenPot={(id, potId) =>
+        router.push({ pathname: '/budget/pot', params: { budgetId: id, potId } })
+      }
+      onOpenActivity={(id) =>
+        router.push({ pathname: '/budget/activity', params: { budgetId: id } })
+      }
     />
   );
 }

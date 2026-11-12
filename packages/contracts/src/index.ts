@@ -5,3 +5,5 @@ export * from './payments.js';
 export * from './budgets.js';
 export * from './examples.js';
 export * from './users.js';
+export * from './spending.js';
+export * from './bill-suggestions.js';

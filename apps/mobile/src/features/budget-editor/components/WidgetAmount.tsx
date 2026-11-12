@@ -8,10 +8,12 @@ export function WidgetAmount({
   widget,
   onOpen,
   onChange,
+  onAmountBlur,
 }: {
   widget: DraftWidget;
   onOpen: () => void;
   onChange: (widget: DraftWidget) => void;
+  onAmountBlur: (rowId: string) => void;
 }) {
   const name = widget.name || 'Unnamed widget';
   const fixed = widget.type === 'FIXED_EXPENSE';
@@ -30,6 +32,7 @@ export function WidgetAmount({
           keyboardType="decimal-pad"
           maxLength={24}
           error={parseAmount(row).error}
+          onBlur={() => onAmountBlur(row.id)}
           onChangeText={(input) => {
             if (isAmountInput(input)) onChange({ ...widget, rows: [{ ...row, input }] });
           }}

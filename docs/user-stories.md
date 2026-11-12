@@ -4,22 +4,22 @@ Status: agreed customer-flow baseline with implementation status checked against
 
 ## Journey and implementation overview
 
-| ID | Customer step | Current status |
-| --- | --- | --- |
-| US-01 | Open Budget through Home / Budget / Cards / More | Implemented navigation and saved-budget routing; device checks pending |
-| US-02 | Understand the introduction and start setup | Implemented empty introduction and returning-customer saved-plan routing |
-| US-03 | Select one account, review and create a budget | Manual native creation/save/reopen implemented; AI-assisted creation remains pending |
-| US-04 | Review initial AI suggestions and edit allocation widgets | Manual widgets and save integration implemented; initial AI suggestions remain pending |
-| US-05 | Understand and plan irregular bills | Planned: schedules and monthly normalization of recurring bills are not implemented by free-form rows |
-| US-06 | View remaining spending and pot details | Partial: saved-plan overview; actual spending, attribution and allowances pending |
-| US-07 | View a separate balance forecast | Planned: forecast calculation and native card pending |
-| US-08 | See a relevant shortfall warning | Planned |
-| US-09 | Understand spending changes within the budget | Deferred: no separate insight journey in the active flow |
-| US-10 | Understand data limitations and recover from errors | Partial: normalization, API issues/coverage and native account loading/error states |
-| US-11 | Set optional automatic rollover | Partial: native setup preferences and backend persistence; execution/month-end decisions pending |
-| US-12 | Review monthly results and rollover history | Planned: month closure, history and fallback decisions pending |
-| US-13 | Edit an existing budget without regenerating suggestions | Partial: revision-controlled backend update; native edit flow pending |
-| US-14 | Save for an item after budget creation | Planned prototype extension: sample proposal only; domain/API and recommendation logic deferred |
+| ID    | Customer step                                             | Current status                                                                                                                                                                                                              |
+| ----- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-01 | Open Budget through Home / Budget / Cards / More          | Implemented navigation and saved-budget routing; device checks pending                                                                                                                                                      |
+| US-02 | Understand the introduction and start setup               | Implemented empty introduction and returning-customer saved-plan routing                                                                                                                                                    |
+| US-03 | Select one account, review and create a budget            | Manual native creation/save/reopen implemented; AI-assisted creation remains pending                                                                                                                                        |
+| US-04 | Review initial AI suggestions and edit allocation widgets | Manual widgets, save integration and on-demand deterministic bill discovery implemented; full AI generation remains pending                                                                                                 |
+| US-05 | Understand and plan irregular bills                       | Partial: payment frequencies and monthly planning equivalents; dated scheduling and forecast payments pending                                                                                                               |
+| US-06 | View remaining spending and pot details                   | Partial: source-snapshot attribution, booked/pending/unconfirmed commitments, separate fixed-expense progress, spending guides, native pot/activity routes and corrections; actual rollover and historical balances pending |
+| US-07 | View a separate balance forecast                          | Planned: forecast calculation and native card pending                                                                                                                                                                       |
+| US-08 | See a relevant shortfall warning                          | Planned                                                                                                                                                                                                                     |
+| US-09 | Understand spending changes within the budget             | Deferred: no separate insight journey in the active flow                                                                                                                                                                    |
+| US-10 | Understand data limitations and recover from errors       | Partial: normalization, API issues/coverage and native account loading/error states                                                                                                                                         |
+| US-11 | Set optional automatic rollover                           | Partial: native setup preferences and backend persistence; execution/month-end decisions pending                                                                                                                            |
+| US-12 | Review monthly results and rollover history               | Planned: month closure, history and fallback decisions pending                                                                                                                                                              |
+| US-13 | Edit an existing budget without regenerating suggestions  | Partial: revision-controlled backend update; native edit flow pending                                                                                                                                                       |
+| US-14 | Save for an item after budget creation                    | Planned prototype extension: sample proposal only; domain/API and recommendation logic deferred                                                                                                                             |
 
 US-10 applies throughout. Figma is a design/prototype reference, not evidence of production behavior or device verification. The native manual flow now goes from **Create budget → account selection → Continue → manual setup → Create budget → saved-plan overview**. The user chose manual creation before AI integration; this staged delivery does not satisfy the initial-suggestion criteria of US-04. The separate offline sample preview still never saves. Physical-device checks remain pending.
 
@@ -132,17 +132,17 @@ Requirements: FR-03, FR-04, FR-08. Personas: P-01, P-02.
 
 1. The overview identifies the selected budget and period; customers with multiple budgets can select which one to view.
 2. Use one overview with monthly spending remaining, weekly guidance, pots grouped by type, a compact separate forecast card, and links to Edit budget and monthly history. Monthly salary, fixed-expense reserves, spending allowances and accumulated savings are clearly distinguished. Each subaccount shows its planned allocation and relevant actual movements; spending pots show their remaining amount.
-3. Actual spending uses eligible booked transactions assigned to the spending pot for the selected month. Each transaction belongs to one account and at most one subaccount. Unassigned transactions remain visible for review; incomplete attribution is disclosed.
+3. Actual spending uses eligible booked transactions assigned to the selected month. Known pending debits are shown separately as pending commitments and reduce the relevant pot immediately. Known debits with an unknown booking status are shown separately as unconfirmed commitments and reduce it conservatively. Each transaction belongs to one account and at most one subaccount. Unassigned transactions remain visible for review; incomplete attribution is disclosed.
 4. Virtual allocations and rollover between subaccounts do not inflate income or expenses or change the bank balance. Actual bank transfers remain distinguished from spending.
 5. Spending pots that exceed their allocation plus carried-in money show the overspent amount in text as well as visual styling.
-6. The overview shows remaining monthly spending and weekly allowance per spending pot. Remaining spending equals monthly allocation plus carried-in money minus actual spending in the selected month. Fixed expenses and savings are excluded. A supplementary daily guide can be shown.
+6. The overview shows remaining monthly spending and weekly allowance per spending pot. Remaining spending equals monthly allocation plus carried-in money minus booked, pending and unconfirmed spending in the selected month. Matched bills reduce their Fixed expenses pot and never the everyday Spending guide. Savings is excluded. A supplementary daily guide can be shown.
 7. For the current month, weekly allowance equals the positive remaining spending divided by remaining calendar days including today, multiplied by the smaller of seven and those remaining days. The daily guide uses the same division without the multiplier. Both update when spending, allocations or carried-in money change.
 8. Displayed weekly and daily guides are rounded to the nearest whole DKK and labelled “About”. Use exact amounts internally. Explain that these are spending guides, not enforced limits or cash-flow forecasts.
 9. With DKK 2,800 remaining on 15 October, there are 17 days left: about DKK 1,153 for seven days and DKK 165 per day. On the last day, the weekly allowance covers only that day and equals the positive remainder.
 10. If the everyday-spending budget is exhausted, show DKK 0 for both weekly and daily guides; if exceeded, also show the overspent amount explicitly. Do not imply that the account balance is zero.
 11. Missing required amounts produce an unavailable guide with an explanation, never a fabricated zero. Past and future months do not show a current weekly or daily allowance.
 
-12. Pot details use one consistent layout with type-specific content: Spending shows allocation, carried-in money, actual spending, remaining allowance, recent transactions and rollover settings; Savings shows accumulated savings and allocation; Fixed expenses shows reserved money and a concise bill list. Supporting transactions/bills remain accessible within pots.
+12. Pot details use one consistent layout with type-specific content: Spending shows allocation, carried-in money, booked/pending/unconfirmed spending, remaining allowance, recent transactions and rollover settings; Savings shows its allocation; Fixed expenses shows allocation, booked/pending/unconfirmed bill movements and a concise bill list. Supporting transactions/bills remain accessible within pots. The prototype does not claim a bank-reserved balance.
 13. Allowances update when recorded transactions, accepted allocations or rollover amounts change. Display freshness/limitations rather than claiming instantaneous live banking. The current cached JSON demo refreshes only on backend restart.
 
 Figma: [Budget prototype](https://www.figma.com/design/0ka6z9Ob7PgioGkZfnEN4V). Weekly and daily amounts are budget guidance; forecast warnings remain separately visible.
@@ -282,16 +282,16 @@ All stories are subject to NFR-02 (accessibility), NFR-05 (privacy/security) and
 
 Stories were reordered to start with navigation and first-time guidance. Existing acceptance criteria were retained, with the overview clarified. Use this mapping when reading earlier references; new work should use the current IDs.
 
-| Previous ID | Current ID | Story |
-| --- | --- | --- |
-| US-01 | US-03 | Create a separate budget |
-| US-02 | US-04 | Review suggested budget items |
-| US-03 | US-05 | Plan for irregular expenses |
-| US-04 | US-06 | Compare the plan with actual spending |
-| US-05 | US-09 | Understand spending changes |
-| US-06 | US-07 | View an explained cash-flow forecast |
-| US-07 | US-08 | Receive an early shortfall warning |
-| US-08 | US-10 | Understand data-quality limitations |
+| Previous ID | Current ID | Story                                 |
+| ----------- | ---------- | ------------------------------------- |
+| US-01       | US-03      | Create a separate budget              |
+| US-02       | US-04      | Review suggested budget items         |
+| US-03       | US-05      | Plan for irregular expenses           |
+| US-04       | US-06      | Compare the plan with actual spending |
+| US-05       | US-09      | Understand spending changes           |
+| US-06       | US-07      | View an explained cash-flow forecast  |
+| US-07       | US-08      | Receive an early shortfall warning    |
+| US-08       | US-10      | Understand data-quality limitations   |
 
 ## Current delivery evidence and remaining work
 
@@ -299,9 +299,11 @@ Stories were reordered to start with navigation and first-time guidance. Existin
 - [Demo user data](demo-user-story.md): server-controlled profile and cached local source, scoped reads, safe file errors and actual coverage. No production authentication or live banking.
 - [Mobile account selection](mobile-account-selection-story.md): active Create budget, profile/account/eligibility reads, masked identifiers, selection and loading/error/empty states. Continue was disabled at that milestone; manual creation now extends it. This supersedes the earlier [shell-only milestone](mobile-shell-story.md), where Create budget was disabled.
 - [Native widget editor](mobile-widget-editor-story.md): an explicitly labelled offline sample preview with expandable rows, additional pots, six colors, exact totals, validation, retained draft source explanations and confirmed savings updates. This was the first partial US-04/13 slice; manual creation now adds save integration and persistent adjustment provenance.
-- The backend stores rollover preferences only. Month closure, actual-spending attribution, accumulated/reserved balances, monthly history and rollover execution remain pending. An initial plan save is not historical accounting.
+- The backend stores rollover preferences only. Month closure, accumulated/reserved balances, monthly history and rollover execution remain pending. An initial plan save is not historical accounting.
 - [Manual creation](mobile-budget-creation-story.md): real account selection, blank manual amounts, optional rollover settings, atomic accepted-plan creation, saved-plan routing and uncertain-save recovery. This does not implement saved-plan editing or AI.
+- [Saved overview](mobile-saved-overview-story.md): monthly API totals, grouped colored tiles, multiple-budget selection and read-only details. Bill payment frequencies, monthly equivalents and rollover preferences remain visible; no actual-spending or forecasting capability is implied.
 - AI suggestions, irregular-bill scheduling, saved-plan editing, forecast/warnings and goal proposals remain pending. Separate US-09 insights are deferred from the simplified active flow.
+- [On-demand bill discovery](mobile-bill-suggestions-story.md): first Add bills opens the editor and fetches evidence-backed recurring/possible bills. Clear patterns fill only an open, untouched editor; late results and refreshes require explicit merging. Saved matching keys survive renamed labels. This supersedes the blank/manual-only fixed-expense behavior, without completing full US-04 AI generation or US-05 scheduling.
 - Automated checks and native bundles are recorded in the linked delivery notes; they do not prove physical-device accessibility, usability or forecast accuracy.
 
 ## Flow alignment decisions
@@ -309,3 +311,5 @@ Stories were reordered to start with navigation and first-time guidance. Existin
 Stable US-01–12 identifiers are retained. US-13 makes the existing create/edit distinction explicit; US-14 records the agreed post-creation sample goal flow without claiming implemented goal contracts. The revised baseline adopts expandable spreadsheet-style widgets, initial-only AI suggestions, explicit savings-update confirmation and optional setup rollover with a month-end fallback. Weekly guidance and virtual-allocation invariants remain unchanged. No Figma, API or application code was changed by this documentation alignment.
 
 The subsequent focused-overlay decision supersedes inline expansion for the native editor; see [revised layout and verification](mobile-widget-editor-story.md#revised-widget-layout--focused-overlays). AI suggestions and saved-plan editing remain deferred.
+
+- [Source-snapshot spending](mobile-spending-story.md): automatic account activity, explainable attribution, exact monthly/weekly/daily guidance, native pot routes and optional independent corrections. Current-plan application and zero carry-in are explicit demonstration assumptions. This does not implement monthly history, live banking or month-end execution.

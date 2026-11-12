@@ -2,6 +2,11 @@ import type { BudgetPlan } from '@budget-builder/contracts';
 import { RepositoryConflict, type BudgetRepository, type StoredBudget } from './repository.js';
 export class MemoryBudgetRepository implements BudgetRepository {
   private readonly records = new Map<string, StoredBudget>();
+  /** Synchronous guard used in the same JS turn as a memory correction commit. */
+  currentRevision(ownerId: string, id: string): number | null {
+    const budget = this.records.get(id);
+    return budget?.ownerId === ownerId ? budget.revision : null;
+  }
   async list(ownerId: string) {
     return structuredClone(
       [...this.records.values()]

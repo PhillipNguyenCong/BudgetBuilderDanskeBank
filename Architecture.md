@@ -1,6 +1,6 @@
 # Architecture
 
-Status: modular monolith with feature-based layers and ports/adapters at banking and persistence boundaries. Accounts, transactions, planned payments and budget create/edit APIs are implemented, with shared schemas and deterministic normalization/allocation logic. Default local/test runtime is memory; PostgreSQL is explicit opt-in. No shared migrations or deployment were performed.
+Status: modular monolith with feature-based layers and ports/adapters at banking and persistence boundaries. Accounts, transactions, planned payments, budget create/edit and source-snapshot spending/correction APIs are implemented, with shared schemas and deterministic normalization/allocation/spending logic. Default local/test runtime is memory; PostgreSQL is explicit opt-in. No shared migrations or deployment were performed.
 
 ## Goals and scope
 
@@ -12,7 +12,7 @@ Use [requirements](docs/requirements.md), [user stories](docs/user-stories.md) a
 
 - `apps/web`: React, TypeScript and Vite; one responsive application for desktop and mobile browsers.
 - `apps/backend`: TypeScript HTTP backend intended for Vercel. It validates requests, enforces access, coordinates workflows and performs authoritative calculations.
-- `apps/mobile`: React Native / Expo client with native screens, API-backed account selection, manual budget creation, a saved-plan overview and an offline allocation-widget preview; AI suggestions and saved-plan editing pending.
+- `apps/mobile`: React Native / Expo client with native screens, API-backed account selection, manual budget creation, a grouped spending overview, Budget-stack pot/activity routes and optional transaction corrections and an offline allocation-widget preview; AI suggestions and saved-plan editing pending.
 - `packages/budget-core`: framework-independent calculation and data-processing logic.
 - `packages/contracts`: shared API request/response types and runtime validation schemas.
 - `database/migrations`: version-controlled PostgreSQL schema changes.
@@ -48,16 +48,16 @@ apps/web/src/
   lib/
 ```
 
-| Area | Responsibility | Must not own |
-| --- | --- | --- |
-| app | Application startup, routes, providers and composition of feature screens | Financial rules or database access |
-| foundation/components | Reusable presentation primitives such as Button, Input, Card and Dialog | Budget knowledge, feature imports or business API calls |
-| foundation/styles | Shared colours, typography, spacing and global styles | Feature-specific behaviour |
-| features/*/components | Feature-specific presentation with explicit props and callbacks | Fetching and persistence mixed into display components |
-| features/*/containers | Coordinate screen data, state, loading, errors and user actions | Financial algorithms or direct database access |
-| features/*/hooks | Reusable feature state and orchestration where useful | An unnecessary wrapper for every component |
-| features/*/api | Feature-specific backend requests and response handling | UI rendering or server credentials |
-| lib | Technical utilities such as the shared HTTP client | Unrelated business logic collected in a global helper folder |
+| Area                  | Responsibility                                                            | Must not own                                                 |
+| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| app                   | Application startup, routes, providers and composition of feature screens | Financial rules or database access                           |
+| foundation/components | Reusable presentation primitives such as Button, Input, Card and Dialog   | Budget knowledge, feature imports or business API calls      |
+| foundation/styles     | Shared colours, typography, spacing and global styles                     | Feature-specific behaviour                                   |
+| features/*/components | Feature-specific presentation with explicit props and callbacks           | Fetching and persistence mixed into display components       |
+| features/*/containers | Coordinate screen data, state, loading, errors and user actions           | Financial algorithms or direct database access               |
+| features/*/hooks      | Reusable feature state and orchestration where useful                     | An unnecessary wrapper for every component                   |
+| features/*/api        | Feature-specific backend requests and response handling                   | UI rendering or server credentials                           |
+| lib                   | Technical utilities such as the shared HTTP client                        | Unrelated business logic collected in a global helper folder |
 
 ### Component rules
 
@@ -188,9 +188,9 @@ The current plan is not historical accounting. Closed months, allocation effecti
 
 ## Native mobile shell — first frontend delivery
 
-`apps/mobile` uses Expo SDK 58, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and font/safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget-overview/screens`; demo screens and the navigation bar belong to `features/shell`.
+`apps/mobile` uses Expo SDK 58, React Native, TypeScript, Expo Router and StyleSheet. `src/app` owns thin routes and safe-area startup. `foundation/components` contains Screen, AppText, BankHeader, Button and Card; `foundation/theme` owns colors, typography and spacing. Budget introduction belongs to `features/budget-overview/screens`; demo screens and the navigation bar belong to `features/shell`.
 
-Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. Fonts are local licensed assets. Four tabs open on Budget. The initial shell had Create budget disabled; account selection and the sample-widget preview now extend that shell as described below. Native UI components are not shared with the future web UI.
+Foundation has no budget knowledge, requests or global business state. Screen layouts scroll and avoid fixed text heights. The current interface uses platform system fonts; unused licensed Open Sans assets are retained locally. Four tabs open on Budget. The initial shell had Create budget disabled; account selection and the sample-widget preview now extend that shell as described below. Native UI components are not shared with the future web UI.
 
 Native Jest/Expo tests run separately from the backend Node runner. Root dev dependencies pin shared React/native test peers to the SDK-compatible versions so npm does not hoist newer incompatible peers into Expo Router. Backend runtime and its memory default are unchanged.
 
@@ -222,7 +222,7 @@ The editor starts with blank amount text over a structural four-widget template.
 
 On save success, navigation dismisses setup and selects the new plan on Budget. Budget entry refreshes the server list and distinguishes loading/error from an empty list. The read-only overview shows saved rows, colors, allocations and rollover preferences; unavailable actual-spending and forecast features do not undo a save. Unknown write outcomes and occupied-account conflicts retain the draft and offer a saved-budget lookup rather than silent resubmission or replacement.
 
-The supplied account history is disclosed but is not used to generate manual amounts. Future AI supplies an initial draft to this same editor; subsequent saved-plan editing must never regenerate it. US-13 editing, type-immutability enforcement on updates, financial history and month-end execution remain separate work. Default memory storage resets on backend restart. See [manual creation criteria](docs/mobile-budget-creation-story.md).
+The manual slice initially disclosed history without generating amounts. The subsequent on-demand bill-discovery slice below supersedes that behavior for fixed expenses only. Future full AI generation may supply an initial draft to this same editor; subsequent saved-plan editing must never regenerate it. US-13 editing, type-immutability enforcement on updates, financial history and month-end execution remain separate work. Default memory storage resets on backend restart. See [manual creation criteria](docs/mobile-budget-creation-story.md).
 
 Live allocation guidance is derived independently of full-plan validity: the native draft adapter maps amount text to integer øre, missing or invalid values, and budget-core calculates the provisional global remainder. Summary/widget components render the same result and identify unfinished pots. No per-keystroke API call or persisted progress field is introduced. Blank amounts still block saving; backend validation remains authoritative. See [guidance criteria](docs/mobile-allocation-guidance-story.md).
 
@@ -237,3 +237,21 @@ App routes import feature `index.ts` exports and retain navigation/discard guard
 Account-selection and budget-creation additionally expose a React Native-free `api.ts` entry for setup orchestration and the Node integration harness. Production cross-feature imports must target `index.ts` or these explicit API entries. Internal modules use direct local imports; test mocks may target the concrete modules they replace. Foundation and lib remain independent of features. Exact monetary algorithms and public HTTP contracts are unchanged.
 
 This is a maintenance refactor of existing US-03/04/11/13 slices, not new product functionality or evidence of usability. See [acceptance criteria and verification](docs/mobile-feature-refactor-story.md).
+
+## Source-snapshot spending — US-06
+
+The spending service loads an owned budget and its complete normalized account snapshot, then delegates automatic attribution and exact guidance to budget-core. Summary and paginated activity responses share a snapshot version covering plan revision, source inputs and correction revisions. Clients reject mismatched versions and refresh both views. The snapshot uses the source Copenhagen date, bounded by coverage, and explicitly applies the current plan with zero opening carry-in; it is not a historical monthly ledger or live-bank view.
+
+Budget-core exposes one `calculateLiveBudgetSnapshot` pipeline under `live-budget`. It reconciles compatible source-status transitions, classifies movements and calculates Spending and Fixed expenses separately. Booked amounts remain actual spending; known pending and unknown-status debits are distinct commitments that reduce the displayed remainder immediately. A compatible booked version replaces pending once, and a cancelled/released version contributes nothing. Missing amount, direction, date or target remains a hard limitation. Overall weekly/daily guidance combines Spending pots only; matched bills never reduce everyday Spending.
+
+Transaction corrections are a separate persistence feature, never fields on imported records or edits to the budget plan. Writes guard both the accepted plan revision and correction revision atomically. Memory uses a synchronous revision check and commit; PostgreSQL locks the owned budget revision in the correction write statement. Changed/missing source fingerprints retain previous corrections for review rather than silently applying them to different records. The additive correction migration is generated but not applied.
+
+The native overview retains its mounted scroll surface during background refresh. Pot and account-activity screens are Expo Router children of the same Budget stack; transient classification corrections use a protected modal container. Source reads, pagination, cancellation, errors and coordinated refresh belong to feature hooks/screens; display components receive data and callbacks. No financial algorithms are duplicated in the client.
+
+## On-demand bill discovery — US-04 / US-05
+
+The account service reads the complete owned-account snapshot for GET /api/v1/accounts/:id/bill-suggestions. Budget-core detects eligible recurring debits and possible planned bills using explicit source dates, exact amounts and merchant/payee identities. This is deterministic detection, not an AI service. Matching keys are saved in fixed-expense rows independently from customer labels; the spending classifier uses them before legacy phrase/default rules. Known Rent/Husleje and Netflix aliases also support manually entered bill labels. Known pending evidence may produce a Possible suggestion but cannot establish a confirmed recurring bill. Ambiguous matches stay reviewable.
+
+Creation injects an account-bound loader into the editor. The editor's useBillSuggestions hook owns the lazy read, request cancellation and draft-local cache; prop-driven presentation owns no requests. First opening Add bills starts discovery. Automatic insertion is limited to recurring patterns while the original overlay is still open, empty and untouched. Closing, manual entry, retries and refreshes require explicit merging. Accepted and removed merchant identities prevent duplicate insertion without hiding unrelated named payees. Account-route remounting isolates drafts; saved overviews and offline preview never invoke discovery.
+
+Suggestion amount/frequency evidence remains separate from confirmed payment inputs. Unknown source amount/frequency is retained as explicit null original-suggestion metadata through save/reopen; unknown draft amounts stay blank and uncertain frequency must be confirmed. Optional matching/provenance fields use the existing JSONB plan, so this slice needs no database migration. See [criteria and verification](docs/mobile-bill-suggestions-story.md).

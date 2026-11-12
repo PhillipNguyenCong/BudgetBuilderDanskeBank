@@ -6,6 +6,8 @@ import Tabs from '../app/(tabs)/_layout';
 import BudgetLayout from '../app/(tabs)/budget/_layout';
 import CreateBudget from '../app/(tabs)/budget/create';
 import BudgetHome from '../app/(tabs)/budget/index';
+import BudgetPot from '../app/(tabs)/budget/pot';
+import BudgetActivity from '../app/(tabs)/budget/activity';
 import SelectAccount from '../app/(tabs)/budget/select-account';
 import Cards from '../app/(tabs)/cards';
 import Home from '../app/(tabs)/home';
@@ -60,6 +62,22 @@ jest.mock('../features/budget-shared/api/budgets', () => ({
   }),
 }));
 
+jest.mock('../features/budget-overview/api', () => ({
+  getSpendingSummary: jest.fn(async (id) => {
+    const { spendingSummary } = require('./spendingFixtures');
+    return spendingSummary(mockSaved.find((budget) => budget.id === id));
+  }),
+  getBudgetActivity: jest.fn(async () => ({
+    budgetRevision: 1,
+    snapshotVersion: 'a'.repeat(64),
+    snapshotDate: '2026-10-15',
+    items: [],
+    page: { offset: 0, limit: 25, total: 0, hasMore: false },
+  })),
+  getBudgetTransaction: jest.fn(),
+  correctBudgetTransaction: jest.fn(),
+}));
+
 beforeEach(() => {
   mockSaved = [];
   jest.clearAllMocks();
@@ -74,6 +92,8 @@ it('US-03: cancelling manual setup discards only the local draft and never write
         '(tabs)/_layout': Tabs,
         '(tabs)/budget/_layout': BudgetLayout,
         '(tabs)/budget/index': BudgetHome,
+        '(tabs)/budget/pot': BudgetPot,
+        '(tabs)/budget/activity': BudgetActivity,
         '(tabs)/budget/select-account': SelectAccount,
         '(tabs)/budget/create': CreateBudget,
         '(tabs)/home': Home,
@@ -111,6 +131,8 @@ it('US-03: routes account selection through manual creation to the saved plan wi
         '(tabs)/_layout': Tabs,
         '(tabs)/budget/_layout': BudgetLayout,
         '(tabs)/budget/index': BudgetHome,
+        '(tabs)/budget/pot': BudgetPot,
+        '(tabs)/budget/activity': BudgetActivity,
         '(tabs)/budget/select-account': SelectAccount,
         '(tabs)/budget/create': CreateBudget,
         '(tabs)/home': Home,
@@ -130,19 +152,30 @@ it('US-03: routes account selection through manual creation to the saved plan wi
       ['Fixed expenses', '12000,20'],
       ['Savings', '4000.25'],
     ]) {
-      if (name === 'Fixed expenses')
+      if (name === 'Fixed expenses') {
         await fireEvent.press(screen.getByRole('button', { name: 'Add bills to Fixed expenses' }));
+        await fireEvent.press(screen.getByRole('button', { name: 'Add bill to Fixed expenses' }));
+        await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Rent');
+        await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+      }
       await fireEvent.changeText(screen.getByLabelText(`${name} row 1 amount in DKK`), amount);
       if (name === 'Fixed expenses') {
-        await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Rent');
+        await fireEvent.press(screen.getByRole('button', { name: 'OK' }));
         await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
       }
     }
     await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
-    expect(await screen.findByText('Saved monthly plan')).toBeVisible();
+    expect(await screen.findByText('Monthly plan')).toBeVisible();
     expect(router.getPathname()).toBe('/budget');
     expect(screen.getByRole('header', { name: 'November plan' })).toBeVisible();
     expect(screen.getByRole('tab', { name: 'Budget' })).toBeSelected();
+    expect(createBudget).toHaveBeenCalledTimes(1);
+    await fireEvent.press(screen.getByRole('button', { name: 'View Fixed expenses details' }));
+    expect(await screen.findByText('Rent: DKK 12,000.20')).toBeVisible();
+    expect(router.getPathname()).toBe('/budget/pot');
+    expect(screen.getByRole('tab', { name: 'Budget' })).toBeSelected();
+    await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+    await screen.findByText('Monthly plan');
     expect(createBudget).toHaveBeenCalledTimes(1);
     expect(screen.getByText('Income: DKK 24,000.55')).toBeVisible();
     expect(mockSaved[0]!.plan.income.rows[0]!.amountOere).toBe(2400055);

@@ -1,6 +1,6 @@
 # Backend foundation
 
-A TypeScript/Express modular monolith with feature services, replaceable persistence and a replaceable bank-data provider. The current delivery implements data normalization and budget setup/editing, not AI generation, forecasts, transaction assignment or month closure.
+A TypeScript/Express modular monolith with feature services, replaceable persistence and a replaceable bank-data provider. The current delivery implements data normalization, budget setup/editing, rules-based source-snapshot spending and transaction corrections, not AI generation, forecasts or month closure.
 
 ## Run locally
 
@@ -28,17 +28,22 @@ Do not expose this demo runtime publicly. `NODE_ENV=production` or `VERCEL` disa
 
 See [OpenAPI](../../docs/openapi.json), [create request](../../docs/examples/create-budget.json) and [response](../../docs/examples/budget-response.json). Shared runtime schemas and inferred types live in `@budget-builder/contracts`.
 
-| Method | Path | Behavior |
-| --- | --- | --- |
-| GET | /api/v1/me | Current server-owned profile: id, nullable displayName, isDemo |
-| GET | /health | Liveness, independent of provider/database readiness |
-| GET | /api/v1/accounts | Owned accounts, masked identifiers, data quality |
-| GET | /api/v1/accounts/:id/transactions | Normalized records and quality metadata |
-| GET | /api/v1/accounts/:id/payments | Normalized planned payments, distinct from transactions |
-| GET | /api/v1/budgets | Owned saved budgets |
-| GET | /api/v1/budgets/:id | Plan, derived totals, revision and timestamps |
-| POST | /api/v1/budgets | Create one budget per owned account; returns 201 and Location |
-| PUT | /api/v1/budgets/:id | Replace the reviewed plan using expectedRevision |
+| Method | Path                                                       | Behavior                                                                          |
+| ------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| GET    | /api/v1/me                                                 | Current server-owned profile: id, nullable displayName, isDemo                    |
+| GET    | /health                                                    | Liveness, independent of provider/database readiness                              |
+| GET    | /api/v1/accounts                                           | Owned accounts, masked identifiers, data quality                                  |
+| GET    | /api/v1/accounts/:id/transactions                          | Normalized records and quality metadata                                           |
+| GET    | /api/v1/accounts/:id/payments                              | Normalized planned payments, distinct from transactions                           |
+| GET    | /api/v1/accounts/:id/bill-suggestions                      | Owned-account recurring/possible bills with evidence, source date and uncertainty |
+| GET    | /api/v1/budgets                                            | Owned saved budgets                                                               |
+| GET    | /api/v1/budgets/:id                                        | Plan, derived totals, revision and timestamps                                     |
+| POST   | /api/v1/budgets                                            | Create one budget per owned account; returns 201 and Location                     |
+| PUT    | /api/v1/budgets/:id                                        | Replace the reviewed plan using expectedRevision                                  |
+| GET    | /api/v1/budgets/:id/spending                               | Source-date snapshot, exact remaining spending and weekly/daily guides            |
+| GET    | /api/v1/budgets/:id/activity                               | Classified linked-account transactions, paginated independently of calculations   |
+| GET    | /api/v1/budgets/:id/transactions/:transactionId            | Latest classification for a read-before-retry check                               |
+| PUT    | /api/v1/budgets/:id/transactions/:transactionId/correction | Accepted classification with expected budget/correction revisions                 |
 
 Transaction/payment reads accept `limit` (1–100, default 50), `offset` (0–100000, default 0), `from` and `to` (inclusive ISO dates). Order is date ascending, then stable internal ID, with undated records last. Date filters exclude undated records and report that limitation. Unknown statuses and cancelled payments remain visible; these read APIs do not pretend to produce forecast-eligible cash flows.
 
@@ -99,3 +104,21 @@ Set `BANK_DATA_FILE` in the ignored local `.env` to use your approved dataset. W
 See the [profile example](../../docs/examples/user-profile-response.json) and [delivery verification](../../docs/demo-user-story.md). No dataset is uploaded or committed. Transaction counts include normalized records of various directions/statuses and are not unique purchase counts. Coverage metadata describes the source period, not twelve months of usable spending.
 
 For a physical phone on a trusted local network, `npm run dev:backend:lan` explicitly opts into HOST=0.0.0.0. Normal startup remains 127.0.0.1. An alternate port can be selected with `PORT=3002 npm run dev:backend:lan`; match that port in the mobile public API URL. This local demo has no authentication and must not be publicly exposed.
+
+## Source-snapshot spending and corrections
+
+The service uses the source Copenhagen date, bounded by its coverage end, rather than wall-clock today. The supplied source therefore opens on 3 September 2026. The current plan is applied to that demonstration month with zero configured opening carry-in. Remaining spending, not the bank balance, funds the rounded About weekly/daily guides. Missing essential data produces unavailable guidance while known activity remains visible.
+
+Every account transaction is accessible automatically. Unique whole-phrase matches against saved spending names/rows and bill labels attribute debits; unmatched eligible debits use the first spending pot. Matched bills reduce Fixed expenses and never the overall Spending guide. Booked amounts, pending commitments and known debits with unknown status are returned separately. Pending and unconfirmed commitments reduce the remainder immediately but are not called actual spending. Missing amount/direction/date/target, ambiguous matches and conflicting source versions remain explicit. Virtual allocations, planned payments, transfers and ordinary credits are excluded. Confirmed refunds can restore a Spending or Fixed expenses pot. No due-date scheduling or actual reserve/savings balance is implied.
+
+Activity accepts limit, offset, optional potId/month and expectedSnapshotVersion. Month filtering retains undated records for review. Summary/activity versions cover the plan, source inputs and correction revisions; a mismatch returns 409 SPENDING_CHANGED. Correction writes accept expectedRevision (zero for a new override), expectedBudgetRevision and a decision. A null decision restores automatic attribution while preserving the correction revision. Explicit expense targets require debit direction and a Spending/Fixed expenses pot; refunds require credit direction and may restore either type. Corrections never alter imported records or budget plans.
+
+Memory and PostgreSQL adapters enforce correction concurrency. PostgreSQL locks the owned budget row at the expected revision within the correction write, preventing a concurrent plan change from invalidating the accepted target. The new transaction_corrections migration is generated only. PostgreSQL mode requires explicit migration application before this read/write feature can use that table. Custom createApp persistence compositions should provide the matching correction repository; the default memory correction writer fails closed without a memory budget revision guard.
+
+See [delivery and verification](../../docs/mobile-spending-story.md). Tests use independent synthetic fixtures, not the configured bank source or shared database. Live PostgreSQL locking behavior is not established by fake-query tests.
+
+## On-demand bill discovery
+
+The bill-suggestions read uses the complete owned snapshot independently of transaction pagination and creates no budget. Budget-core returns recurring patterns and possible bills with actual coverage, original record IDs and review explanations. Only eligible booked debits establish confirmed recurrence. Known pending Rent/Husleje or similar evidence can produce a Possible suggestion requiring review; transfers, conflicting records and cancelled payments do not. Known Rent/Husleje and Netflix aliases support stable matching independently of editable bill labels. Named payees distinguish otherwise identical generic descriptions. Other eligible debits retain the disclosed first-Spending-pot fallback.
+
+Optional fixed-expense match and nullable original-suggestion evidence are saved in the existing validated JSONB plan; no new bill-discovery migration or external AI call is required. Client-supplied source/matching metadata remains planning data, never ownership or proof of a bank movement. Discovery does not repair source data or implement bill payment scheduling. See [criteria and verification](../../docs/mobile-bill-suggestions-story.md).

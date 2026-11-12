@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { ApiError } from '../../../lib/api';
 import type { BudgetSetup } from '../api/setup';
 import { CreateBudgetScreen } from './CreateBudgetScreen';
+import { billSuggestions } from '../../../tests/billSuggestionFixtures';
 
 const setup: BudgetSetup = {
   account: {
@@ -70,6 +71,20 @@ function props(api = services()) {
     services: api,
   };
 }
+
+it('US-04: account setup does not fetch bills until Add bills is opened', async () => {
+  const api = {
+    ...services(),
+    suggest: jest.fn(async (_id: string, _signal?: AbortSignal) => billSuggestions()),
+  };
+  await render(<CreateBudgetScreen {...props(api)} />);
+  await screen.findByLabelText('Budget name');
+  expect(api.suggest).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Add bills to Fixed expenses' }));
+  expect(api.suggest).toHaveBeenCalledWith('demo-account', expect.any(AbortSignal));
+  expect(screen.getByLabelText('Fixed expenses row 1 label')).toHaveDisplayValue('Rent');
+  expect(api.create).not.toHaveBeenCalled();
+});
 
 it('US-03: starts blank, submits the accepted manual plan once and preserves input after a failed save', async () => {
   const api = services();

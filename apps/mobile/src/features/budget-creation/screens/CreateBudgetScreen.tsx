@@ -1,5 +1,5 @@
 import type { Budget } from '@budget-builder/contracts';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { BackButton } from '../../../foundation/components/BackButton';
@@ -12,7 +12,11 @@ import { BudgetSetupLoading } from '../components/BudgetSetupLoading';
 import { CreationHeader } from '../components/CreationHeader';
 import { SaveRecoveryFeedback } from '../components/SaveRecoveryFeedback';
 import { manualPlan } from '../editor/manualPlan';
-import { creationServices, useBudgetCreation } from '../hooks/useBudgetCreation';
+import {
+  creationServices,
+  useBudgetCreation,
+  type CreationServices,
+} from '../hooks/useBudgetCreation';
 
 export function CreateBudgetScreen({
   accountId,
@@ -29,11 +33,16 @@ export function CreateBudgetScreen({
   onOpenExisting: (budget: Budget) => void;
   onDirty: () => void;
   onBusy: (busy: boolean) => void;
-  services?: typeof creationServices;
+  services?: CreationServices;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [initialPlan] = useState(manualPlan);
   const flow = useBudgetCreation(accountId, onCreated, onBusy, services);
+  const loadSuggestions = useMemo(
+    () =>
+      services.suggest ? (signal: AbortSignal) => services.suggest!(accountId, signal) : undefined,
+    [services.suggest, accountId],
+  );
   return (
     <>
       <Screen>
@@ -63,6 +72,7 @@ export function CreateBudgetScreen({
               <BudgetEditor
                 initialPlan={initialPlan}
                 startBlank
+                loadBillSuggestions={loadSuggestions}
                 onDirty={onDirty}
                 onSubmit={(plan) => void flow.submit(plan)}
                 busy={flow.busy}

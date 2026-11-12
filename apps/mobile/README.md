@@ -1,6 +1,6 @@
 # Native mobile app
 
-First frontend delivery: React Native, TypeScript and Expo SDK 58 with Expo Router. Four working tabs open on Budget. Create budget opens account selection; Home, Cards and More are explicit demo screens. Account selection reads the local backend profile, masked accounts, coverage and existing budgets. Budget also offers an offline sample-widget editor. Manual setup now saves through the existing backend and opens the saved-plan overview. Account-derived suggestions, saved-plan editing and login remain deferred.
+First frontend delivery: React Native, TypeScript and Expo SDK 58 with Expo Router. Four working tabs open on Budget. Create budget opens account selection; Home, Cards and More are explicit demo screens. Account selection reads the local backend profile, masked accounts, coverage and existing budgets. Budget also offers an offline sample-widget editor. Setup saves through the backend and opens the spending overview for the linked account’s source-date snapshot. Add bills discovers account-derived fixed expenses on demand. Full AI budget generation, saved-plan editing and login remain deferred.
 
 ## Start on iPhone
 
@@ -18,17 +18,17 @@ After a dependency upgrade, stop Metro and run `npm run start --workspace @budge
 
 ## Commands (repository root)
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev:mobile` | Start only Metro on the LAN |
-| `npm run test:mobile` | Native component/navigation tests (Jest Expo) |
-| `npm run test:mobile:api` | Mobile feature API against an isolated synthetic HTTP backend; builds shared/backend packages first |
-| `npm run typecheck:mobile` | Native TypeScript check |
-| `npm run check:mobile` | Expo dependency compatibility |
-| `cd apps/mobile && npx expo-doctor` | Full Expo project checks |
-| `npm run bundle:mobile:ios` | Export iOS JavaScript/assets to ignored `dist/ios` |
-| `npm run bundle:mobile:android` | Export Android JavaScript/assets to ignored `dist/android` |
-| `npm run format:check` | Repository TypeScript formatting, including mobile |
+| Command                             | Purpose                                                                                             |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `npm run dev:mobile`                | Start only Metro on the LAN                                                                         |
+| `npm run test:mobile`               | Native component/navigation tests (Jest Expo)                                                       |
+| `npm run test:mobile:api`           | Mobile feature API against an isolated synthetic HTTP backend; builds shared/backend packages first |
+| `npm run typecheck:mobile`          | Native TypeScript check                                                                             |
+| `npm run check:mobile`              | Expo dependency compatibility                                                                       |
+| `cd apps/mobile && npx expo-doctor` | Full Expo project checks                                                                            |
+| `npm run bundle:mobile:ios`         | Export iOS JavaScript/assets to ignored `dist/ios`                                                  |
+| `npm run bundle:mobile:android`     | Export Android JavaScript/assets to ignored `dist/android`                                          |
+| `npm run format:check`              | Repository TypeScript formatting, including mobile                                                  |
 
 Root `npm test` still runs only backend/shared Node tests. `npm run typecheck` checks all workspaces. Root `npm run build` builds backend/shared packages; native exports are explicit commands above. Lint is not configured. Bundles are not native installers or device tests.
 
@@ -40,7 +40,7 @@ Root `npm test` still runs only backend/shared Node tests. `npm run typecheck` c
 - `src/features/account-selection`: account eligibility/loading hook, account list and history components.
 - `src/features/budget-creation`: setup checks, initial manual plan, save/recovery hook and creation UI.
 - `src/features/budget-editor`: draft hook and validation adapter; composed widgets, bill inputs, savings review and rollover controls.
-- `src/features/budget-overview`: saved-budget loading hook and read-only plan components using contract data directly.
+- `src/features/budget-overview`: saved-budget/spending/activity hooks, summary and tile presentation, Budget-stack pot/activity screens and a transaction-correction container. API requests have a React Native-free public `api.ts` entry for integration tests.
 - `src/features/budget-preview`: offline sample-plan factory and preview screen.
 - `src/features/budget-shared`: budget list/create requests, DKK formatting, labels and widget palette; no workflow or React Native imports.
 - `src/features/shell`: demo screens, navigation bar and colocated navigation tests.
@@ -91,14 +91,25 @@ Live guidance above the widgets and in each widget and the fixed-expense overlay
 
 Saving freezes the draft until the response arrives. Failures retain inputs; account conflicts and uncertain write outcomes offer a read-only check for an existing saved budget. No automatic resubmission or account switching occurs. Back/swipe confirms discarding an edited draft. Success returns to the new saved plan; other budgets remain separately selectable. Re-entering Budget refreshes the backend list.
 
-The saved overview shows planning rows and amounts. It does not invent actual spending, weekly allowances, accumulated savings or forecasts. Default backend memory storage lasts until server restart; durable PostgreSQL storage remains explicit opt-in outside this task. Physical-device checks are still pending. See [manual creation verification](../../docs/mobile-budget-creation-story.md).
+The saved overview leads with Left to spend this month, About guidance for the next seven days (or remaining days), a smaller daily guide and days left. Spending and Fixed expenses show booked, pending and unconfirmed movements separately. Matched bills reduce Fixed expenses; other eligible debits reduce Spending. Known pending and unknown-status debits reduce the remainder immediately without being called booked spending. The source snapshot date and account are explicit; the supplied source opens on 3 September 2026. The current plan is applied to the demonstration month with zero opening carry-in. Genuinely missing amount, direction, date or target can still make a guide unavailable while retaining known movements.
+
+Pot details and all-account activity are native child routes in Budget, preserving the bank header and tabs. Back returns to the selected overview; background refresh retains its mounted scroll surface. Activity is automatic and paginated separately from the server’s full calculation inputs. View classification explains automatic decisions and source notes. Optional accepted corrections assign an expense, mark a transfer, confirm a refund, or restore automatic attribution. Pending saves block closure; stale/uncertain outcomes retain choices and require a latest-classification read before retry. Plan conflicts require refreshing the budget.
+
+Summary/activity share a snapshot version. Changing plans, source inputs or corrections invalidates older activity pages; re-entry restarts activity from page one. Saved plans remain available when spending reads fail. The existing Refresh budgets action and the independent spending/activity retry controls remain available.
+
+Default memory storage lasts until server restart. Durable correction storage requires the generated PostgreSQL migration to be applied through a separate explicit action. Forecasts, accumulated/reserved balances, monthly history, budget editing and rollover execution remain deferred. See [spending delivery](../../docs/mobile-spending-story.md) and the [earlier overview slice](../../docs/mobile-saved-overview-story.md). Native device verification remains pending.
 
 Fixed-expense bill rows offer Monthly, Quarterly, Every 6 months and Yearly inside the overlay. Enter the amount per payment; the row shows its monthly equivalent and the header shows Set aside per month. Choosing frequency never replaces the payment amount. Saved plans display both frequency and monthly allocation. More info explains rounding and the absence of payment scheduling/catch-up funding.
 
 Account selection, manual creation and the sample preview use a compact back-arrow control with a 44 × 44 touch target and the screen-reader label “Back”. Existing discard confirmation remains in the routes; the control is disabled while creation is saving.
 
-
 Inside Fixed expenses, Add bill focuses the new bill name and scrolls it into view. Next (or the keyboard submit action) moves to its amount. OK dismisses the keyboard without closing the overlay; Done becomes available once editing and the keyboard have ended. Close remains available in the header. Physical-device keyboard, scrolling and accessibility verification is still pending.
+
+## On-demand bill suggestions
+
+In account-backed creation, the first Add bills tap opens the editor and requests bill suggestions. You can type or close while it loads. Clear recurring patterns fill only the original empty, untouched editor; possible bills or late results remain separate until Add found bills. Reopening reuses the draft cache. Explicit refresh/retry preserves edits and removals. Leaving creation cancels the request; another account starts a new draft. Nothing persists before Create budget, and offline preview/saved overviews never run discovery.
+
+Source history, evidence and uncertainty remain visible. Unknown amounts stay blank; unknown frequencies need confirmation before saving. Accepted bills retain original evidence and stable merchant keys when renamed, including Rent/Husleje and Netflix aliases. Known pending evidence can offer a Possible bill, but never auto-confirms recurrence. Manual bills remain available if discovery fails. Rules-based suggestions do not establish detection accuracy on representative banking data. See [acceptance criteria and verification](../../docs/mobile-bill-suggestions-story.md).
 
 ## Visual design
 

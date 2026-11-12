@@ -3,6 +3,7 @@ import { MemoryBudgetRepository } from './features/budgets/memory-repository.js'
 import { PostgresBudgetRepository } from './features/budgets/postgres-repository.js';
 import { JsonBankDataProvider } from './infrastructure/banking/json-bank-data-provider.js';
 import { demoIdentity, DEMO_USER_ID } from './infrastructure/identity/demo-identity.js';
+import { PostgresCorrectionRepository } from './features/spending/postgres-repository.js';
 export function createLocalRuntime(environment: NodeJS.ProcessEnv = process.env) {
   const identity = demoIdentity(environment);
   const mode = environment.BUDGET_STORAGE ?? 'memory';
@@ -19,5 +20,6 @@ export function createLocalRuntime(environment: NodeJS.ProcessEnv = process.env)
     identity,
     bank,
     budgets: mode === 'memory' ? new MemoryBudgetRepository() : new PostgresBudgetRepository(),
+    ...(mode === 'postgres' ? { corrections: new PostgresCorrectionRepository() } : {}),
   });
 }

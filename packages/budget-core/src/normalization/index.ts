@@ -270,7 +270,9 @@ export function normalizeDataset(input: unknown, ownerId: string, asOf: Date): N
         ? 'BOOKED'
         : ['PENDING', 'RESERVED'].includes(rawStatus ?? '')
           ? 'PENDING'
-          : 'UNKNOWN';
+          : ['CAN', 'CANCELLED', 'CANCELED', 'RELEASED', 'REVERSED'].includes(rawStatus ?? '')
+            ? 'CANCELLED'
+            : 'UNKNOWN';
     if (status === 'UNKNOWN')
       issues.push(issue('UNKNOWN_STATUS', 'status', 'Transaction status is unknown.'));
     const dir = direction(raw.direction, issues);
@@ -301,6 +303,15 @@ export function normalizeDataset(input: unknown, ownerId: string, asOf: Date): N
         text(raw.originalTransactionText) ??
         'Unlabelled transaction',
       counterparty: text(raw.counterpartyName),
+      transferEvidence:
+        text(raw.channel)?.toUpperCase() === 'INTERNAL_TRANSFER'
+          ? 'EXPLICIT_INTERNAL_TRANSFER'
+          : text(raw.ownAccount) &&
+              text(raw.counterpartyAccount) &&
+              text(raw.ownAccount)!.replace(/\s/g, '') ===
+                text(raw.counterpartyAccount)!.replace(/\s/g, '')
+            ? 'SAME_ACCOUNT'
+            : null,
       issues,
     });
   });

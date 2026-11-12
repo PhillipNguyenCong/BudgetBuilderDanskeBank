@@ -13,12 +13,14 @@ export function BudgetRowEditor({
   onChange,
   onRemove,
   focus,
+  onAmountBlur,
 }: {
   row: DraftRow;
   prefix: string;
   onChange: (row: DraftRow) => void;
   onRemove: () => void;
   focus: BillFocus;
+  onAmountBlur: (rowId: string) => void;
 }) {
   const { fontScale } = useWindowDimensions();
   const stacked = fontScale > 1.3;
@@ -46,7 +48,10 @@ export function BudgetRowEditor({
         <TextField
           ref={(input) => focus.register(row.id, 'amount', input)}
           onFocus={() => focus.onFocus(row.id, 'amount')}
-          onBlur={() => focus.onBlur(row.id, 'amount')}
+          onBlur={() => {
+            onAmountBlur(row.id);
+            focus.onBlur(row.id, 'amount');
+          }}
           returnKeyType="done"
           submitBehavior="submit"
           onSubmitEditing={focus.dismiss}

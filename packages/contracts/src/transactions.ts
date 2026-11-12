@@ -19,13 +19,14 @@ export const TransactionSchema = z.strictObject({
   date: DateSchema.nullable(),
   dateBasis: z.enum(['BOOKED_ON', 'VALUE_DATE', 'UNKNOWN']),
   direction: DirectionSchema,
-  status: z.enum(['BOOKED', 'PENDING', 'UNKNOWN']),
+  status: z.enum(['BOOKED', 'PENDING', 'CANCELLED', 'UNKNOWN']),
   amountOere: NonNegativeOereSchema.nullable(),
   original: OriginalMoneySchema,
   conversionBasis: z.enum(['ACCOUNT_AMOUNT', 'DKK_AMOUNT', 'FX_RATE', 'UNAVAILABLE']),
   text: z.string(),
   counterparty: z.string().nullable(),
   issues: z.array(IssueSchema),
+  transferEvidence: z.enum(['EXPLICIT_INTERNAL_TRANSFER', 'SAME_ACCOUNT']).nullable().optional(),
 });
 export type Transaction = z.infer<typeof TransactionSchema>;
 export const TransactionPageSchema = pageOf(TransactionSchema);

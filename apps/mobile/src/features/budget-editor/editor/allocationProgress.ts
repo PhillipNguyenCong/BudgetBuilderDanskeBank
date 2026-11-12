@@ -7,6 +7,7 @@ import { parseAmount, type Draft, type DraftRow } from './draft';
 
 export function allocationProgress(draft: Draft) {
   const amount = (row: DraftRow, fixed = false): DraftAmount => {
+    if (fixed && row.needsFrequencyReview) return 'invalid';
     if (!row.input.trim()) return null;
     const parsed = parseAmount(row).amount;
     if (parsed === undefined) return 'invalid';

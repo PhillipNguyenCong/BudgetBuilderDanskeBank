@@ -4,7 +4,7 @@ Show how much of entered income remains to allocate while the customer completes
 
 ## Acceptance criteria
 
-- A compact summary above the widgets and the same global remainder in each expanded pot update immediately. Income 17,000 DKK gives 17,000 left; spending 8,000 gives 9,000; savings 2,000 gives 7,000; fixed expenses 7,000 gives zero.
+- A compact summary above the widgets and the same global remainder in each expanded pot update after the customer leaves an amount field. This avoids changing the guidance mid-entry. Income 17,000 DKK gives 17,000 left; spending 8,000 gives 9,000; savings 2,000 gives 7,000; fixed expenses 7,000 gives zero.
 - All income rows must have valid amounts before showing a remainder. A nonblank invalid amount anywhere suspends guidance. Overflow is explicit.
 - Blank pot amounts are excluded from the entered allocation total, remain incomplete, and retain save-blocking validation. Label provisional guidance “Based on amounts entered so far”; mark entirely blank pots “Not entered yet” and partly blank pots “Some amounts missing”. A pot with no rows has no entered allocation; existing empty-pot save rules remain unchanged.
 - Row additions/removals, clearing amounts, multiple incomes/pots and editing in any order update the same global figure. Explicit zero counts as entered. Names and rollover settings do not affect arithmetic availability.

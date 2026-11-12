@@ -3,8 +3,20 @@ import { useEffect, useRef, useState } from 'react';
 import { ApiError } from '../../../lib/api';
 import { createBudget, listBudgets } from '../../budget-shared';
 import { loadBudgetSetup, type BudgetSetup } from '../api/setup';
+import { loadAccountBillSuggestions } from '../api/billSuggestions';
 
-export const creationServices = { load: loadBudgetSetup, create: createBudget, list: listBudgets };
+export type CreationServices = {
+  load: typeof loadBudgetSetup;
+  create: typeof createBudget;
+  list: typeof listBudgets;
+  suggest?: typeof loadAccountBillSuggestions;
+};
+export const creationServices: CreationServices = {
+  load: loadBudgetSetup,
+  create: createBudget,
+  list: listBudgets,
+  suggest: loadAccountBillSuggestions,
+};
 type LoadState =
   | { status: 'loading' }
   | { status: 'error'; message: string }

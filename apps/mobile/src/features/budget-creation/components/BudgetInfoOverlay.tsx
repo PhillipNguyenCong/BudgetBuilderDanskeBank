@@ -41,9 +41,10 @@ export function BudgetInfoOverlay({
         <ScrollView contentContainerStyle={styles.content}>
           <AppText variant="heading">Manual setup</AppText>
           <AppText>
-            Enter your monthly income and allocations in DKK with up to two decimal places. No
-            amounts have been suggested. Enter zero explicitly where appropriate; blank amounts are
-            incomplete.
+            Enter your monthly income and allocations in DKK with up to two decimal places. Add
+            bills looks for possible fixed expenses in your account history when first opened.
+            Suggested bills remain editable drafts. Enter zero explicitly where appropriate; blank
+            amounts are incomplete.
           </AppText>
           <AppText variant="heading">Your pots</AppText>
           <AppText>
@@ -76,7 +77,8 @@ export function BudgetInfoOverlay({
               <AppText>
                 Available source history: {quality.coverage.from ?? 'Unknown start'} to{' '}
                 {quality.coverage.to ?? 'unknown end'} ({quality.coverage.completeMonths} complete
-                months). This manual plan does not calculate spending from that history.
+                months). Bill suggestions use eligible records from this history; other allocations
+                remain manual.
               </AppText>
               {quality.issues.length ? (
                 <AppText>Some source data is incomplete or uncertain.</AppText>

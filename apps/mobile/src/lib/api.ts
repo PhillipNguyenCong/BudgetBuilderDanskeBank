@@ -11,17 +11,24 @@ export class ApiError extends Error {
   }
 }
 const safeMessages: Record<string, string> = {
+  SPENDING_CHANGED: 'Spending inputs changed. Refresh spending and activity together.',
   ACCOUNT_IN_USE: 'This account already has a budget. Your draft has not replaced it.',
   OVER_ALLOCATED: 'Allocations exceed income. Review your amounts before trying again.',
   AMOUNT_OVERFLOW: 'The combined amounts are too large.',
   VALIDATION_ERROR: 'Some budget details are invalid. Review your inputs.',
   NOT_FOUND: 'This account or budget is no longer available.',
   BANK_DATA_UNAVAILABLE: 'Bank data is temporarily unavailable. Please try again later.',
+  CORRECTION_CONFLICT:
+    'This classification changed. Reload the latest classification before saving again.',
+  PLAN_CHANGED: 'The budget plan changed. Reload the latest data before saving again.',
+  INVALID_ASSIGNMENT: 'Choose an eligible pot for this transaction direction.',
 };
-const unconfirmed = () =>
+const unconfirmed = (resourceLabel = 'budget') =>
   new ApiError(
     'SAVE_UNCONFIRMED',
-    'We could not confirm whether your budget was saved. Check saved budgets before trying again.',
+    resourceLabel === 'budget'
+      ? 'We could not confirm whether your budget was saved. Check saved budgets before trying again.'
+      : 'We could not confirm whether your transaction correction was saved. Reload the latest classification before trying again.',
     undefined,
     true,
   );
@@ -32,7 +39,7 @@ export async function requestJson<T>(
   schema: { parse(value: unknown): T },
   signal?: AbortSignal,
   baseUrl = process.env.EXPO_PUBLIC_API_URL,
-  options?: { method: 'POST' | 'PUT'; body: unknown },
+  options?: { method: 'POST' | 'PUT'; body: unknown; resourceLabel?: string },
 ): Promise<T> {
   if (!baseUrl)
     throw new Error(
@@ -55,7 +62,7 @@ export async function requestJson<T>(
         signal: controller.signal,
       });
     } catch {
-      if (options) throw unconfirmed();
+      if (options) throw unconfirmed(options.resourceLabel);
       throw new Error(
         'Cannot connect to the demo backend. Check your Wi-Fi connection and try again.',
       );
@@ -68,7 +75,8 @@ export async function requestJson<T>(
       } catch {
         /* Error bodies are optional and never displayed verbatim. */
       }
-      if (options && response.status >= 500 && response.status !== 503) throw unconfirmed();
+      if (options && response.status >= 500 && response.status !== 503)
+        throw unconfirmed(options.resourceLabel);
       throw new ApiError(
         code,
         safeMessages[code] ??
@@ -81,7 +89,7 @@ export async function requestJson<T>(
     try {
       return schema.parse(await response.json());
     } catch {
-      if (options) throw unconfirmed();
+      if (options) throw unconfirmed(options.resourceLabel);
       throw new Error('The backend returned an unexpected response. Please try again.');
     }
   } finally {
