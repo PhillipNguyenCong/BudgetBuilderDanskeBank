@@ -30,6 +30,7 @@ export function WidgetAmount({
           appearance="bubble"
           style={[styles.mainInput, styles.alignRight]}
           label="DKK / month"
+          keyboardDone
           hideLabel
           suffix={row.input.trim() ? 'kr.' : undefined}
           placeholder="Angiv beløb"

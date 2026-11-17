@@ -20,7 +20,7 @@ async function done() {
 function remaining(value: string) {
   expect(
     screen.getAllByText(
-      `${value.replaceAll(',', '.')} kr. ${screen.queryByTestId('budget-widget-overlay') ? 'left to allocate' : 'left'}`,
+      `${value.replaceAll(',', '.')} kr.${screen.queryByTestId('budget-widget-overlay') ? ' left to allocate' : ''}`,
     ),
   ).toHaveLength(1);
 }
@@ -87,7 +87,7 @@ it('US-04: adding and removing bills updates progress without redistributing sav
   remaining('0');
   await done();
   await amount('Monthly salary', '12000');
-  expect(screen.getAllByText('5.000 kr. over')).toHaveLength(1);
+  expect(screen.getAllByText('5.000 kr.')).toHaveLength(1);
   expect(screen.getByLabelText('Savings row 1 amount in DKK')).toHaveDisplayValue('2.000');
   expect(screen.getByLabelText('Spending budget row 1 amount in DKK')).toHaveDisplayValue('8.000');
   expect(screen.queryByRole('button', { name: 'Use remaining' })).toBeNull();

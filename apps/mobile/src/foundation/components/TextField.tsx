@@ -21,6 +21,7 @@ export function TextField({
   hideLabel = false,
   suffix,
   displayValue,
+  keyboardDone = false,
   onFocus,
   onBlur,
   ...props
@@ -33,6 +34,7 @@ export function TextField({
   hideLabel?: boolean;
   suffix?: string;
   displayValue?: string;
+  keyboardDone?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   const { fontScale } = useWindowDimensions();
@@ -46,6 +48,10 @@ export function TextField({
       <View style={suffix ? styles.inputRow : undefined}>
         <TextInput
           {...props}
+          key={keyboardDone ? 'with-keyboard-confirmation' : 'standard'}
+          inputAccessoryViewButtonLabel={keyboardDone ? 'OK' : props.inputAccessoryViewButtonLabel}
+          returnKeyType={keyboardDone ? 'done' : props.returnKeyType}
+          submitBehavior={keyboardDone ? 'blurAndSubmit' : props.submitBehavior}
           value={!focused && displayValue !== undefined ? displayValue : props.value}
           onChangeText={(text) => {
             setFocused(true);

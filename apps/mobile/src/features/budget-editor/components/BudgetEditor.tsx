@@ -106,6 +106,7 @@ export function BudgetEditor({
         importantForAccessibility={busy || overlay ? 'no-hide-descendants' : 'auto'}
       >
         <TextField
+          keyboardDone
           label="Budget name"
           value={draft.name}
           maxLength={100}

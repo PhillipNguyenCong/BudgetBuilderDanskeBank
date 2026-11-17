@@ -7,6 +7,7 @@ import {
   type ViewProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardDoneBar } from './KeyboardDoneBar';
 import { BankHeader } from './BankHeader';
 import { colors, spacing } from '../theme/theme';
 export function Screen({ children }: ViewProps) {
@@ -26,6 +27,7 @@ export function Screen({ children }: ViewProps) {
           >
             {children}
           </ScrollView>
+          <KeyboardDoneBar />
         </KeyboardAvoidingView>
       </SafeAreaView>
     </View>

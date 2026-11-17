@@ -168,7 +168,7 @@ it('US-04: prefills salary and committed guidance once, retaining other blank am
   expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue(
     '25.000,50',
   );
-  expect(screen.getAllByText('25.000,50 kr. left')).toHaveLength(1);
+  expect(screen.getAllByText('25.000,50 kr.')).toHaveLength(1);
   expect(screen.queryByText('From latest salary')).toBeNull();
   expect(screen.getByLabelText('Spending budget row 1 amount in DKK')).toHaveDisplayValue('');
   await edit('Monthly salary row 1 amount in DKK', '');

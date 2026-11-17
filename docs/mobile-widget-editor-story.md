@@ -137,3 +137,7 @@ Keep the 44-point amount touch area, but optically bring both secondary rows 8 p
 ### Setup as a form, saved plans as an overview (US-04, NFR-02)
 
 Supersedes the quiet-field and per-widget-remainder layout: Income, Budget and Savings are edited directly in stable white fields with restrained borders. Fixed expenses retains its bill-list action. Remove negative spacing and show the shared remainder once after the four widgets; the bill overlay retains its own allocation guidance. Titles and monthly descriptions form a natural two-line group. Keep square icons, fixed labels, exact amounts, blank/zero distinction, blur commits and saved-plan overview behaviour. Rollover stays absent.
+
+### Prominent remainder and keyboard confirmation (US-04, NFR-02)
+
+Show the single allocation remainder in a distinct bordered summary with a visible Left to allocate label and 22-point amount. Negative remainders use Over-allocated and preserve the warning semantics. Missing amounts remain identified through accessible context. The screen shell shows an OK bar above the software keyboard; OK dismisses and blurs the active input, triggering its existing commit behaviour. Hide the bar after keyboard dismissal; bill overlays retain their existing keyboard controls.
