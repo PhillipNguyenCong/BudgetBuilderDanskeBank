@@ -16,9 +16,9 @@ it('US-04: keeps inline inputs without settings or colour controls', async () =>
   await render(<BudgetEditor initialPlan={createBudgetExample.plan} />);
   await edit('Monthly salary row 1 amount in DKK', '25000');
   expect(screen.queryByRole('button', { name: /Settings/ })).toBeNull();
-  expect(screen.queryByRole('radio')).toBeNull();
+  expect(screen.queryByRole('radio', { name: /color/ })).toBeNull();
   await open('Fixed expenses');
-  expect(screen.queryByRole('radio')).toBeNull();
+  expect(screen.queryByRole('radio', { name: /color/ })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
   expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('25000');
 });
@@ -64,7 +64,7 @@ it('US-04: removes add-pot actions and edits bills in an overlay without expandi
 it('US-04: reviews savings before applying, and cancellation preserves inputs', async () => {
   await render(<BudgetEditor initialPlan={createBudgetExample.plan} />);
   await edit('Monthly salary row 1 amount in DKK', '25000');
-  await fireEvent.press(screen.getByRole('button', { name: 'Monthly plan' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'View monthly totals' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Update savings' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Review Savings / Rainy day' }));
   expect(screen.getByText('4.000 kr. → 5.000 kr.')).toBeVisible();
@@ -92,6 +92,9 @@ it('US-04: retains source evidence and identifies adjusted amounts', async () =>
   expect(screen.getByText('Adjusted by you')).toBeVisible();
   expect(screen.getByText('Sample: 2.700 kr. quarterly divided by three.')).toBeVisible();
   expect(screen.getByText('Source period: 2026-07-01 – 2026-08-31')).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Source details' }));
+  expect(screen.queryByText('Adjusted by you')).toBeNull();
+  expect(screen.getByLabelText('Fixed expenses row 3 amount in DKK')).toHaveDisplayValue('950');
 });
 
 it('US-04: platform dismissal retains bill edits', async () => {
@@ -102,7 +105,7 @@ it('US-04: platform dismissal retains bill edits', async () => {
   await fireEvent(screen.getByTestId('budget-widget-overlay'), 'requestClose');
   expect(screen.getByText('11.000 kr.')).toBeVisible();
   await open('Fixed expenses');
-  expect(screen.getByLabelText('Fixed expenses row 1 amount in DKK')).toHaveDisplayValue('8000');
+  expect(screen.getByLabelText('Fixed expenses row 1 amount in DKK')).toHaveDisplayValue('8.000');
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
 });
 

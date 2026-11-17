@@ -12,7 +12,8 @@ export function WidgetOverlayTotal({ widget, total }: { widget: DraftWidget; tot
         {fixed ? 'Set aside per month' : 'Total per month'}
       </AppText>
       <AppText
-        variant="title"
+        variant="heading"
+        style={styles.amount}
         maxFontSizeMultiplier={2}
         adjustsFontSizeToFit
         minimumFontScale={0.6}
@@ -25,10 +26,15 @@ export function WidgetOverlayTotal({ widget, total }: { widget: DraftWidget; tot
   );
 }
 const styles = StyleSheet.create({
+  amount: { fontSize: 22, lineHeight: 28 },
   total: {
     marginHorizontal: spacing.large,
     padding: spacing.large,
     borderRadius: 16,
-    gap: spacing.small,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
   },
 });

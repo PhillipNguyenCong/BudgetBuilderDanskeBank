@@ -73,7 +73,7 @@ export function BillFrequencyPicker({
   );
 }
 const styles = StyleSheet.create({
-  frequencyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.medium },
+  frequencyRow: { flexWrap: 'wrap', flexDirection: 'row', alignItems: 'center', gap: 4 },
   frequencyButton: {
     minHeight: 44,
     justifyContent: 'center',
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   },
   action: { color: colors.blue, fontWeight: '600' },
   pressed: { opacity: 0.65 },
-  monthly: { flex: 1, textAlign: 'right', marginRight: 44 + spacing.medium },
+  monthly: { flex: 1, textAlign: 'right', minWidth: 85 },
   choices: {
     flexDirection: 'row',
     flexWrap: 'wrap',

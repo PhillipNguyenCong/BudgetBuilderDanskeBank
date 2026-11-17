@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Keyboard, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { useKeyboardField } from './KeyboardFieldEditor';
 import { AppText } from './AppText';
 import { colors } from '../theme/theme';
 
 /** Place after scroll content inside a KeyboardAvoidingView. */
 export function KeyboardDoneBar() {
+  const editor = useKeyboardField();
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     if (Platform.OS === 'ios') return;
@@ -15,7 +17,8 @@ export function KeyboardDoneBar() {
       hide.remove();
     };
   }, []);
-  if (Platform.OS === 'ios' || !visible) return null;
+  if (Platform.OS === 'ios' || (!visible && !editor?.active)) return null;
+  if (editor?.active) return null;
   return (
     <View style={styles.bar}>
       <Pressable

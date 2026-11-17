@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { colors, spacing } from '../../../foundation/theme/theme';
 import { type DraftWidget } from '../editor/draft';
@@ -18,12 +18,11 @@ export function BillList({
   focus: BillFocus;
   onAmountBlur: (rowId: string) => void;
 }) {
-  const { fontScale } = useWindowDimensions();
   const name = widget.name || 'Unnamed widget';
   return (
     <>
       <View style={styles.sectionHeading}>
-        <AppText variant="heading" accessibilityRole="header">
+        <AppText variant="label" accessibilityRole="header">
           Bills
         </AppText>
         <AppText variant="small">
@@ -31,17 +30,6 @@ export function BillList({
         </AppText>
       </View>
       <View style={styles.billList}>
-        {fontScale <= 1.3 && widget.rows.length > 0 ? (
-          <View style={styles.columns}>
-            <AppText variant="small" style={styles.column}>
-              Bill name
-            </AppText>
-            <AppText variant="small" style={[styles.column, styles.right]}>
-              DKK / payment
-            </AppText>
-            <View style={styles.removeSpace} />
-          </View>
-        ) : null}
         {widget.rows.length === 0 ? (
           <AppText>No bills yet. Add a bill to plan an amount.</AppText>
         ) : null}
@@ -87,15 +75,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.medium,
   },
-  billList: {
+  billList: { gap: 10 },
+  addBill: {
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 14,
     backgroundColor: colors.white,
-    borderRadius: 12,
-    paddingHorizontal: spacing.medium,
-    paddingTop: spacing.medium,
   },
-  columns: { flexDirection: 'row', gap: spacing.medium, paddingBottom: spacing.small },
-  column: { flex: 1 },
-  right: { textAlign: 'right' },
-  removeSpace: { width: 44 },
-  addBill: { minHeight: 52, justifyContent: 'center', borderTopWidth: 1, borderColor: colors.line },
 });

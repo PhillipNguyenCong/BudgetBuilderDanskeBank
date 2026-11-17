@@ -1,3 +1,4 @@
+import { BackHandler } from 'react-native';
 import { calculatePlan } from '@budget-builder/budget-core/allocations';
 import { BudgetSchema, createBudgetExample, type BudgetPlan } from '@budget-builder/contracts';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
@@ -40,7 +41,7 @@ function services() {
     list: jest.fn(async (_signal?: AbortSignal) => [saved]),
   };
 }
-async function enterPlan() {
+async function enterPlan(review = true) {
   await screen.findByLabelText('Budget name');
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'My manual budget');
   for (const [name, amount] of [
@@ -61,6 +62,7 @@ async function enterPlan() {
       await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
     }
   }
+  if (review) await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
 }
 function props(api = services()) {
   return {
@@ -97,7 +99,9 @@ it('US-03: starts blank, submits the accepted manual plan once and preserves inp
   expect(api.create).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
   expect(await screen.findByText('Review the inputs.')).toBeVisible();
-  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('24000');
+  await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('24.000');
+  await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
   expect(callbacks.onCreated).toHaveBeenCalledWith(saved);
   expect(api.create.mock.calls[0]).toEqual([
@@ -107,14 +111,21 @@ it('US-03: starts blank, submits the accepted manual plan once and preserves inp
   ]);
 });
 
-it('US-04: keeps rollover controls out of setup', async () => {
+it('US-11: saves the selected month-end rule with the explicit budget creation', async () => {
   const api = services();
   await render(<CreateBudgetScreen {...props(api)} />);
   await enterPlan();
-  expect(screen.queryByRole('button', { name: /Rollover/ })).toBeNull();
-  expect(screen.queryByRole('switch')).toBeNull();
+  expect(screen.getByRole('header', { name: 'Rollover' })).toBeVisible();
+  await fireEvent.press(
+    screen.getByRole('radio', { name: 'Spending budget: Add to next month’s Budget' }),
+  );
+  expect(api.create).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
-  expect(api.create).toHaveBeenCalled();
+  expect(api.create.mock.calls[0]?.[1]?.pots.find((p) => p.type === 'SPENDING')).toEqual(
+    expect.objectContaining({
+      rollover: { enabled: true, destination: 'TO_NEXT_MONTH', targetPotId: null },
+    }),
+  );
 });
 
 it('US-03: a lost save response blocks resubmission and offers the existing budget without replacing the draft', async () => {
@@ -128,10 +139,13 @@ it('US-03: a lost save response blocks resubmission and offers the existing budg
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
   expect(await screen.findByRole('button', { name: 'Check saved budgets' })).toBeEnabled();
   expect(screen.getByRole('button', { name: 'Create budget' })).toBeDisabled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+  expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Check saved budgets' }));
   expect(await screen.findByRole('button', { name: 'Open saved budget' })).toBeVisible();
   expect(callbacks.onCreated).not.toHaveBeenCalled();
-  expect(screen.getByLabelText('Budget name')).toHaveDisplayValue('My manual budget');
+  expect(screen.getByText('My manual budget')).toBeVisible();
   expect(api.create).toHaveBeenCalledTimes(1);
 });
 
@@ -209,4 +223,85 @@ it('US-10: failed salary lookup never blocks manual entry or saving', async () =
   await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
   expect(api.create).toHaveBeenCalledTimes(1);
+});
+
+it('US-03/04: Next requires a complete zero remainder and does not save', async () => {
+  const api = services();
+  await render(<CreateBudgetScreen {...props(api)} />);
+  await enterPlan(false);
+  expect(screen.queryByRole('header', { name: 'Rollover' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Create budget' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
+  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '25000');
+  expect(screen.getByText('Allocate the remaining 1.000 kr. to continue.')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '23000');
+  expect(screen.getByText(/Over-allocated by/)).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '');
+  expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '24000');
+  await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+  expect(api.create).not.toHaveBeenCalled();
+  expect(screen.getByRole('header', { name: 'Review budget' })).toBeVisible();
+  expect(screen.getByText('Fully allocated')).toBeVisible();
+  expect(screen.getByText('Rent')).toBeVisible();
+  expect(screen.getByText('Monthly')).toBeVisible();
+  expect(screen.queryByLabelText('Monthly salary row 1 amount in DKK')).toBeNull();
+});
+
+it('US-04/11: review lists irregular bills and Back preserves amounts, frequencies and rules', async () => {
+  const api = services();
+  const callbacks = props(api);
+  await render(<CreateBudgetScreen {...callbacks} />);
+  await enterPlan(false);
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit bills to Fixed expenses' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Fixed expenses row 1 frequency: Monthly' }),
+  );
+  await fireEvent.press(screen.getByRole('radio', { name: 'Fixed expenses row 1: Quarterly' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
+  await fireEvent.changeText(screen.getByLabelText('Savings row 1 amount in DKK'), '12000');
+  await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+  expect(screen.getByText('Quarterly · 4.000 kr./month')).toBeVisible();
+  expect(screen.getAllByText('12.000 kr.')).toHaveLength(2);
+  await fireEvent.press(
+    screen.getByRole('radio', { name: 'Spending budget: Add to next month’s Budget' }),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+  expect(callbacks.onBack).not.toHaveBeenCalled();
+  expect(screen.getByLabelText('Savings row 1 amount in DKK')).toHaveDisplayValue('12.000');
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit bills to Fixed expenses' }));
+  expect(screen.getByLabelText('Fixed expenses row 1 label')).toHaveDisplayValue('Rent');
+  expect(
+    screen.getByRole('button', { name: 'Fixed expenses row 1 frequency: Quarterly' }),
+  ).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+  expect(
+    screen.getByRole('radio', { name: 'Spending budget: Add to next month’s Budget' }),
+  ).toBeChecked();
+  expect(api.create).not.toHaveBeenCalled();
+});
+
+it('US-03: Android Back returns to allocation without discarding the review draft', async () => {
+  let handler: (() => boolean | null | undefined) | undefined;
+  const subscription = jest
+    .spyOn(BackHandler, 'addEventListener')
+    .mockImplementation((_event, listener) => {
+      handler = () => listener({} as Parameters<typeof listener>[0]);
+      return { remove: jest.fn() };
+    });
+  try {
+    const callbacks = props();
+    await render(<CreateBudgetScreen {...callbacks} />);
+    await enterPlan();
+    await act(() => {
+      expect(handler?.()).toBe(true);
+    });
+    expect(screen.getByLabelText('Budget name')).toHaveDisplayValue('My manual budget');
+    expect(callbacks.onBack).not.toHaveBeenCalled();
+  } finally {
+    subscription.mockRestore();
+  }
 });

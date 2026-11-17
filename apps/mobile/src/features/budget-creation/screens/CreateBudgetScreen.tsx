@@ -1,7 +1,7 @@
 import { useSalarySuggestion } from '../hooks/useSalarySuggestion';
 import type { Budget } from '@budget-builder/contracts';
-import { useMemo, useState, useRef, type ComponentRef } from 'react';
-import { AccessibilityInfo, Keyboard, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useState, useRef, type ComponentRef } from 'react';
+import { AccessibilityInfo, BackHandler, Keyboard, StyleSheet, View } from 'react-native';
 import { Screen } from '../../../foundation/components/Screen';
 import { spacing } from '../../../foundation/theme/theme';
 import { BudgetEditor } from '../../budget-editor';
@@ -19,6 +19,8 @@ import {
 
 export function CreateBudgetScreen({
   accountId,
+  step: controlledStep,
+  onStepChange,
   onBack,
   onCreated,
   onOpenExisting,
@@ -26,6 +28,8 @@ export function CreateBudgetScreen({
   onBusy,
   services = creationServices,
 }: {
+  step?: 'allocate' | 'review';
+  onStepChange?: (step: 'allocate' | 'review') => void;
   accountId: string;
   onBack: () => void;
   onCreated: (budget: Budget) => void;
@@ -34,6 +38,9 @@ export function CreateBudgetScreen({
   onBusy: (busy: boolean) => void;
   services?: CreationServices;
 }) {
+  const [localStep, setLocalStep] = useState<'allocate' | 'review'>('allocate');
+  const step = controlledStep ?? localStep;
+  const setStep = onStepChange ?? setLocalStep;
   const infoTrigger = useRef<ComponentRef<typeof View>>(null);
   function closeInfo() {
     setInfoOpen(false);
@@ -51,9 +58,17 @@ export function CreateBudgetScreen({
       services.suggest ? (signal: AbortSignal) => services.suggest!(accountId, signal) : undefined,
     [services.suggest, accountId],
   );
+  useEffect(() => {
+    const back = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (step !== 'review') return false;
+      if (!flow.busy) setStep('allocate');
+      return true;
+    });
+    return () => back.remove();
+  }, [step, flow.busy, setStep]);
   return (
     <>
-      <Screen contentStyle={styles.screen}>
+      <Screen contentStyle={styles.screen} scrollResetKey={step}>
         <View
           style={styles.content}
           accessibilityElementsHidden={infoOpen}
@@ -65,7 +80,11 @@ export function CreateBudgetScreen({
                 ? `${flow.state.data.account.name} · ${flow.state.data.account.maskedIdentifier ?? 'Identifier unavailable'}`
                 : undefined
             }
-            onBack={onBack}
+            title={step === 'review' ? 'Review budget' : 'Create budget'}
+            onBack={() => {
+              if (step === 'review') setStep('allocate');
+              else onBack();
+            }}
             infoRef={infoTrigger}
             busy={flow.busy}
             onInfo={() => {
@@ -80,6 +99,13 @@ export function CreateBudgetScreen({
           ) : (
             <>
               <BudgetEditor
+                creationStep={step}
+                onNext={() => setStep('review')}
+                reviewAccount={
+                  flow.state.status === 'ready'
+                    ? `${flow.state.data.account.name} · ${flow.state.data.account.maskedIdentifier ?? 'Identifier unavailable'}`
+                    : undefined
+                }
                 initialPlan={initialPlan}
                 startBlank
                 salarySuggestion={salary?.data}

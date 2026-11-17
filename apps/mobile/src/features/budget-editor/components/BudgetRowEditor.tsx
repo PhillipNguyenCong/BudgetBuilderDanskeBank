@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { TextField } from '../../../foundation/components/TextField';
-import { colors, spacing } from '../../../foundation/theme/theme';
+import { colors } from '../../../foundation/theme/theme';
+import { formatDkk } from '../../budget-shared';
 import { isAmountInput, parseAmount, type DraftRow } from '../editor/draft';
 import type { BillFocus } from '../hooks/useBillFocus';
 import { BillFrequencyPicker } from './BillFrequencyPicker';
@@ -24,6 +26,7 @@ export function BudgetRowEditor({
 }) {
   const { fontScale } = useWindowDimensions();
   const stacked = fontScale > 1.3;
+  const [sourceOpen, setSourceOpen] = useState(false);
   return (
     <View style={styles.row}>
       <View style={[styles.fields, stacked && styles.stacked]}>
@@ -37,7 +40,8 @@ export function BudgetRowEditor({
           label="Bill"
           placeholder="Bill name"
           hideLabel={!stacked}
-          appearance="underline"
+          appearance="quiet"
+          style={styles.name}
           containerStyle={!stacked && styles.field}
           accessibilityLabel={`${prefix} label`}
           value={row.label}
@@ -52,13 +56,19 @@ export function BudgetRowEditor({
             onAmountBlur(row.id);
             focus.onBlur(row.id, 'amount');
           }}
-          returnKeyType="done"
+          returnKeyType="default"
           submitBehavior="submit"
           onSubmitEditing={focus.dismiss}
           label="DKK / payment"
-          placeholder="0"
+          placeholder="Amount"
+          suffix={row.input.trim() ? 'kr.' : undefined}
+          displayValue={
+            parseAmount(row).amount !== undefined
+              ? formatDkk(parseAmount(row).amount!).replace(/ kr\.$/, '')
+              : row.input
+          }
           hideLabel={!stacked}
-          appearance="underline"
+          appearance="bubble"
           style={styles.amount}
           containerStyle={!stacked && styles.field}
           accessibilityLabel={`${prefix} amount in DKK`}
@@ -70,36 +80,72 @@ export function BudgetRowEditor({
           maxLength={24}
           error={parseAmount(row).error}
         />
+      </View>
+      <View style={styles.actions}>
+        <View style={styles.frequency}>
+          <BillFrequencyPicker row={row} prefix={prefix} onChange={onChange} />
+        </View>
+        {row.source ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Source details"
+            accessibilityState={{ expanded: sourceOpen }}
+            onPress={() => setSourceOpen(!sourceOpen)}
+            style={styles.action}
+          >
+            <AppText variant="small" style={styles.link}>
+              Details
+            </AppText>
+          </Pressable>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Remove ${prefix}`}
           onPress={onRemove}
-          style={styles.remove}
+          style={styles.action}
         >
-          <AppText variant="heading">×</AppText>
+          <AppText variant="small" style={styles.muted}>
+            Remove
+          </AppText>
         </Pressable>
       </View>
-      <BillFrequencyPicker row={row} prefix={prefix} onChange={onChange} />
-      <RowSourceDetails row={row} />
+      {sourceOpen ? <RowSourceDetails row={row} /> : null}
     </View>
   );
 }
 const styles = StyleSheet.create({
   row: {
-    gap: spacing.small,
-    borderTopWidth: 1,
+    gap: 4,
+    borderWidth: 1,
     borderColor: colors.line,
-    paddingVertical: spacing.small,
+    borderRadius: 16,
+    backgroundColor: colors.white,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
-  fields: { flexDirection: 'row', gap: spacing.medium, alignItems: 'flex-start' },
-  amount: { textAlign: 'right' },
+  fields: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+  amount: {
+    textAlign: 'right',
+    fontSize: 16,
+    lineHeight: 22,
+    minHeight: 44,
+    paddingVertical: 8,
+    borderColor: colors.line,
+  },
+  name: {
+    fontSize: 16,
+    lineHeight: 22,
+    minHeight: 44,
+    paddingVertical: 8,
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+  },
   stacked: { flexDirection: 'column', alignItems: 'stretch' },
-  field: { flexGrow: 1, flexBasis: 0, minWidth: 0 },
-  remove: {
-    minWidth: 44,
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-  },
+  field: { flex: 1, minWidth: 0 },
+  actions: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' },
+  frequency: { flex: 1, minWidth: 90 },
+  action: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
+  link: { color: colors.blue },
+  muted: { color: colors.muted },
 });

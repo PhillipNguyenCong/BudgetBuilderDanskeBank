@@ -76,7 +76,9 @@ export function BudgetWidgetOverlay({
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
             <WidgetOverlayHeader name={name} heading={heading} onClose={close} />
-            {fontScale <= 1.3 ? <WidgetOverlayTotal widget={widget} total={total} /> : null}
+            {fontScale <= 1.3 && !billFocus.active && !billFocus.keyboardVisible ? (
+              <WidgetOverlayTotal widget={widget} total={total} />
+            ) : null}
             <ScrollView
               ref={billFocus.scroll}
               onContentSizeChange={billFocus.reveal}
@@ -87,7 +89,6 @@ export function BudgetWidgetOverlay({
               {fontScale > 1.3 ? <WidgetOverlayTotal widget={widget} total={total} /> : null}
               {widget.type === 'FIXED_EXPENSE' ? (
                 <>
-                  {suggestionPanel}
                   <BillList
                     widget={widget}
                     onChange={onChange}
@@ -95,6 +96,7 @@ export function BudgetWidgetOverlay({
                     focus={billFocus}
                     onAmountBlur={onAmountBlur}
                   />
+                  {suggestionPanel}
                   <View style={styles.guidance}>
                     <AllocationGuidance progress={progress} announce />
                   </View>

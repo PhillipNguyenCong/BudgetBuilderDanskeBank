@@ -1,4 +1,12 @@
-import { useState, type Ref, type ComponentRef } from 'react';
+import {
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type Ref,
+  type ComponentRef,
+} from 'react';
 import {
   TextInput,
   useWindowDimensions,
@@ -8,6 +16,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { useKeyboardField } from './KeyboardFieldEditor';
 import { AppText } from './AppText';
 import { colors, fonts, spacing } from '../theme/theme';
 
@@ -36,8 +45,41 @@ export function TextField({
   displayValue?: string;
   keyboardDone?: boolean;
 }) {
+  const source = useRef<ComponentRef<typeof TextInput>>(null);
+  useImperativeHandle(ref, () => source.current!, []);
+  const controller = useKeyboardField();
+  const id = useId();
+  const blurEvent = useRef<Parameters<NonNullable<TextInputProps['onBlur']>>[0] | undefined>(
+    undefined,
+  );
   const [focused, setFocused] = useState(false);
   const { fontScale } = useWindowDimensions();
+  const session = {
+    id,
+    source,
+    label: props.accessibilityLabel ?? label,
+    value: props.value ?? '',
+    suffix,
+    error,
+    input: {
+      keyboardType: props.keyboardType,
+      maxLength: props.maxLength,
+      placeholder: props.placeholder,
+      autoCapitalize: props.autoCapitalize,
+      autoCorrect: props.autoCorrect,
+      secureTextEntry: props.secureTextEntry,
+    },
+    onChangeText: (text: string) => props.onChangeText?.(text),
+    onFinish: () => {
+      setFocused(false);
+      if (blurEvent.current) onBlur?.(blurEvent.current);
+    },
+  };
+  useEffect(() => {
+    if (keyboardDone && controller?.owns(id)) controller.update(session);
+  }, [props.value, props.onChangeText, onBlur, error, suffix, keyboardDone]);
+  const cancel = controller?.cancel;
+  useEffect(() => () => cancel?.(id), [cancel, id]);
   return (
     <View style={[styles.field, containerStyle]}>
       {!hideLabel ? (
@@ -48,23 +90,40 @@ export function TextField({
       <View style={suffix ? styles.inputRow : undefined}>
         <TextInput
           {...props}
-          key={keyboardDone ? 'with-keyboard-confirmation' : 'standard'}
-          inputAccessoryViewButtonLabel={keyboardDone ? 'OK' : props.inputAccessoryViewButtonLabel}
-          returnKeyType={keyboardDone ? 'done' : props.returnKeyType}
+          key={
+            keyboardDone && controller
+              ? 'keyboard-bubble-source'
+              : keyboardDone
+                ? 'with-keyboard-confirmation'
+                : 'standard'
+          }
+          inputAccessoryViewID={
+            keyboardDone && controller ? `keyboard-source-${id}` : props.inputAccessoryViewID
+          }
+          inputAccessoryViewButtonLabel={
+            keyboardDone && !controller ? 'OK' : props.inputAccessoryViewButtonLabel
+          }
+          returnKeyType={
+            keyboardDone && controller ? 'default' : keyboardDone ? 'done' : props.returnKeyType
+          }
           submitBehavior={keyboardDone ? 'blurAndSubmit' : props.submitBehavior}
           value={!focused && displayValue !== undefined ? displayValue : props.value}
           onChangeText={(text) => {
             setFocused(true);
             props.onChangeText?.(text);
           }}
-          ref={ref}
+          ref={source}
           accessibilityLabel={props.accessibilityLabel ?? label}
           accessibilityHint={error ?? props.accessibilityHint}
           onFocus={(event) => {
             setFocused(true);
             onFocus?.(event);
+            if (keyboardDone && controller && props.editable !== false && !props.readOnly)
+              controller.begin(session);
           }}
           onBlur={(event) => {
+            blurEvent.current = event;
+            if (keyboardDone && controller?.owns(id)) return;
             setFocused(false);
             onBlur?.(event);
           }}
@@ -81,6 +140,9 @@ export function TextField({
             appearance === 'quiet' && error && styles.invalid,
             suffix && { paddingRight: Math.ceil(30 * fontScale) + 12 },
             style,
+            focused && appearance !== 'underline' && styles.focused,
+            focused && appearance === 'underline' && styles.activeUnderline,
+            error && styles.invalid,
           ]}
         />
         {suffix ? (
@@ -140,6 +202,7 @@ const styles = StyleSheet.create({
   },
   quiet: { backgroundColor: 'transparent', borderColor: 'transparent' },
   activeQuiet: { borderColor: colors.muted },
+  focused: { borderWidth: 2, borderColor: colors.blue, backgroundColor: colors.tint },
   activeBubble: { borderWidth: 2 },
   activeUnderline: { borderBottomWidth: 2, borderBottomColor: colors.ink },
   invalid: { borderColor: colors.ink, borderWidth: 2 },

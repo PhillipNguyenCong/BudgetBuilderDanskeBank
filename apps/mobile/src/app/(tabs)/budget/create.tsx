@@ -8,6 +8,7 @@ export default function CreateBudget() {
   const router = useRouter();
   const params = useLocalSearchParams<{ accountId?: string | string[] }>();
   const accountId = typeof params.accountId === 'string' ? params.accountId : '';
+  const [step, setStep] = useState<'allocate' | 'review'>('allocate');
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   function confirmDiscard(leave: () => void) {
@@ -28,7 +29,10 @@ export default function CreateBudget() {
       },
     ]);
   }
-  const disablePrevention = usePreventRemove(dirty || busy, ({ repeat }) => confirmDiscard(repeat));
+  const disablePrevention = usePreventRemove(dirty || busy || step === 'review', ({ repeat }) => {
+    if (step === 'review' && !busy) setStep('allocate');
+    else confirmDiscard(repeat);
+  });
   function openSaved(budget: Budget) {
     setDirty(false);
     setBusy(false);
@@ -39,6 +43,8 @@ export default function CreateBudget() {
     <CreateBudgetScreen
       key={accountId}
       accountId={accountId}
+      step={step}
+      onStepChange={setStep}
       onBack={() => {
         const leave = () => router.dismissTo('/budget/select-account');
         if (dirty || busy) confirmDiscard(leave);

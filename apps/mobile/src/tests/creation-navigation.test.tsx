@@ -164,6 +164,8 @@ it('US-03: routes account selection through manual creation to the saved plan wi
         await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
       }
     }
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    expect(createBudget).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
     expect(await screen.findByText('Monthly plan')).toBeVisible();
     expect(router.getPathname()).toBe('/budget');

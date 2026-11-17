@@ -33,7 +33,7 @@ export function RolloverSavingsTarget({
         </Pressable>
       ))}
       {!savings.some((pot) => pot.id === value.targetPotId) ? (
-        <AppText accessibilityRole="alert">Select a savings pot, or add one first.</AppText>
+        <AppText accessibilityRole="alert">Select a savings pot in this budget.</AppText>
       ) : null}
     </>
   );

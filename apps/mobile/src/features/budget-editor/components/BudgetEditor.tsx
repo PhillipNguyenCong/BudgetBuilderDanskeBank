@@ -14,7 +14,10 @@ import { SavingsReview } from './SavingsReview';
 import { useBillSuggestions, type BillSuggestionLoader } from '../hooks/useBillSuggestions';
 import { remainingBillSuggestions } from '../editor/suggestedBills';
 import { BillSuggestionPanel } from './BillSuggestionPanel';
-import type { DraftWidget } from '../editor/draft';
+import { formatDkk } from '../../budget-shared';
+import { BudgetReview } from './BudgetReview';
+import { Button } from '../../../foundation/components/Button';
+import { validateDraft, type DraftWidget } from '../editor/draft';
 
 /** Mount with a new key when intentionally switching plans; rerenders never reset a draft. */
 export function BudgetEditor({
@@ -27,7 +30,13 @@ export function BudgetEditor({
   submitDisabled = false,
   feedback,
   loadBillSuggestions,
+  creationStep,
+  onNext,
+  reviewAccount,
 }: {
+  creationStep?: 'allocate' | 'review';
+  onNext?: () => void;
+  reviewAccount?: string;
   initialPlan: BudgetPlan;
   salarySuggestion?: SalarySuggestion | undefined;
   onDirty?: () => void;
@@ -55,6 +64,22 @@ export function BudgetEditor({
     setReviewSavings,
     setReviewed,
   } = useBudgetEditor({ initialPlan, startBlank, busy, onDirty, salarySuggestion });
+  // Validate allocation independently so an unfinished review rule cannot trap Back navigation.
+  const allocationResult = creationStep
+    ? validateDraft({
+        ...draft,
+        widgets: draft.widgets.map((widget) =>
+          widget.type === 'SPENDING'
+            ? { ...widget, rollover: { enabled: false, destination: null, targetPotId: null } }
+            : widget,
+        ),
+      })
+    : result;
+  const inReview = creationStep === 'review';
+  const balanced =
+    !!allocationResult.plan &&
+    !allocationResult.error &&
+    allocationResult.totals?.unallocatedOere === 0;
   const activeOverlay = useRef<string | undefined>(undefined);
   const touchedBills = useRef(new Set<string>());
   const discovery = useBillSuggestions(loadBillSuggestions, (data, targetId, auto) => {
@@ -105,36 +130,83 @@ export function BudgetEditor({
         accessibilityElementsHidden={busy || !!overlay}
         importantForAccessibility={busy || overlay ? 'no-hide-descendants' : 'auto'}
       >
-        <TextField
-          keyboardDone
-          label="Budget name"
-          value={draft.name}
-          maxLength={100}
-          placeholder="e.g. Everyday budget"
-          onChangeText={(name) => update({ ...draft, name })}
-        />
-        <BudgetWidgetList
-          widgets={draft.widgets}
-          progress={progress}
-          onOpen={(id) => {
-            Keyboard.dismiss();
-            setOverlayId(id);
-            activeOverlay.current = id;
-            if (draft.widgets.find((widget) => widget.id === id)?.type === 'FIXED_EXPENSE')
-              discovery.open(id);
-          }}
-          onChange={change}
-          onAmountBlur={commitAmount}
-        />
-        <BudgetPlanSummary result={result} onUpdateSavings={() => setReviewSavings(true)} />
-        <BudgetSubmission
-          onSubmit={onSubmit}
-          result={result}
-          busy={busy}
-          submitDisabled={submitDisabled}
-          reviewed={reviewed}
-          onReview={() => setReviewed(true)}
-        />
+        {!inReview ? (
+          <>
+            <TextField
+              keyboardDone
+              label="Budget name"
+              value={draft.name}
+              maxLength={100}
+              placeholder="e.g. Everyday budget"
+              onChangeText={(name) => update({ ...draft, name })}
+            />
+            <BudgetWidgetList
+              widgets={draft.widgets}
+              progress={progress}
+              onOpen={(id) => {
+                Keyboard.dismiss();
+                setOverlayId(id);
+                activeOverlay.current = id;
+                if (draft.widgets.find((widget) => widget.id === id)?.type === 'FIXED_EXPENSE')
+                  discovery.open(id);
+              }}
+              onChange={change}
+              onAmountBlur={commitAmount}
+            />
+          </>
+        ) : null}
+        {!creationStep || inReview ? (
+          <BudgetPlanSummary
+            result={result}
+            widgets={draft.widgets}
+            onChange={change}
+            reviewOnly={inReview}
+            onUpdateSavings={() => {
+              Keyboard.dismiss();
+              setReviewSavings(true);
+            }}
+          />
+        ) : null}
+        {inReview && allocationResult.plan && allocationResult.totals ? (
+          <BudgetReview
+            plan={allocationResult.plan}
+            totals={allocationResult.totals}
+            account={reviewAccount}
+          />
+        ) : null}
+        {creationStep === 'allocate' ? (
+          <>
+            {allocationResult.error ? (
+              <AppText accessibilityRole="alert">{allocationResult.error}</AppText>
+            ) : null}
+            {allocationResult.totals && allocationResult.totals.unallocatedOere > 0 ? (
+              <AppText accessibilityLiveRegion="polite">
+                Allocate the remaining {formatDkk(allocationResult.totals.unallocatedOere)} to
+                continue.
+              </AppText>
+            ) : null}
+            <Button
+              label="Next"
+              disabled={!balanced || busy}
+              onPress={() => {
+                Keyboard.dismiss();
+                draft.widgets.forEach((widget) =>
+                  widget.rows.forEach((row) => commitAmount(row.id)),
+                );
+                onNext?.();
+              }}
+            />
+          </>
+        ) : (
+          <BudgetSubmission
+            onSubmit={onSubmit}
+            result={result}
+            busy={busy}
+            submitDisabled={submitDisabled || (inReview && !balanced)}
+            reviewed={reviewed}
+            onReview={() => setReviewed(true)}
+          />
+        )}
       </View>
       {overlay ? (
         <BudgetWidgetOverlay
@@ -165,7 +237,7 @@ export function BudgetEditor({
           onAmountBlur={commitAmount}
         />
       ) : null}
-      {feedback}
+      {!creationStep || inReview ? feedback : null}
       {reviewSavings && result.plan ? (
         <SavingsReview
           plan={result.plan}

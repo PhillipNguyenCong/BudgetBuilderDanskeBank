@@ -1,7 +1,7 @@
 import { type ComponentRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
-import { colors, spacing } from '../../../foundation/theme/theme';
+import { spacing } from '../../../foundation/theme/theme';
 
 export function WidgetOverlayHeader({
   name,
@@ -21,7 +21,7 @@ export function WidgetOverlayHeader({
         accessibilityLabel={name}
         style={styles.title}
       >
-        <AppText variant="heading" maxFontSizeMultiplier={2}>
+        <AppText variant="heading" style={styles.heading} maxFontSizeMultiplier={2}>
           {name}
         </AppText>
       </View>
@@ -49,9 +49,10 @@ const styles = StyleSheet.create({
     width: 44,
     minHeight: 44,
     borderRadius: 22,
-    backgroundColor: colors.white,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  heading: { fontSize: 20, lineHeight: 26 },
   title: { flex: 1, gap: spacing.small },
 });

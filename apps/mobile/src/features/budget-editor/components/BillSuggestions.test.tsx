@@ -41,7 +41,7 @@ it('US-04: fetches on first Add bills only, inserts editable draft suggestions a
     await fireEvent.changeText(screen.getByLabelText(`${name} row 1 amount in DKK`), amount);
   await openBills();
   expect(screen.getByLabelText('Fixed expenses row 1 label')).toHaveDisplayValue('Rent');
-  expect(screen.getByLabelText('Fixed expenses row 1 amount in DKK')).toHaveDisplayValue('8000');
+  expect(screen.getByLabelText('Fixed expenses row 1 amount in DKK')).toHaveDisplayValue('8.000');
   expect(screen.getByLabelText('Fixed expenses row 2 label')).toHaveDisplayValue('Netflix');
   expect(submit).not.toHaveBeenCalled();
   await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Husleje');

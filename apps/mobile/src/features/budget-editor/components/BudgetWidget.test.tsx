@@ -69,7 +69,10 @@ it('US-04: frequency changes preserve payment text and update the monthly total 
   expect(screen.getByRole('radio', { name: 'Fixed expenses row 1: Monthly' })).toBeChecked();
   await fireEvent.press(screen.getByRole('radio', { name: 'Fixed expenses row 1: Yearly' }));
   expect(screen.queryByRole('radio', { name: 'Fixed expenses row 1: Yearly' })).toBeNull();
+  expect(screen.getByLabelText('Fixed expenses row 1 amount in DKK')).toHaveDisplayValue('3.600');
+  await fireEvent(screen.getByLabelText('Fixed expenses row 1 amount in DKK'), 'focus');
   expect(screen.getByLabelText('Fixed expenses row 1 amount in DKK')).toHaveDisplayValue('3600');
+  await fireEvent(screen.getByLabelText('Fixed expenses row 1 amount in DKK'), 'blur');
   expect(screen.getByText('300 kr./month')).toBeVisible();
   expect(screen.getByText('700 kr. left to allocate')).toBeVisible();
   expect(screen.getByText('Set aside per month')).toBeVisible();

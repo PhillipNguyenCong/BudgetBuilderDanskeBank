@@ -59,7 +59,8 @@ export function BudgetInfoOverlay({
             Enter your monthly income and allocations in DKK with up to two decimal places. Add
             bills looks for possible fixed expenses in your account history when first opened.
             Suggested bills remain editable drafts. Enter zero explicitly where appropriate; blank
-            amounts are incomplete.
+            amounts are incomplete. Allocate the full income before Next. Review the rollover rule
+            and complete budget on the next page; only the final Create budget saves.
           </AppText>
           <AppText variant="heading">Your pots</AppText>
           <AppText>
@@ -84,6 +85,9 @@ export function BudgetInfoOverlay({
           <AppText variant="heading">Savings</AppText>
           <AppText>
             Savings stays as entered unless you edit it or confirm an Update savings proposal.
+            Rollover sets a rule for positive money left in Budget at month-end: savings, next
+            month’s Budget or unallocated. It does not allocate unused setup income. The rule is
+            saved with your budget, but automatic month-end processing is not available yet.
           </AppText>
           <AppText variant="heading">Source history</AppText>
           {quality ? (
