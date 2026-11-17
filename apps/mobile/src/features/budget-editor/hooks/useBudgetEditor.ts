@@ -1,7 +1,6 @@
-import type { BillSuggestion, BudgetPlan } from '@budget-builder/contracts';
+import type { BillSuggestion, BudgetPlan, SalarySuggestion } from '@budget-builder/contracts';
 import { insertSuggestedBills } from '../editor/suggestedBills';
-import { useMemo, useState } from 'react';
-import { typeLabels } from '../../budget-shared';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import type { proposeSavingsUpdate } from '@budget-builder/budget-core/allocations';
 import { allocationProgress } from '../editor/allocationProgress';
 import {
@@ -15,11 +14,13 @@ import {
 } from '../editor/draft';
 export function useBudgetEditor({
   initialPlan,
+  salarySuggestion,
   startBlank,
   busy,
   onDirty,
 }: {
   initialPlan: BudgetPlan;
+  salarySuggestion?: SalarySuggestion | undefined;
   startBlank: boolean;
   busy: boolean;
   onDirty?: () => void;
@@ -41,6 +42,30 @@ export function useBudgetEditor({
       initialDraft().widgets.flatMap((widget) => widget.rows.map((row) => [row.id, row.input])),
     ),
   );
+  const salaryTouched = useRef(false);
+  const [salaryApplied, setSalaryApplied] = useState(false);
+  useEffect(() => {
+    const suggestion = salarySuggestion?.suggestion;
+    if (!startBlank || !suggestion || busy || salaryTouched.current || salaryApplied) return;
+    salaryTouched.current = true;
+    const text = amountText(suggestion.amountOere);
+    setDraft((current) => ({
+      ...current,
+      widgets: current.widgets.map((widget) =>
+        widget.type === 'INCOME'
+          ? {
+              ...widget,
+              rows: widget.rows.map((row, index) =>
+                index === 0 ? { ...row, input: text, confirmedAmount: suggestion.amountOere } : row,
+              ),
+            }
+          : widget,
+      ),
+    }));
+    const income = draft.widgets.find((widget) => widget.type === 'INCOME')?.rows[0];
+    if (income) setCommittedAmounts((current) => ({ ...current, [income.id]: text }));
+    setSalaryApplied(true);
+  }, [salarySuggestion, startBlank, busy, salaryApplied, draft.widgets]);
   const [overlayId, setOverlayId] = useState<string>();
   const overlay = draft.widgets.find((widget) => widget.id === overlayId);
   const [reviewSavings, setReviewSavings] = useState(false);
@@ -68,24 +93,21 @@ export function useBudgetEditor({
     onDirty?.();
   }
   function changeWidget(widget: DraftWidget) {
+    if (busy) return;
+    const previous = draft.widgets.find((item) => item.id === widget.id);
+    if (
+      widget.type === 'INCOME' &&
+      widget.rows.some(
+        (row) => row.input !== previous?.rows.find((item) => item.id === row.id)?.input,
+      )
+    ) {
+      salaryTouched.current = true;
+      setSalaryApplied(false);
+    }
     update({
       ...draft,
       widgets: draft.widgets.map((item) => (item.id === widget.id ? widget : item)),
     });
-  }
-  function addPot(type: BudgetPlan['pots'][number]['type']) {
-    const id = nextId(draft);
-    const widget: DraftWidget = {
-      id,
-      name: `New ${typeLabels[type].toLowerCase()}`,
-      type,
-      color: type === 'SAVINGS' ? 'MINT' : type === 'SPENDING' ? 'SKY' : 'SAND',
-      rows: [{ ...newRow(`${id}-row`), label: `New ${typeLabels[type].toLowerCase()}` }],
-      ...(type === 'SPENDING'
-        ? { rollover: { enabled: false, destination: null, targetPotId: null } }
-        : {}),
-    };
-    update({ ...draft, widgets: [...draft.widgets, widget] });
   }
   function applySavings(proposal: ReturnType<typeof proposeSavingsUpdate>) {
     update({
@@ -144,7 +166,6 @@ export function useBudgetEditor({
     progress,
     update,
     changeWidget,
-    addPot,
     addRow,
     addSuggestedBills,
     commitAmount,

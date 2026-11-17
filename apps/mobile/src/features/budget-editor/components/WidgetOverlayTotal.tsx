@@ -8,8 +8,17 @@ export function WidgetOverlayTotal({ widget, total }: { widget: DraftWidget; tot
   const fixed = widget.type === 'FIXED_EXPENSE';
   return (
     <View style={[styles.total, { backgroundColor: widgetPalette[widget.color].background }]}>
-      <AppText variant="small">{fixed ? 'Total' : 'Total per month'}</AppText>
-      <AppText variant="title" accessibilityLiveRegion="polite">
+      <AppText variant="small" maxFontSizeMultiplier={2}>
+        {fixed ? 'Set aside per month' : 'Total per month'}
+      </AppText>
+      <AppText
+        variant="title"
+        maxFontSizeMultiplier={2}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+        numberOfLines={1}
+        accessibilityLiveRegion="polite"
+      >
         {total}
       </AppText>
     </View>

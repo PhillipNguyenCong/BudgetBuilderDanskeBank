@@ -144,3 +144,32 @@ test('reordering source records does not change generated IDs', () => {
       .sort();
   assert.deepEqual(norm([first, second]), norm([second, first]));
 });
+
+test('US-10: pending authorisation dates are explicit and never become booking dates', () => {
+  const base = {
+    direction: 'DEBIT',
+    amount: { value: -100, currency: 'DKK' },
+    authorisedOn: '2026-08-27T23:14:03Z',
+  };
+  const out = normalizeDataset(
+    {
+      account,
+      meta: {},
+      transactions: {
+        items: [
+          { ...base, id: 'pending', status: 'PENDING' },
+          { ...base, id: 'booked', status: 'BOOKED' },
+          { ...base, id: 'dated', status: 'PENDING', bookedOn: '2026-08-25' },
+          { ...base, id: 'invalid', status: 'PENDING', authorisedOn: 'invalid' },
+        ],
+      },
+    },
+    'demo-user',
+    new Date('2026-09-03T12:00:00Z'),
+  );
+  assert.equal(out.transactions[0]!.date, '2026-08-28');
+  assert.equal(out.transactions[0]!.dateBasis, 'AUTHORISED_ON');
+  assert.equal(out.transactions[1]!.date, null);
+  assert.equal(out.transactions[2]!.dateBasis, 'BOOKED_ON');
+  assert.equal(out.transactions[3]!.date, null);
+});

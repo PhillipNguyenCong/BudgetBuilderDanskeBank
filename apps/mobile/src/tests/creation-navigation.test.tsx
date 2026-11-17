@@ -171,13 +171,14 @@ it('US-03: routes account selection through manual creation to the saved plan wi
     expect(screen.getByRole('tab', { name: 'Budget' })).toBeSelected();
     expect(createBudget).toHaveBeenCalledTimes(1);
     await fireEvent.press(screen.getByRole('button', { name: 'View Fixed expenses details' }));
-    expect(await screen.findByText('Rent: DKK 12,000.20')).toBeVisible();
+    expect(await screen.findByText('Rent: 12.000,20 kr.')).toBeVisible();
     expect(router.getPathname()).toBe('/budget/pot');
     expect(screen.getByRole('tab', { name: 'Budget' })).toBeSelected();
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     await screen.findByText('Monthly plan');
     expect(createBudget).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('Income: DKK 24,000.55')).toBeVisible();
+    await fireEvent.press(screen.getByRole('button', { name: 'Monthly plan' }));
+    expect(screen.getByText('Income: 24.000,55 kr.')).toBeVisible();
     expect(mockSaved[0]!.plan.income.rows[0]!.amountOere).toBe(2400055);
     expect(mockSaved[0]!.totals.unallocatedOere).toBe(0);
     expect(alert).not.toHaveBeenCalled();

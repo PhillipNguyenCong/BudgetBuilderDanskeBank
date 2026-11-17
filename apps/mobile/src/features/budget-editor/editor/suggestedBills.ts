@@ -50,7 +50,7 @@ export function insertSuggestedBills(
       id,
       label: suggestion.label,
       amountOere: suggestion.amountOere ?? 0,
-      ...(suggestion.frequency ? { frequency: suggestion.frequency } : {}),
+      frequency: suggestion.frequency ?? 'MONTHLY',
       match: suggestion.match,
       source: suggestion.source,
       originalSuggestion: {
@@ -64,7 +64,6 @@ export function insertSuggestedBills(
       ...(suggestion.amountOere === null
         ? { input: '', originalInput: '', sourceAmountKnown: false }
         : {}),
-      ...(!suggestion.frequency ? { needsFrequencyReview: true } : {}),
     };
   });
   return {

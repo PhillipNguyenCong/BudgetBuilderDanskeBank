@@ -1,14 +1,11 @@
-import type { BudgetPlan } from '@budget-builder/contracts';
+import type { SalarySuggestion, BudgetPlan } from '@budget-builder/contracts';
 import { billIdentityKeys } from '@budget-builder/budget-core/bill-matching';
 import { useRef, type ReactNode } from 'react';
 import { ActivityIndicator, Keyboard, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
-import { Card } from '../../../foundation/components/Card';
 import { TextField } from '../../../foundation/components/TextField';
 import { spacing } from '../../../foundation/theme/theme';
 import { useBudgetEditor } from '../hooks/useBudgetEditor';
-import { AddPotControls } from './AddPotControls';
-import { AllocationGuidance } from './AllocationGuidance';
 import { BudgetPlanSummary } from './BudgetPlanSummary';
 import { BudgetSubmission } from './BudgetSubmission';
 import { BudgetWidgetList } from './BudgetWidgetList';
@@ -22,6 +19,7 @@ import type { DraftWidget } from '../editor/draft';
 /** Mount with a new key when intentionally switching plans; rerenders never reset a draft. */
 export function BudgetEditor({
   initialPlan,
+  salarySuggestion,
   onDirty,
   startBlank = false,
   onSubmit,
@@ -31,6 +29,7 @@ export function BudgetEditor({
   loadBillSuggestions,
 }: {
   initialPlan: BudgetPlan;
+  salarySuggestion?: SalarySuggestion | undefined;
   onDirty?: () => void;
   startBlank?: boolean;
   onSubmit?: (plan: BudgetPlan) => void;
@@ -48,7 +47,6 @@ export function BudgetEditor({
     progress,
     update,
     changeWidget,
-    addPot,
     addRow,
     addSuggestedBills,
     commitAmount,
@@ -56,7 +54,7 @@ export function BudgetEditor({
     setOverlayId,
     setReviewSavings,
     setReviewed,
-  } = useBudgetEditor({ initialPlan, startBlank, busy, onDirty });
+  } = useBudgetEditor({ initialPlan, startBlank, busy, onDirty, salarySuggestion });
   const activeOverlay = useRef<string | undefined>(undefined);
   const touchedBills = useRef(new Set<string>());
   const discovery = useBillSuggestions(loadBillSuggestions, (data, targetId, auto) => {
@@ -111,12 +109,9 @@ export function BudgetEditor({
           label="Budget name"
           value={draft.name}
           maxLength={100}
-          error={!draft.name.trim() ? 'Enter a budget name.' : undefined}
+          placeholder="e.g. Everyday budget"
           onChangeText={(name) => update({ ...draft, name })}
         />
-        <Card>
-          <AllocationGuidance progress={progress} announce />
-        </Card>
         <BudgetWidgetList
           widgets={draft.widgets}
           progress={progress}
@@ -130,7 +125,6 @@ export function BudgetEditor({
           onChange={change}
           onAmountBlur={commitAmount}
         />
-        <AddPotControls disabled={draft.widgets.length >= 101} onAdd={addPot} />
         <BudgetPlanSummary result={result} onUpdateSavings={() => setReviewSavings(true)} />
         <BudgetSubmission
           onSubmit={onSubmit}
@@ -182,5 +176,5 @@ export function BudgetEditor({
   );
 }
 const styles = StyleSheet.create({
-  content: { gap: spacing.large },
+  content: { gap: spacing.medium },
 });

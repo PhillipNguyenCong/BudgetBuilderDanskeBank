@@ -20,10 +20,7 @@ export function RolloverSettings({
   return (
     <View style={styles.content}>
       <AppText variant="label">Month-end preference</AppText>
-      <AppText variant="small">
-        Optional. Your choice is saved, but automatic month-end processing is not available in this
-        prototype yet.
-      </AppText>
+      <AppText variant="small">Preference only · Month-end processing unavailable</AppText>
       <View style={styles.toggle}>
         <AppText>Automatic rollover</AppText>
         <Switch

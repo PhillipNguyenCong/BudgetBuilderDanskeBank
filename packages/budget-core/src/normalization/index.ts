@@ -251,16 +251,26 @@ export function normalizeDataset(input: unknown, ownerId: string, asOf: Date): N
       );
     const booked = date(raw.bookedOn),
       fallback = date(raw.valueDate),
-      d = booked ?? fallback;
-    const dateBasis = booked ? 'BOOKED_ON' : fallback ? 'VALUE_DATE' : 'UNKNOWN';
+      pending = ['PENDING', 'RESERVED'].includes(text(raw.status)?.toUpperCase() ?? ''),
+      authorised = pending ? date(raw.authorisedOn) : null,
+      d = booked ?? fallback ?? authorised;
+    const dateBasis = booked
+      ? 'BOOKED_ON'
+      : fallback
+        ? 'VALUE_DATE'
+        : authorised
+          ? 'AUTHORISED_ON'
+          : 'UNKNOWN';
     if (!booked)
       issues.push(
         issue(
-          fallback ? 'DATE_FALLBACK' : 'UNKNOWN_DATE',
+          fallback || authorised ? 'DATE_FALLBACK' : 'UNKNOWN_DATE',
           'bookedOn',
           fallback
             ? 'Using value date because booking date is unavailable.'
-            : 'Transaction date is unknown.',
+            : authorised
+              ? 'Using authorisation date for a pending commitment; booking date is unknown.'
+              : 'Transaction date is unknown.',
         ),
       );
     if (d && d > cutoff)

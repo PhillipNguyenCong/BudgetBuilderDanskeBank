@@ -1,3 +1,4 @@
+import { Disclosure } from '../../../foundation/components/Disclosure';
 import { AppText } from '../../../foundation/components/AppText';
 import { Button } from '../../../foundation/components/Button';
 import { Card } from '../../../foundation/components/Card';
@@ -13,20 +14,19 @@ export function BudgetPlanSummary({
 }) {
   return (
     <Card>
-      <AppText variant="heading" accessibilityRole="header">
-        Monthly plan
-      </AppText>
-      {result.totals ? (
-        <>
-          <AppText>Income: {formatDkk(result.totals.incomeOere)}</AppText>
-          <AppText>Allocated: {formatDkk(result.totals.allocatedOere)}</AppText>
-          <AppText accessibilityLiveRegion="polite">
-            Unallocated: {formatDkk(result.totals.unallocatedOere)}
-          </AppText>
-        </>
-      ) : (
-        <AppText>Totals unavailable until the inputs are valid.</AppText>
-      )}
+      <Disclosure label="Monthly plan">
+        {result.totals ? (
+          <>
+            <AppText>Income: {formatDkk(result.totals.incomeOere)}</AppText>
+            <AppText>Allocated: {formatDkk(result.totals.allocatedOere)}</AppText>
+            <AppText accessibilityLiveRegion="polite">
+              Unallocated: {formatDkk(result.totals.unallocatedOere)}
+            </AppText>
+          </>
+        ) : (
+          <AppText>Totals unavailable until the inputs are valid.</AppText>
+        )}
+      </Disclosure>
       {result.error ? <AppText accessibilityRole="alert">{result.error}</AppText> : null}
       <Button
         label="Update savings"

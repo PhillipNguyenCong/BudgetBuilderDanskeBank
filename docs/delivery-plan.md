@@ -52,3 +52,7 @@ The [domain model](../domain-model-notes.md), [Mermaid source](../domain-model.m
 ## Traceability and completion
 
 Use stable IDs in issues, tests and pull requests, for example `US-07 AC-2` and `NFR-06`. For each completed story, record the implementation link, tests run, unresolved limitations and any usability evidence. Changes to acceptance criteria should be documented as decisions, not silently rewritten to match the implementation.
+
+Read-only [monthly budget views](monthly-budget-views-story.md) are now implemented for US-06/US-10 and a partial US-12 slice. Persisted closed-month results, effective-dated plans and rollover execution remain separate future deliveries.
+
+The [Budget log refinement](budget-log-story.md) now limits monthly views to actual active months and replaces Previous/Next with a vertical native log. The imported source period remains independent from the activation period.

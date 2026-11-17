@@ -25,12 +25,16 @@ export function SavedPotDetails({
         : 'Monthly allocation';
   return (
     <View style={styles.rows}>
-      <Card style={{ backgroundColor: widgetPalette[widget.color].background }}>
+      <Card
+        style={{
+          backgroundColor:
+            widgetPalette[widget.type === 'SAVINGS' ? 'MINT' : widget.color].background,
+        }}
+      >
         <AppText variant="label">{typeLabels[widget.type]}</AppText>
         <AppText variant="heading">
           {label}: {allocationOere === undefined ? 'Amount unavailable' : formatDkk(allocationOere)}
         </AppText>
-        <AppText>Planned amounts, not an account balance.</AppText>
       </Card>
       <View style={styles.rows}>
         <AppText variant="heading" accessibilityRole="header">
@@ -44,12 +48,6 @@ export function SavedPotDetails({
           <AppText>No rows in this pot.</AppText>
         )}
       </View>
-      {widget.type === 'FIXED_EXPENSE' ? (
-        <AppText variant="small">
-          Bill amounts are per payment. Monthly equivalents are planning allocations, not extra
-          payments. Payment dates and reserved balances are not available yet.
-        </AppText>
-      ) : null}
       {rollover ? (
         <Card>
           <AppText variant="label">
@@ -60,13 +58,7 @@ export function SavedPotDetails({
                 : `to ${pots.find((pot) => pot.id === rollover.targetPotId)?.name ?? 'unavailable savings target'}`
               : 'off'}
           </AppText>
-          <AppText>Month-end processing is not available yet.</AppText>
         </Card>
-      ) : null}
-      {widget.type === 'SAVINGS' ? (
-        <AppText variant="small">
-          This is your monthly savings allocation. Accumulated savings are not available yet.
-        </AppText>
       ) : null}
     </View>
   );

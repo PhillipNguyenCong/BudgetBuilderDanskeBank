@@ -68,7 +68,7 @@ it('opens the offline sample editor and confirms discarding edits before returni
   );
   await fireEvent.press(await screen.findByRole('button', { name: 'Preview sample widgets' }));
   expect(await screen.findByText('Sample widget editor')).toBeVisible();
-  expect(screen.getByText(/They are not based on your account/)).toBeVisible();
+  expect(screen.getByText('Fictional sample · Nothing is saved')).toBeVisible();
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'Changed sample');
   await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
   expect(alert).toHaveBeenCalledWith(

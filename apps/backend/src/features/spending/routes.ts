@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  SpendingQuerySchema,
   ActivityQuerySchema,
   BudgetActivitySchema,
   ClassifiedTransactionSchema,
@@ -11,7 +12,13 @@ import type { SpendingService } from './service.js';
 export function spendingRoutes(service: SpendingService) {
   const router = Router();
   router.get('/budgets/:id/spending', async (req, res) =>
-    res.json(await service.summary(owner(res), IdSchema.parse(req.params.id))),
+    res.json(
+      await service.summary(
+        owner(res),
+        IdSchema.parse(req.params.id),
+        SpendingQuerySchema.parse(req.query).month,
+      ),
+    ),
   );
   router.get('/budgets/:id/activity', async (req, res) =>
     res.json(
@@ -31,6 +38,7 @@ export function spendingRoutes(service: SpendingService) {
           owner(res),
           IdSchema.parse(req.params.id),
           IdSchema.parse(req.params.transactionId),
+          SpendingQuerySchema.parse(req.query).month,
         ),
       ),
     ),

@@ -1,53 +1,26 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
-import { colors, spacing } from '../../../foundation/theme/theme';
+import { colors } from '../../../foundation/theme/theme';
 import { typeLabels } from '../../budget-shared';
 import { type DraftWidget } from '../editor/draft';
 
-export function WidgetHeader({
-  widget,
-  overlayLabel,
-  onOpen,
-}: {
-  widget: DraftWidget;
-  overlayLabel: string;
-  onOpen: () => void;
-}) {
-  const name = widget.name || 'Unnamed widget';
+export function WidgetHeader({ widget }: { widget: DraftWidget }) {
   return (
-    <View style={[styles.row, styles.topRow]}>
-      <View style={styles.cell}>
-        <AppText variant="label">{typeLabels[widget.type]}</AppText>
-      </View>
-      <Pressable
-        style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-        onPress={onOpen}
-        accessibilityRole="button"
-        accessibilityLabel={`${overlayLabel} for ${name}`}
-      >
-        <AppText variant="label" style={styles.action}>
-          {overlayLabel}
+    <View style={styles.column}>
+      <View style={styles.titleRow}>
+        <AppText variant="label" style={styles.title}>
+          {widget.type === 'SPENDING' ? 'Budget' : typeLabels[widget.type]}
         </AppText>
-      </Pressable>
+      </View>
+      <AppText variant="small" style={styles.description}>
+        Per month
+      </AppText>
     </View>
   );
 }
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: spacing.medium, alignItems: 'flex-start' },
-  topRow: { alignItems: 'center' },
-  cell: { flex: 1, minWidth: 0, gap: spacing.small },
-  button: {
-    minHeight: 44,
-    flexShrink: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.blue,
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  action: { color: colors.blue },
-  pressed: { opacity: 0.65 },
+  column: { alignItems: 'flex-start', gap: 4 },
+  titleRow: { minHeight: 44, justifyContent: 'center' },
+  title: { fontSize: 16, lineHeight: 22 },
+  description: { fontSize: 12, lineHeight: 16, color: colors.muted },
 });

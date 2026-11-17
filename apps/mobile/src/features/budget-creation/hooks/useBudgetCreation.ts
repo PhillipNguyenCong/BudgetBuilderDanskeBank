@@ -1,3 +1,4 @@
+import { loadSalarySuggestion } from '../api/salarySuggestion';
 import type { Budget, BudgetPlan } from '@budget-builder/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { ApiError } from '../../../lib/api';
@@ -10,12 +11,14 @@ export type CreationServices = {
   create: typeof createBudget;
   list: typeof listBudgets;
   suggest?: typeof loadAccountBillSuggestions;
+  salary?: typeof loadSalarySuggestion;
 };
 export const creationServices: CreationServices = {
   load: loadBudgetSetup,
   create: createBudget,
   list: listBudgets,
   suggest: loadAccountBillSuggestions,
+  salary: loadSalarySuggestion,
 };
 type LoadState =
   | { status: 'loading' }

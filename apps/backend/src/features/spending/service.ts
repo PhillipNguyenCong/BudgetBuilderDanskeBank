@@ -26,7 +26,7 @@ export class SpendingService {
     private readonly corrections: CorrectionRepository,
     private readonly clock: () => Date = () => new Date(),
   ) {}
-  private async view(ownerId: string, id: string) {
+  private async view(ownerId: string, id: string, month?: string) {
     const budget = await this.budgets.get(ownerId, id);
     const [data, corrections] = await Promise.all([
       this.accounts.snapshot(ownerId, budget.accountId),
@@ -40,10 +40,41 @@ export class SpendingService {
     }).formatToParts(new Date(data.quality.asOf));
     const get = (type: string) => parts.find((p) => p.type === type)!.value;
     const sourceDate = `${get('year')}-${get('month')}-${get('day')}`;
-    const date =
+    const sourceCutoff =
       data.quality.coverage.to && data.quality.coverage.to < sourceDate
         ? data.quality.coverage.to
         : sourceDate;
+    const calendarDate = (value: Date) => {
+      const parts = new Intl.DateTimeFormat('en', {
+        timeZone: 'Europe/Copenhagen',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).formatToParts(value);
+      const part = (type: string) => parts.find((item) => item.type === type)!.value;
+      return `${part('year')}-${part('month')}-${part('day')}`;
+    };
+    const today = calendarDate(this.clock());
+    const startMonth = calendarDate(new Date(budget.createdAt)).slice(0, 7);
+    const currentMonth = today.slice(0, 7) < startMonth ? startMonth : today.slice(0, 7);
+    const availableMonths: string[] = [];
+    const cursor = new Date(`${startMonth}-01T00:00:00Z`);
+    while (cursor.toISOString().slice(0, 7) <= currentMonth) {
+      availableMonths.push(cursor.toISOString().slice(0, 7));
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+    if (month && !availableMonths.includes(month))
+      throw new AppError(400, 'VALIDATION_ERROR', 'Choose a month when this budget was active.');
+    const selectedMonth = month ?? currentMonth;
+    const next = new Date(`${selectedMonth}-01T00:00:00Z`);
+    next.setUTCMonth(next.getUTCMonth() + 1);
+    next.setUTCDate(0);
+    const periodDate =
+      selectedMonth === today.slice(0, 7) ? today : next.toISOString().slice(0, 10);
+    const date =
+      sourceCutoff.startsWith(selectedMonth) && sourceCutoff < periodDate
+        ? sourceCutoff
+        : periodDate;
     const calculated = calculateLiveBudgetSnapshot({
       plan: budget.plan,
       accountId: budget.accountId,
@@ -58,6 +89,7 @@ export class SpendingService {
           budget.id,
           budget.revision,
           date,
+          sourceCutoff,
           data.quality,
           data.transactions,
           corrections
@@ -66,14 +98,39 @@ export class SpendingService {
         ]),
       )
       .digest('hex');
-    return { budget, data, date, calculated, snapshotVersion };
+    return {
+      budget,
+      data,
+      date,
+      sourceCutoff,
+      availableMonths,
+      startMonth,
+      currentMonth,
+      calculated,
+      snapshotVersion,
+    };
   }
-  async summary(ownerId: string, id: string) {
-    const { budget, data, date, calculated: c, snapshotVersion } = await this.view(ownerId, id);
+  async summary(ownerId: string, id: string, month?: string) {
+    const {
+      budget,
+      data,
+      date,
+      sourceCutoff,
+      availableMonths,
+      startMonth,
+      currentMonth,
+      calculated: c,
+      snapshotVersion,
+    } = await this.view(ownerId, id, month);
     return SpendingSummarySchema.parse({
       budget,
       account: data.account,
       snapshotDate: date,
+      sourceSnapshotDate: sourceCutoff,
+      availableMonths,
+      startMonth,
+      currentMonth,
+      undatedReviewCount: c.activity.filter((item) => item.transaction.date === null).length,
       month: date.slice(0, 7),
       daysRemaining: remainingDays(date),
       mode: 'SOURCE_SNAPSHOT',
@@ -96,7 +153,7 @@ export class SpendingService {
     });
   }
   async activity(ownerId: string, id: string, query: z.infer<typeof ActivityQuerySchema>) {
-    const { calculated, budget, date, snapshotVersion } = await this.view(ownerId, id);
+    const { calculated, budget, date, snapshotVersion } = await this.view(ownerId, id, query.month);
     if (query.expectedSnapshotVersion && query.expectedSnapshotVersion !== snapshotVersion)
       throw new AppError(
         409,
@@ -107,7 +164,9 @@ export class SpendingService {
     const items = calculated.activity.filter(
       (a) =>
         (!query.potId || a.potId === query.potId) &&
-        (!query.month || a.transaction.date === null || a.transaction.date.startsWith(query.month)),
+        (query.review === 'undated'
+          ? a.transaction.date === null
+          : !!a.transaction.date && a.transaction.date.startsWith(query.month ?? date.slice(0, 7))),
     );
     return {
       budgetRevision: budget.revision,
@@ -122,8 +181,8 @@ export class SpendingService {
       },
     };
   }
-  async transaction(ownerId: string, id: string, transactionId: string) {
-    const { calculated } = await this.view(ownerId, id);
+  async transaction(ownerId: string, id: string, transactionId: string, month?: string) {
+    const { calculated } = await this.view(ownerId, id, month);
     const found = calculated.activity.find((a) => a.transaction.id === transactionId);
     if (!found) throw notFound();
     return found;

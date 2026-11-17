@@ -5,6 +5,8 @@ export type ReconciledTransaction = {
   selected: boolean;
   conflictingSourceVersions: boolean;
   supersededBySourceVersion: boolean;
+  resolvedMonth?: string;
+  releasedMonth?: string;
 };
 
 const identity = (transaction: Transaction) =>
@@ -55,7 +57,31 @@ export function reconcileTransactions(
 
   const result: ReconciledTransaction[] = [];
   for (const group of groups.values()) {
-    const compatible = new Set(group.map(identity)).size === 1;
+    const pending = group.filter((tx) => tx.status === 'PENDING');
+    const terminal = group.filter((tx) => tx.status === 'BOOKED' || tx.status === 'CANCELLED');
+    const transition =
+      group.length === 2 &&
+      pending.length === 1 &&
+      terminal.length === 1 &&
+      pending[0]!.date !== null &&
+      terminal[0]!.date !== null &&
+      pending[0]!.date! <= terminal[0]!.date! &&
+      pending[0]!.amountOere !== null &&
+      JSON.stringify([
+        pending[0]!.accountId,
+        pending[0]!.direction,
+        pending[0]!.amountOere,
+        pending[0]!.text,
+        pending[0]!.counterparty,
+      ]) ===
+        JSON.stringify([
+          terminal[0]!.accountId,
+          terminal[0]!.direction,
+          terminal[0]!.amountOere,
+          terminal[0]!.text,
+          terminal[0]!.counterparty,
+        ]);
+    const compatible = transition || new Set(group.map(identity)).size === 1;
     const selected = [...group].sort((left, right) => {
       const priority = compatible
         ? transitionPriority[right.status] - transitionPriority[left.status]
@@ -73,6 +99,11 @@ export function reconcileTransactions(
         selected: transaction.id === selected.id,
         conflictingSourceVersions: sourceConflict || conflictingInternalIds.has(transaction.id),
         supersededBySourceVersion: transaction.id !== selected.id,
+        ...(transition && transaction.status === 'PENDING'
+          ? terminal[0]!.status === 'BOOKED'
+            ? { resolvedMonth: terminal[0]!.date!.slice(0, 7) }
+            : { releasedMonth: terminal[0]!.date!.slice(0, 7) }
+          : {}),
       });
     }
   }

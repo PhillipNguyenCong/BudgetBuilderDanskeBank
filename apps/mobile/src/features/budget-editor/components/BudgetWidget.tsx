@@ -1,13 +1,12 @@
 import type { AllocationProgress } from '@budget-builder/budget-core/allocations';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Card } from '../../../foundation/components/Card';
-import { TextField } from '../../../foundation/components/TextField';
-import { fonts, spacing } from '../../../foundation/theme/theme';
 import { widgetPalette } from '../../budget-shared';
 import { type DraftWidget } from '../editor/draft';
 import { WidgetAllocationStatus } from './WidgetAllocationStatus';
 import { WidgetAmount } from './WidgetAmount';
 import { WidgetHeader } from './WidgetHeader';
+import { WidgetIcon } from './WidgetIcon';
 
 export function BudgetWidget({
   widget,
@@ -22,48 +21,52 @@ export function BudgetWidget({
   onAmountBlur: (rowId: string) => void;
   progress: AllocationProgress;
 }) {
-  const name = widget.name || 'Unnamed widget';
-  const fixed = widget.type === 'FIXED_EXPENSE';
-  const hasBillInput = fixed && widget.rows.some((item) => item.input.trim() !== '');
-  const overlayLabel = hasBillInput ? 'Edit bills' : 'Settings';
+  const { fontScale } = useWindowDimensions();
   return (
-    <Card style={[styles.card, { backgroundColor: widgetPalette[widget.color].background }]}>
-      <WidgetHeader widget={widget} overlayLabel={overlayLabel} onOpen={onOpen} />
-      <View style={styles.row}>
-        <TextField
-          containerStyle={styles.cell}
-          appearance="underline"
-          style={styles.mainInput}
-          label="Name"
-          accessibilityLabel={`${name} name`}
-          value={widget.name}
-          maxLength={100}
-          error={!widget.name.trim() ? 'Enter a widget name.' : undefined}
-          onChangeText={(value) =>
-            onChange({
-              ...widget,
-              name: value,
-              rows:
-                !fixed && widget.rows.length === 1
-                  ? widget.rows.map((item) => ({ ...item, label: value }))
-                  : widget.rows,
-            })
-          }
-        />
-        <WidgetAmount
-          widget={widget}
-          onOpen={onOpen}
-          onChange={onChange}
-          onAmountBlur={onAmountBlur}
-        />
+    <Card
+      style={[
+        styles.card,
+        {
+          backgroundColor:
+            widgetPalette[widget.type === 'SAVINGS' ? 'MINT' : widget.color].background,
+        },
+      ]}
+    >
+      <View style={styles.outerRow}>
+        <WidgetIcon type={widget.type} />
+        <View
+          style={[
+            styles.row,
+            fontScale > 1.3 && { flexDirection: 'column', alignItems: 'stretch' },
+          ]}
+        >
+          <View style={styles.nameCell}>
+            <WidgetHeader widget={widget} />
+          </View>
+          <View style={[styles.amountCell, fontScale > 1.3 && { width: '100%' }]}>
+            <WidgetAmount
+              widget={widget}
+              onOpen={onOpen}
+              onChange={onChange}
+              onAmountBlur={onAmountBlur}
+            />
+            <WidgetAllocationStatus progress={progress} />
+          </View>
+        </View>
       </View>
-      <WidgetAllocationStatus progress={progress} widgetId={widget.id} />
     </Card>
   );
 }
 const styles = StyleSheet.create({
-  card: { borderRadius: 24, padding: spacing.screen, gap: spacing.medium },
-  row: { flexDirection: 'row', gap: spacing.medium, alignItems: 'flex-start' },
-  mainInput: { fontSize: 20, lineHeight: 28, fontFamily: fonts.semibold, minHeight: 54 },
-  cell: { flex: 1, minWidth: 0, gap: spacing.small },
+  card: { borderRadius: 22, paddingHorizontal: 14, paddingVertical: 12 },
+  outerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  row: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  nameCell: { flex: 1, flexBasis: 0, minWidth: 0, alignItems: 'flex-start' },
+  amountCell: { width: '52%', minWidth: 0, gap: 4 },
 });

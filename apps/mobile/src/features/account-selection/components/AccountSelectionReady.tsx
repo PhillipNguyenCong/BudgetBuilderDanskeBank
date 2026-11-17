@@ -40,11 +40,6 @@ export function AccountSelectionReady({
               onSelect={() => onSelect(account.id)}
             />
           ))}
-          {selectedId ? (
-            <AppText accessibilityLiveRegion="polite">
-              Account selected. No budget has been created.
-            </AppText>
-          ) : null}
           <Button
             label="Continue"
             disabled={!selectedId || data.usedAccountIds.includes(selectedId)}
@@ -53,9 +48,6 @@ export function AccountSelectionReady({
             }}
             accessibilityHint="Open manual budget setup for the selected account."
           />
-          <AppText variant="small">
-            Next, enter and review your monthly plan before creating your budget.
-          </AppText>
         </>
       )}
     </>

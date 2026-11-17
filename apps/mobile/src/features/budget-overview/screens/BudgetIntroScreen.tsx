@@ -1,3 +1,4 @@
+import { ReadMore } from '../../../foundation/components/ReadMore';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { Button } from '../../../foundation/components/Button';
@@ -16,12 +17,10 @@ export function BudgetIntroScreen({
       <AppText variant="title" accessibilityRole="header">
         Your money, organised
       </AppText>
-      <AppText style={styles.subtitle}>A simple plan for your monthly salary.</AppText>
       <View style={styles.tiles}>
         <Card style={styles.spending}>
           <AppText variant="heading">Spending</AppText>
           <AppText style={styles.hero}>Make room for everyday life.</AppText>
-          <AppText>Know what you can spend</AppText>
         </Card>
         <View style={styles.pair}>
           <Card style={[styles.smallTile, styles.savings]}>
@@ -34,7 +33,12 @@ export function BudgetIntroScreen({
           </Card>
         </View>
       </View>
-      <AppText>Pots divide the money in your account. No bank transfer is made.</AppText>
+      <ReadMore title="About budgets">
+        <AppText>
+          Pots divide the money in your account into spending, bills and savings. No bank transfer
+          is made.
+        </AppText>
+      </ReadMore>
       <Button label="Create budget" onPress={onCreate} />
       {onPreview ? (
         <Button label="Preview sample widgets" variant="secondary" onPress={onPreview} />

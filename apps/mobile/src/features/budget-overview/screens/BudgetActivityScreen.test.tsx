@@ -49,14 +49,14 @@ it('US-06: pot breakdown and linked transactions refresh after a correction', as
         loadActivity={loadActivity}
       />,
     );
-    expect(await screen.findByText('Booked: DKK 5,200')).toBeVisible();
+    expect(await screen.findByText('Booked: 5.200 kr.')).toBeVisible();
     await fireEvent.press(
       await screen.findByRole('button', { name: 'View Synthetic grocery shop classification' }),
     );
     await fireEvent.press(screen.getByRole('button', { name: 'Transfer · exclude from spending' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Save classification' }));
-    expect(await screen.findByText('DKK 3,300')).toBeVisible();
-    expect(screen.getByText('Booked: DKK 4,700')).toBeVisible();
+    expect(await screen.findByText('3.300 kr.')).toBeVisible();
+    expect(screen.getByText('Booked: 4.700 kr.')).toBeVisible();
     expect(loadActivity.mock.calls.length).toBeGreaterThanOrEqual(2);
     expect(screen.queryByRole('button', { name: 'Save classification' })).toBeNull();
   } finally {

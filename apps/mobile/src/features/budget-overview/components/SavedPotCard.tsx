@@ -1,9 +1,9 @@
+import { billStatus } from './billStatus';
 import type { Budget, SpendingNumbers } from '@budget-builder/contracts';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { colors, spacing } from '../../../foundation/theme/theme';
 import { formatDkk, typeLabels, widgetPalette } from '../../budget-shared';
-import { formatGuideDkk } from './SpendingFigures';
 export type SavedWidget =
   (Budget['plan']['income'] & { type: 'INCOME' }) | Budget['plan']['pots'][number];
 export function SavedPotCard({
@@ -11,62 +11,61 @@ export function SavedPotCard({
   allocationOere,
   onOpen,
   numbers,
-  guideDays = 7,
+  periodLabel,
 }: {
   widget: SavedWidget;
   allocationOere: number | undefined;
   onOpen: () => void;
   numbers?: SpendingNumbers | undefined;
   guideDays?: number;
+  periodLabel?: string | undefined;
 }) {
+  const isFixed = widget.type === 'FIXED_EXPENSE';
   const displayed = numbers
     ? numbers.remainingOere === null
       ? undefined
-      : Math.max(0, numbers.remainingOere)
+      : isFixed || periodLabel
+        ? numbers.remainingOere
+        : Math.max(0, numbers.remainingOere)
     : allocationOere;
   const amount = displayed === undefined ? 'Amount unavailable' : formatDkk(displayed);
-  const isFixed = widget.type === 'FIXED_EXPENSE';
+  const status = isFixed && numbers ? billStatus(numbers) : undefined;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`View ${widget.name} details`}
       accessibilityValue={{
-        text: `${typeLabels[widget.type]}, ${amount} ${numbers ? 'left this month' : 'planned per month'}`,
+        text: `${typeLabels[widget.type]}, ${amount} ${numbers ? (periodLabel ? `remaining in ${periodLabel}` : 'left this month') : 'planned per month'}${status ? `, ${status}` : ''}`,
       }}
       accessibilityHint="Opens pot details and recorded activity."
       onPress={onOpen}
       style={({ pressed }) => [
         styles.tile,
-        { backgroundColor: widgetPalette[widget.color].background },
+        {
+          backgroundColor:
+            widgetPalette[widget.type === 'SAVINGS' ? 'MINT' : widget.color].background,
+        },
         pressed && styles.pressed,
       ]}
     >
       <AppText variant="heading">{widget.name}</AppText>
       <AppText>
-        {typeLabels[widget.type]} ·{' '}
-        {numbers ? (isFixed ? 'Left for bills' : 'Left this month') : 'Monthly plan'}
+        {numbers
+          ? periodLabel
+            ? `Remaining in ${periodLabel}`
+            : isFixed
+              ? 'Left for bills'
+              : 'Left this month'
+          : 'Planned per month'}
       </AppText>
       <AppText variant="title" style={styles.amount}>
         {amount}
       </AppText>
+      {status ? <AppText variant="label">{status}</AppText> : null}
       {numbers ? (
         <>
-          <AppText>
-            Planned: {formatDkk(numbers.allocationOere)} · Booked:{' '}
-            {formatDkk(numbers.recordedSpendingOere)}
-          </AppText>
-          {numbers.pendingSpendingOere !== 0 ? (
-            <AppText>Pending: {formatDkk(numbers.pendingSpendingOere)}</AppText>
-          ) : null}
-          {numbers.unconfirmedSpendingOere !== 0 ? (
-            <AppText>Unconfirmed: {formatDkk(numbers.unconfirmedSpendingOere)}</AppText>
-          ) : null}
-          {!isFixed ? (
-            <AppText>
-              {numbers.weeklyGuideDkk === null
-                ? 'Weekly guide unavailable'
-                : `About ${formatGuideDkk(numbers.weeklyGuideDkk)} for the next ${guideDays} ${guideDays === 1 ? 'day' : 'days'}`}
-            </AppText>
+          {numbers.limitations.length > 0 ? (
+            <AppText variant="small">Provisional · Review activity</AppText>
           ) : null}
           {numbers.reviewAffectingCount > 0 ? (
             <AppText variant="small">

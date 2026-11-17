@@ -40,7 +40,11 @@ export function TabBar({ state, descriptors, emitter, navigateToTab, insets }: B
             onLongPress={() => emitter.emit({ type: 'tabLongPress', target: route.key })}
           >
             <TabIcon name={route.name} selected={selected} />
-            <AppText variant="small" style={[styles.label, selected && styles.selected]}>
+            <AppText
+              variant="small"
+              maxFontSizeMultiplier={1.4}
+              style={[styles.label, selected && styles.selected]}
+            >
               {label}
             </AppText>
           </Pressable>

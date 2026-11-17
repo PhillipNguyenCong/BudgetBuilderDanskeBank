@@ -5,8 +5,8 @@ import { createDraft, draftRow, isAmountInput, newRow, parseAmount, validateDraf
 it('NFR-04: preserves exact legacy fractions and formats maximum safe money without rounding', () => {
   const row = draftRow({ id: 'exact', label: 'Exact amount', amountOere: Number.MAX_SAFE_INTEGER });
   expect(parseAmount(row).amount).toBe(Number.MAX_SAFE_INTEGER);
-  expect(formatDkk(Number.MAX_SAFE_INTEGER)).toBe('DKK 90,071,992,547,409.91');
-  expect(formatDkk(-1)).toBe('DKK -0.01');
+  expect(formatDkk(Number.MAX_SAFE_INTEGER)).toBe('90.071.992.547.409,91 kr.');
+  expect(formatDkk(-1)).toBe('-0,01 kr.');
   expect(parseAmount({ ...row, input: '90071992547410' }).error).toBe('This amount is too large.');
   expect(parseAmount({ ...row, input: '100.50' }).amount).toBe(10050);
   expect(parseAmount({ ...row, input: '90071992547409.91' }).amount).toBe(Number.MAX_SAFE_INTEGER);

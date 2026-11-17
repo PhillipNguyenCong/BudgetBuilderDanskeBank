@@ -41,7 +41,10 @@ it('selects one eligible account and disables accounts with budgets', async () =
   );
   const available = await screen.findByRole('radio', { name: 'Everyday, ••1234' });
   expect(screen.getByText('Available balance unknown')).toBeVisible();
+  expect(screen.queryByText(/2 complete months/)).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Read more' }));
   expect(screen.getByText(/2 complete months/)).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
   const used = screen.getByRole('radio', { name: 'Other account, ••5678' });
   expect(used).toBeDisabled();
   await fireEvent.press(available);

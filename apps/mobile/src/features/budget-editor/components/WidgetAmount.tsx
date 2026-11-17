@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { TextField } from '../../../foundation/components/TextField';
+import { formatDkk } from '../../budget-shared';
 import { colors, fonts, spacing } from '../../../foundation/theme/theme';
 import { isAmountInput, parseAmount, widgetTotal, type DraftWidget } from '../editor/draft';
 
@@ -18,17 +19,27 @@ export function WidgetAmount({
   const name = widget.name || 'Unnamed widget';
   const fixed = widget.type === 'FIXED_EXPENSE';
   const row = widget.rows[0];
+  const total = widgetTotal(widget);
+  const numericTotal = total.endsWith(' kr.');
   const hasBillInput = fixed && widget.rows.some((item) => item.input.trim() !== '');
   return (
     <>
       {!fixed && row && widget.rows.length === 1 ? (
         <TextField
           containerStyle={styles.cell}
-          appearance="underline"
+          appearance="bubble"
           style={[styles.mainInput, styles.alignRight]}
           label="DKK / month"
+          hideLabel
+          suffix="kr."
+          accessibilityHint="Monthly amount in DKK"
           accessibilityLabel={`${name} row 1 amount in DKK`}
           value={row.input}
+          displayValue={
+            parseAmount(row).amount !== undefined
+              ? formatDkk(parseAmount(row).amount!).replace(/ kr\.$/, '')
+              : row.input
+          }
           keyboardType="decimal-pad"
           maxLength={24}
           error={parseAmount(row).error}
@@ -39,9 +50,6 @@ export function WidgetAmount({
         />
       ) : (
         <View style={styles.cell}>
-          <AppText variant="small" style={styles.alignRight}>
-            Total / month
-          </AppText>
           {fixed ? (
             <Pressable
               style={({ pressed }) => [
@@ -52,25 +60,42 @@ export function WidgetAmount({
               accessibilityRole="button"
               accessibilityLabel={`${hasBillInput ? 'Edit bills' : 'Add bills'} to ${name}`}
               accessibilityHint="Opens the bill list"
+              accessibilityValue={{ text: hasBillInput ? total : 'No bill amounts entered' }}
               onPress={onOpen}
             >
-              <AppText variant="heading" style={[styles.amountText, styles.actionText]}>
-                {hasBillInput ? widgetTotal(widget) : 'Add bills'}
+              <AppText
+                variant="heading"
+                style={[styles.amountText, !hasBillInput && styles.actionText]}
+                numberOfLines={hasBillInput && numericTotal ? 1 : undefined}
+                adjustsFontSizeToFit={hasBillInput && numericTotal}
+                minimumFontScale={0.7}
+              >
+                {hasBillInput && numericTotal ? (
+                  <>
+                    {' '}
+                    {total.slice(0, -4)}
+                    <AppText style={styles.currency}> kr.</AppText>
+                  </>
+                ) : hasBillInput ? (
+                  total
+                ) : (
+                  'Add bills'
+                )}
               </AppText>
               <AppText variant="small" accessible={false} importantForAccessibility="no">
                 ›
               </AppText>
             </Pressable>
           ) : (
-            <View style={styles.amountSurface}>
+            <View
+              style={styles.amountSurface}
+              accessible
+              accessibilityLabel={`${name} monthly total: ${widgetTotal(widget)}`}
+              accessibilityHint="Contains multiple preserved planning items."
+            >
               <AppText variant="heading">{widgetTotal(widget)}</AppText>
             </View>
           )}
-          {!fixed ? (
-            <AppText variant="small">
-              This draft contains multiple items; their amounts are preserved.
-            </AppText>
-          ) : null}
         </View>
       )}
     </>
@@ -82,16 +107,32 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.blue,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingHorizontal: 12,
   },
+  currency: { fontSize: 14, fontWeight: '400' },
   actionText: { color: colors.blue },
   pressed: { opacity: 0.65 },
-  amountText: { flexShrink: 1, textAlign: 'right' },
-  mainInput: { fontSize: 20, lineHeight: 28, fontFamily: fonts.semibold, minHeight: 54 },
+  amountText: {
+    flex: 1,
+    minWidth: 0,
+    textAlign: 'right',
+    fontSize: 18,
+    lineHeight: 24,
+    fontFamily: fonts.semibold,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  mainInput: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontFamily: fonts.semibold,
+    minHeight: 44,
+    paddingVertical: 8,
+  },
   amountSurface: {
-    minHeight: 54,
-    paddingVertical: spacing.medium,
+    minHeight: 44,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderColor: colors.muted,
     flexDirection: 'row',
@@ -99,5 +140,5 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
-  cell: { flex: 1, minWidth: 0, gap: spacing.small },
+  cell: { minWidth: 0, gap: spacing.small },
 });

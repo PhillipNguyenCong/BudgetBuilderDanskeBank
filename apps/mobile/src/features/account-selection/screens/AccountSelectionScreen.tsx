@@ -22,7 +22,6 @@ export function AccountSelectionScreen({
       <AppText variant="title" accessibilityRole="header">
         Select an account
       </AppText>
-      <AppText>Choose one account for your budget.</AppText>
       {state.status === 'loading' ? (
         <AccountsLoading />
       ) : state.status === 'error' ? (

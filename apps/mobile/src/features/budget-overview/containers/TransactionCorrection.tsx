@@ -11,6 +11,7 @@ import { formatDkk } from '../../budget-shared';
 
 export function TransactionCorrection({
   budget,
+  month,
   initial,
   onClose,
   onSaved,
@@ -19,6 +20,7 @@ export function TransactionCorrection({
   reload = getBudgetTransaction,
 }: {
   budget: Budget;
+  month?: string | undefined;
   initial: ClassifiedTransaction;
   onClose: () => void;
   onSaved: () => void;
@@ -73,7 +75,9 @@ export function TransactionCorrection({
   async function reloadLatest() {
     setBusy(true);
     try {
-      const latest = await reload(budget.id, record.transaction.id);
+      const latest = await (month
+        ? reload(budget.id, record.transaction.id, undefined, month)
+        : reload(budget.id, record.transaction.id));
       setRecord(latest);
       setDecision(latest.origin === 'CUSTOMER' ? { kind: latest.kind, potId: latest.potId } : null);
       setMustReload(false);

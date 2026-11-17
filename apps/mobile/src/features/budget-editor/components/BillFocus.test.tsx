@@ -8,7 +8,7 @@ const field = (row: number, kind = 'label') =>
   screen.getByLabelText(`Fixed expenses row ${row} ${kind}`);
 async function open() {
   await render(<BudgetEditor initialPlan={createBudgetExample.plan} />);
-  await press('Edit bills for Fixed expenses');
+  await press('Edit bills to Fixed expenses');
 }
 
 it('adds bills with name → amount → OK without closing, and keeps focus through edits', async () => {

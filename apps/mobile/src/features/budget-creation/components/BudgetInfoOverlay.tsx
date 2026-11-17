@@ -1,3 +1,4 @@
+import type { SalarySuggestion } from '@budget-builder/contracts';
 import { useRef, type ComponentRef } from 'react';
 import { AccessibilityInfo, Modal, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,9 +9,13 @@ import type { BudgetSetup } from '../api/setup';
 
 export function BudgetInfoOverlay({
   quality,
+  salary,
+  salaryMessage,
   onClose,
 }: {
   quality?: BudgetSetup['quality'];
+  salary?: SalarySuggestion | undefined;
+  salaryMessage?: string | undefined;
   onClose: () => void;
 }) {
   const heading = useRef<ComponentRef<typeof View>>(null);
@@ -39,6 +44,16 @@ export function BudgetInfoOverlay({
           <Button label="Close" variant="secondary" onPress={onClose} />
         </View>
         <ScrollView contentContainerStyle={styles.content}>
+          <AppText variant="heading">Monthly salary</AppText>
+          <AppText>
+            {salaryMessage ??
+              'The latest eligible salary is filled when available. You can always enter or edit your total monthly income.'}
+          </AppText>
+          {salary?.suggestion ? (
+            <AppText>
+              Latest salary payment: {salary.suggestion.paymentDate}. Edits are never overwritten.
+            </AppText>
+          ) : null}
           <AppText variant="heading">Manual setup</AppText>
           <AppText>
             Enter your monthly income and allocations in DKK with up to two decimal places. Add
@@ -48,8 +63,8 @@ export function BudgetInfoOverlay({
           </AppText>
           <AppText variant="heading">Your pots</AppText>
           <AppText>
-            Pots divide the money in your account. No bank transfer is made. Choose spending, fixed
-            expenses or savings when adding a pot. You can change its name and colour later.
+            Pots divide the money in your account. No bank transfer is made. Edit the names, amounts
+            and colours of the existing pots.
           </AppText>
           <AppText variant="heading">Left to allocate</AppText>
           <AppText>
@@ -60,10 +75,11 @@ export function BudgetInfoOverlay({
           </AppText>
           <AppText variant="heading">Bill frequency</AppText>
           <AppText>
-            Enter each bill’s amount per payment and choose Monthly, Quarterly, Every 6 months or
-            Yearly. We divide by 1, 3, 6 or 12 and round each monthly allocation up to the nearest
-            øre. This is an average amount to set aside, not a payment schedule or a calculation of
-            catch-up funding.
+            Bills default to Monthly when no frequency is established. You can change this planning
+            default. Enter each bill’s amount per payment and choose Monthly, Quarterly, Every 6
+            months or Yearly. We divide by 1, 3, 6 or 12 and round each monthly allocation up to the
+            nearest øre. This is an average amount to set aside, not a payment schedule or a
+            calculation of catch-up funding.
           </AppText>
           <AppText variant="heading">Savings and rollover</AppText>
           <AppText>

@@ -1,3 +1,5 @@
+import { monthLabel } from './budgetMonth';
+import { billStatus } from './billStatus';
 import type { SpendingNumbers } from '@budget-builder/contracts';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
@@ -5,32 +7,48 @@ import { Card } from '../../../foundation/components/Card';
 import { colors, spacing } from '../../../foundation/theme/theme';
 import { formatDkk } from '../../budget-shared';
 export const formatGuideDkk = (amount: number) =>
-  `DKK ${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+  `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} kr.`;
 export function SpendingFigures({
   numbers,
   daysRemaining,
   breakdown = false,
   kind = 'SPENDING',
+  historicalMonth,
 }: {
   numbers: SpendingNumbers;
   daysRemaining: number;
   breakdown?: boolean;
   kind?: 'SPENDING' | 'FIXED_EXPENSE';
+  historicalMonth?: string | undefined;
 }) {
-  const available = numbers.remainingOere === null ? null : Math.max(0, numbers.remainingOere);
+  const status = kind === 'FIXED_EXPENSE' ? billStatus(numbers) : undefined;
+  const available =
+    numbers.remainingOere === null
+      ? null
+      : kind === 'FIXED_EXPENSE' || historicalMonth
+        ? numbers.remainingOere
+        : Math.max(0, numbers.remainingOere);
   return (
     <View style={styles.stack}>
       <Card style={styles.primary}>
         <AppText variant="heading" accessibilityRole="header">
-          {kind === 'FIXED_EXPENSE' ? 'Left for bills this month' : 'Left to spend this month'}
+          {historicalMonth
+            ? `Remaining in ${monthLabel(historicalMonth)}`
+            : kind === 'FIXED_EXPENSE'
+              ? 'Left for bills this month'
+              : 'Left to spend this month'}
         </AppText>
         <AppText variant="title" style={styles.amount}>
           {available === null ? 'Unavailable' : formatDkk(available)}
         </AppText>
+        {status ? <AppText variant="label">{status}</AppText> : null}
+        {numbers.limitations.length > 0 ? (
+          <AppText variant="label">Provisional · Based on known transactions</AppText>
+        ) : null}
         {numbers.overspentOere !== null && numbers.overspentOere > 0 ? (
           <AppText variant="label">{formatDkk(numbers.overspentOere)} over your allowance</AppText>
         ) : null}
-        {kind === 'SPENDING' ? (
+        {kind === 'SPENDING' && !historicalMonth ? (
           <>
             <AppText variant="label">
               {numbers.weeklyGuideDkk === null
@@ -43,16 +61,8 @@ export function SpendingFigures({
                 : `About ${formatGuideDkk(numbers.dailyGuideDkk)} per day`}{' '}
               · {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining
             </AppText>
-            <AppText variant="small">
-              Spending guidance, not an account balance or enforced card limit.
-            </AppText>
           </>
-        ) : (
-          <AppText variant="small">
-            Fixed-expense progress, not a reserved bank balance or a claim that future bills are
-            covered.
-          </AppText>
-        )}
+        ) : null}
         {!breakdown ? (
           <>
             <AppText>Booked so far: {formatDkk(numbers.recordedSpendingOere)}</AppText>
@@ -67,6 +77,9 @@ export function SpendingFigures({
           </>
         ) : null}
       </Card>
+      {numbers.limitations.length > 0 ? (
+        <AppText>Unresolved records may change this amount. Review account activity.</AppText>
+      ) : null}
       {numbers.limitations.map((message) => (
         <AppText key={message} accessibilityRole="alert">
           {message}
@@ -79,10 +92,6 @@ export function SpendingFigures({
           <AppText>Booked: {formatDkk(numbers.recordedSpendingOere)}</AppText>
           <AppText>Pending commitments: {formatDkk(numbers.pendingSpendingOere)}</AppText>
           <AppText>Unconfirmed commitments: {formatDkk(numbers.unconfirmedSpendingOere)}</AppText>
-          <AppText variant="small">
-            Remaining = allocation + carried in − booked − pending − unconfirmed. Confirmed refunds
-            restore the selected pot.
-          </AppText>
         </Card>
       ) : null}
     </View>

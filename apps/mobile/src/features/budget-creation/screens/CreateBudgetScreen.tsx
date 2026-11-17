@@ -1,8 +1,8 @@
+import { useSalarySuggestion } from '../hooks/useSalarySuggestion';
 import type { Budget } from '@budget-builder/contracts';
-import { useMemo, useState } from 'react';
-import { Keyboard, StyleSheet, View } from 'react-native';
+import { useMemo, useState, useRef, type ComponentRef } from 'react';
+import { AccessibilityInfo, Keyboard, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
-import { BackButton } from '../../../foundation/components/BackButton';
 import { Screen } from '../../../foundation/components/Screen';
 import { spacing } from '../../../foundation/theme/theme';
 import { BudgetEditor } from '../../budget-editor';
@@ -35,8 +35,17 @@ export function CreateBudgetScreen({
   onBusy: (busy: boolean) => void;
   services?: CreationServices;
 }) {
+  const infoTrigger = useRef<ComponentRef<typeof View>>(null);
+  function closeInfo() {
+    setInfoOpen(false);
+    requestAnimationFrame(() => {
+      if (infoTrigger.current)
+        AccessibilityInfo.sendAccessibilityEvent(infoTrigger.current, 'focus');
+    });
+  }
   const [infoOpen, setInfoOpen] = useState(false);
   const [initialPlan] = useState(manualPlan);
+  const salary = useSalarySuggestion(accountId, services.salary);
   const flow = useBudgetCreation(accountId, onCreated, onBusy, services);
   const loadSuggestions = useMemo(
     () =>
@@ -51,8 +60,9 @@ export function CreateBudgetScreen({
           accessibilityElementsHidden={infoOpen}
           importantForAccessibility={infoOpen ? 'no-hide-descendants' : 'auto'}
         >
-          <BackButton disabled={flow.busy} onPress={onBack} />
           <CreationHeader
+            onBack={onBack}
+            infoRef={infoTrigger}
             busy={flow.busy}
             onInfo={() => {
               Keyboard.dismiss();
@@ -65,13 +75,14 @@ export function CreateBudgetScreen({
             <BudgetSetupError message={flow.state.message} onRetry={flow.retry} />
           ) : (
             <>
-              <AppText variant="label">
+              <AppText variant="small">
                 {flow.state.data.account.name} ·{' '}
                 {flow.state.data.account.maskedIdentifier ?? 'Identifier unavailable'}
               </AppText>
               <BudgetEditor
                 initialPlan={initialPlan}
                 startBlank
+                salarySuggestion={salary?.data}
                 loadBillSuggestions={loadSuggestions}
                 onDirty={onDirty}
                 onSubmit={(plan) => void flow.submit(plan)}
@@ -95,8 +106,10 @@ export function CreateBudgetScreen({
       </Screen>
       {infoOpen ? (
         <BudgetInfoOverlay
+          salary={salary?.data}
+          salaryMessage={salary?.message}
           quality={flow.state.status === 'ready' ? flow.state.data.quality : undefined}
-          onClose={() => setInfoOpen(false)}
+          onClose={closeInfo}
         />
       ) : null}
     </>
@@ -104,5 +117,5 @@ export function CreateBudgetScreen({
 }
 
 const styles = StyleSheet.create({
-  content: { gap: spacing.large },
+  content: { gap: spacing.medium },
 });

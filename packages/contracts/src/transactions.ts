@@ -17,7 +17,7 @@ export const TransactionSchema = z.strictObject({
   sourceId: z.string().nullable(),
   accountId: IdSchema,
   date: DateSchema.nullable(),
-  dateBasis: z.enum(['BOOKED_ON', 'VALUE_DATE', 'UNKNOWN']),
+  dateBasis: z.enum(['BOOKED_ON', 'VALUE_DATE', 'AUTHORISED_ON', 'UNKNOWN']),
   direction: DirectionSchema,
   status: z.enum(['BOOKED', 'PENDING', 'CANCELLED', 'UNKNOWN']),
   amountOere: NonNegativeOereSchema.nullable(),

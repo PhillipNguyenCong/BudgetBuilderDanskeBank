@@ -1,0 +1,21 @@
+# Editor setup refinement — US-04 / US-10 / NFR-02
+
+User decision, 12 November 2026: restore allocation guidance beneath each amount, reduce fixed-expense text, default unknown bill frequency Monthly and prefill an editable latest main salary.
+
+## Acceptance criteria
+
+1. Every widget, including Income, shows the same budget-wide left-to-allocate figure beneath its amount; the separate top card is absent. Existing blur updates, exact øre arithmetic, missing-input labels, explicit zero and over-allocation remain intact.
+2. Bill rows show name, amount per payment, compact frequency and Remove. Monthly equivalents appear only for non-monthly rows. Source evidence and suggestion/refresh details are disclosed; actionable amount errors remain visible.
+3. Manual and unknown-frequency suggested bills use Monthly without confirmation. Established quarterly/half-yearly/yearly cadence and user changes are preserved. Unknown original frequency stays null in suggestion metadata; the planning default is explained in help.
+4. An owned account salary-suggestion read uses reconciled booked DKK credits explicitly labelled salary/payroll/løn/loen or supported Danish salary terms within the preceding twelve months. Transfers, refunds, missing amount/date, pending, future and conflicting versions are excluded. Source groups use counterparty, falling back to normalised transaction text without numbers. Rank by distinct payment months, then exact total; tied groups or differing latest same-day amounts leave manual entry. Suggest the selected group's latest payment, not an average.
+5. The mobile lookup runs independently from eligibility and is cancelled on leaving or switching account. It fills only an untouched salary field once, synchronises committed guidance and never saves automatically. Edits, including clearing, win; source failure/no suggestion keeps manual entry available. Other allocations remain blank. From latest salary is shown only until the amount is edited; payment date and explanation are in Read more.
+6. `GET /api/v1/accounts/:id/salary-suggestion` validates IDs and trusted ownership and returns a runtime-validated account ID, snapshot date, nullable suggestion (amountOere, paymentDate, transactionId) and explanation. No customer ID from the request grants access. No migration or deployment.
+7. Native verification exercises creation, bill defaults/edits, keyboard dismissal and save navigation. Large text stacks fields, scrolls the bill total and retains usable fixed navigation and safe areas. Offline sample values and existing multiple-pot plans remain supported.
+
+## Verification
+
+Automated checks and simulator evidence are recorded below after final verification. Simulator observations do not establish physical-device accessibility, participant usability or salary-detection accuracy on representative bank data. The supplied demonstration file stays local and unchanged.
+
+Final checks passed: 79 backend/shared/contract tests, 82 native tests across 21 suites, and one mobile feature API integration test. All-workspace TypeScript, formatting, OpenAPI drift and diff whitespace checks passed. Final iOS and Android Hermes exports passed. HTTP tests used isolated synthetic loopback servers; no shared database or deployment was involved.
+
+Native evidence: iPhone 17e on iOS 27.2, Expo Go SDK 58, using the Xcode plugin for simulator lifecycle/screenshots and Device Hub accessibility for input. The supplied local demo salary prefilled as DKK 31,250; editing it to DKK 32,000 updated guidance. Netflix accepted Monthly without confirmation. Changing another bill to Quarterly preserved its DKK 624 payment amount and showed DKK 208/month. A manual DKK 299 bill survived OK/Done; Create budget opened a saved overview with numeric spending guidance. Largest accessibility text was exercised in the offline editor; fixed navigation scaling, stacked fields, scrolling totals and modal safe areas were corrected. Original simulator text size was restored. This is simulator/semantic-input evidence, not a physical touch, VoiceOver or participant usability evaluation. A separate memory backend on port 3015 and Metro on port 8091 were used; rebuilding backend/shared modules can restart that disposable backend and clear its test budgets.

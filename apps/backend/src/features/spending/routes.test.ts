@@ -60,7 +60,13 @@ function fixture() {
     },
   };
   const bank = new JsonBankDataProvider({ load: async () => source });
-  const app = createApp({ bank, budgets, corrections, identity: () => ({ userId }) });
+  const app = createApp({
+    bank,
+    budgets,
+    corrections,
+    identity: () => ({ userId }),
+    clock: () => new Date('2026-10-15T12:00:00Z'),
+  });
   return {
     app,
     bank,
@@ -221,6 +227,7 @@ test('US-06: corrections survive identical re-imports and concurrent writes cann
   );
   assert.deepEqual(responses.map((r) => r.status).sort(), [200, 409]);
   const app = createApp({
+    clock: () => new Date('2026-10-15T12:00:00Z'),
     budgets: f.budgets,
     corrections: f.corrections,
     bank: new JsonBankDataProvider({ load: async () => structuredClone(f.source) }),

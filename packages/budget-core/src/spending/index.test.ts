@@ -130,8 +130,9 @@ test('US-08/10: transfers, pending movements, credits, duplicates and missing am
   assert.equal(result.overall.pendingSpendingOere, 50000);
   assert.equal(result.overall.remainingOere, 700000);
   const incomplete = snapshot([{ ...shop, amountOere: null }]);
-  assert.equal(incomplete.overall.remainingOere, null);
-  assert.equal(incomplete.overall.weeklyGuideDkk, null);
+  assert.equal(incomplete.overall.remainingOere, 800000);
+  assert.ok(incomplete.overall.limitations.length > 0);
+  assert.equal(incomplete.overall.weeklyGuideDkk, 3294);
   assert.equal(incomplete.activity.length, 1);
 });
 
@@ -141,7 +142,8 @@ test('US-10: ambiguous matches, source collisions, unknown direction/status/date
     { ...transaction('a', 'Shop'), date: null },
   ]) {
     const result = snapshot([tx]);
-    assert.equal(result.overall.weeklyGuideDkk, null);
+    assert.equal(typeof result.overall.weeklyGuideDkk, 'number');
+    assert.ok(result.overall.limitations.length > 0);
     assert.equal(result.activity[0]!.needsReview, true);
   }
   const unknownStatus = snapshot([{ ...transaction('status', 'Shop'), status: 'UNKNOWN' }]);
@@ -164,7 +166,7 @@ test('US-10: ambiguous matches, source collisions, unknown direction/status/date
     coverage: { from: '2026-10-02', to: '2026-10-15', completeMonths: 0 },
   });
   assert.equal(ambiguous.activity[0]!.potId, null);
-  assert.equal(ambiguous.overall.remainingOere, null);
+  assert.equal(ambiguous.overall.remainingOere, 800000);
   assert.ok(ambiguous.overall.limitations.some((message) => message.includes('coverage')));
 });
 
@@ -287,4 +289,129 @@ test('US-06: changed source corrections remain reviewable until explicitly repla
     [correction, { ...correction, transactionId: tx.id, decision: null }],
   );
   assert.equal(reset.overall.recordedSpendingOere, 50000);
+});
+
+test('US-06/10: undated and prior-month debits stay outside current monthly totals', () => {
+  const unknownDate = {
+    ...transaction('undated', 'Shop', 10000),
+    date: null,
+    dateBasis: 'UNKNOWN' as const,
+    status: 'PENDING' as const,
+  };
+  const result = snapshot([
+    unknownDate,
+    unknownDate,
+    { ...transaction('old-reservation', 'Shop', 20000), date: '2026-09-27', status: 'PENDING' },
+    { ...transaction('future-reservation', 'Shop', 90000), date: '2026-10-16', status: 'PENDING' },
+    { ...transaction('cancelled', 'Shop', 90000), date: null, status: 'CANCELLED' },
+    {
+      ...transaction('transfer', 'Move', 90000),
+      date: null,
+      status: 'PENDING',
+      transferEvidence: 'EXPLICIT_INTERNAL_TRANSFER',
+    },
+  ]);
+  assert.equal(result.overall.pendingSpendingOere, 0);
+  assert.equal(result.overall.recordedSpendingOere, 0);
+  assert.equal(result.overall.remainingOere, 800000);
+  assert.ok(result.overall.limitations.some((x) => x.includes('missing information')));
+  assert.equal(result.activity.filter((x) => x.transaction.id === 'undated').length, 1);
+});
+
+test('US-10: missing amounts remain unknown while known spending still provides labelled guidance', () => {
+  const result = snapshot([
+    transaction('known', 'Shop', 12345),
+    { ...transaction('missing', 'Shop'), amountOere: null },
+  ]);
+  assert.equal(result.overall.remainingOere, 787655);
+  assert.equal(
+    result.activity.find((x) => x.transaction.id === 'missing')!.transaction.amountOere,
+    null,
+  );
+  assert.ok(result.overall.limitations.length > 0);
+});
+
+test('US-06/12: an August pending debit stays in August and a linked September booking counts once', () => {
+  const pending = {
+    ...transaction('reservation', 'Shop', 10000),
+    sourceId: 'movement',
+    status: 'PENDING' as const,
+    date: '2026-08-27',
+  };
+  const calculate = (date: string, transactions: Transaction[]) =>
+    buildSpendingSnapshot({
+      plan: createBudgetExample.plan,
+      accountId: 'demo-account',
+      date,
+      transactions,
+      corrections: [],
+      coverage: { from: '2026-08-01', to: '2026-09-03', completeMonths: 1 },
+    });
+  assert.equal(calculate('2026-08-31', [pending]).overall.pendingSpendingOere, 10000);
+  assert.equal(calculate('2026-09-03', [pending]).overall.pendingSpendingOere, 0);
+  const booked = { ...pending, id: 'booked', status: 'BOOKED' as const, date: '2026-09-02' };
+  const august = calculate('2026-08-31', [pending, booked]);
+  const september = calculate('2026-09-03', [pending, booked]);
+  assert.equal(august.overall.pendingSpendingOere, 0);
+  assert.equal(august.overall.recordedSpendingOere, 0);
+  assert.equal(
+    august.activity.find((item) => item.transaction.id === 'reservation')!.exclusionReason,
+    'Booked in 2026-09; this reservation is not counted twice.',
+  );
+  assert.equal(september.overall.recordedSpendingOere, 10000);
+  assert.equal(september.overall.pendingSpendingOere, 0);
+});
+
+test('US-06/10: a matched release in a later month removes the reservation without creating spending', () => {
+  const pending = {
+    ...transaction('pending', 'Shop', 10000),
+    sourceId: 'release',
+    status: 'PENDING' as const,
+    date: '2026-08-27',
+  };
+  const released = { ...pending, id: 'released', date: '2026-09-02', status: 'CANCELLED' as const };
+  const august = buildSpendingSnapshot({
+    plan: createBudgetExample.plan,
+    accountId: 'demo-account',
+    date: '2026-08-31',
+    transactions: [pending, released],
+    corrections: [],
+    coverage: { from: '2026-08-01', to: '2026-09-03', completeMonths: 1 },
+  });
+  assert.equal(august.overall.pendingSpendingOere, 0);
+  assert.equal(august.overall.recordedSpendingOere, 0);
+  assert.equal(
+    august.activity.find((item) => item.transaction.id === 'pending')!.exclusionReason,
+    'Released in 2026-09; this reservation does not reduce the budget.',
+  );
+});
+
+test('US-10: corrections on a superseded reservation remain reviewable on its later booking', () => {
+  const pending = {
+    ...transaction('pending', 'Shop', 10000),
+    sourceId: 'corrected-movement',
+    status: 'PENDING' as const,
+    date: '2026-08-27',
+  };
+  const booked = { ...pending, id: 'booked', date: '2026-09-02', status: 'BOOKED' as const };
+  const result = buildSpendingSnapshot({
+    plan: createBudgetExample.plan,
+    accountId: 'demo-account',
+    date: '2026-09-03',
+    transactions: [pending, booked],
+    corrections: [
+      {
+        transactionId: 'pending',
+        sourceId: 'corrected-movement',
+        revision: 1,
+        decision: { kind: 'TRANSFER', potId: null },
+        updatedAt: '2026-08-28T12:00:00Z',
+      },
+    ],
+    coverage: { from: '2026-08-01', to: '2026-09-03', completeMonths: 1 },
+  });
+  assert.equal(result.activity.find((item) => item.transaction.id === 'booked')!.needsReview, true);
+  assert.equal(result.activity.find((item) => item.transaction.id === 'booked')!.kind, 'UNKNOWN');
+  assert.equal(result.overall.recordedSpendingOere, 0);
+  assert.ok(result.overall.limitations.length > 0);
 });

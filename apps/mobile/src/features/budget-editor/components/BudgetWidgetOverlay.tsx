@@ -8,8 +8,9 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../../foundation/components/Button';
 import { colors, spacing } from '../../../foundation/theme/theme';
 import { widgetPalette } from '../../budget-shared';
@@ -17,14 +18,11 @@ import { widgetTotal, type DraftWidget } from '../editor/draft';
 import { useBillFocus } from '../hooks/useBillFocus';
 import { AllocationGuidance } from './AllocationGuidance';
 import { BillList } from './BillList';
-import { RolloverSettings } from './RolloverSettings';
-import { WidgetColorPicker } from './WidgetColorPicker';
 import { WidgetOverlayHeader } from './WidgetOverlayHeader';
 import { WidgetOverlayTotal } from './WidgetOverlayTotal';
 
 export function BudgetWidgetOverlay({
   widget,
-  savings,
   progress,
   onChange,
   onAddRow,
@@ -41,6 +39,7 @@ export function BudgetWidgetOverlay({
   suggestionPanel?: ReactNode;
   onAmountBlur: (rowId: string) => void;
 }) {
+  const { fontScale } = useWindowDimensions();
   const fixed = widget.type === 'FIXED_EXPENSE';
   const billFocus = useBillFocus(widget.rows, fixed);
   const heading = useRef<ComponentRef<typeof View>>(null);
@@ -64,58 +63,60 @@ export function BudgetWidgetOverlay({
         if (heading.current) AccessibilityInfo.sendAccessibilityEvent(heading.current, 'focus');
       }}
     >
-      <SafeAreaView
-        style={[
-          styles.root,
-          { backgroundColor: fixed ? colors.canvas : widgetPalette[widget.color].background },
-        ]}
-        accessibilityViewIsModal
-      >
-        <KeyboardAvoidingView
-          style={styles.root}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <SafeAreaProvider>
+        <SafeAreaView
+          style={[
+            styles.root,
+            { backgroundColor: fixed ? colors.canvas : widgetPalette[widget.color].background },
+          ]}
+          accessibilityViewIsModal
         >
-          <WidgetOverlayHeader name={name} heading={heading} onClose={close} />
-          <WidgetOverlayTotal widget={widget} total={total} />
-          <ScrollView
-            ref={billFocus.scroll}
-            onContentSizeChange={billFocus.reveal}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-            contentContainerStyle={styles.content}
+          <KeyboardAvoidingView
+            style={styles.root}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
-            {widget.type === 'FIXED_EXPENSE' ? (
-              <>
-                {suggestionPanel}
-                <BillList
-                  widget={widget}
-                  onChange={onChange}
-                  onAddRow={onAddRow}
-                  focus={billFocus}
-                  onAmountBlur={onAmountBlur}
+            <WidgetOverlayHeader name={name} heading={heading} onClose={close} />
+            {fontScale <= 1.3 ? <WidgetOverlayTotal widget={widget} total={total} /> : null}
+            <ScrollView
+              ref={billFocus.scroll}
+              onContentSizeChange={billFocus.reveal}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              contentContainerStyle={styles.content}
+            >
+              {fontScale > 1.3 ? <WidgetOverlayTotal widget={widget} total={total} /> : null}
+              {widget.type === 'FIXED_EXPENSE' ? (
+                <>
+                  {suggestionPanel}
+                  <BillList
+                    widget={widget}
+                    onChange={onChange}
+                    onAddRow={onAddRow}
+                    focus={billFocus}
+                    onAmountBlur={onAmountBlur}
+                  />
+                  <View style={styles.guidance}>
+                    <AllocationGuidance progress={progress} announce />
+                  </View>
+                </>
+              ) : null}
+            </ScrollView>
+            <View style={styles.footer}>
+              {fixed && billFocus.active?.field === 'name' ? (
+                <Button
+                  label="Next"
+                  maxFontSizeMultiplier={2}
+                  onPress={() => billFocus.focus(billFocus.active!.rowId, 'amount')}
                 />
-                <View style={styles.guidance}>
-                  <AllocationGuidance progress={progress} announce />
-                </View>
-              </>
-            ) : null}
-            <WidgetColorPicker widget={widget} onChange={onChange} />
-            <RolloverSettings widget={widget} savings={savings} onChange={onChange} />
-          </ScrollView>
-          <View style={styles.footer}>
-            {fixed && billFocus.active?.field === 'name' ? (
-              <Button
-                label="Next"
-                onPress={() => billFocus.focus(billFocus.active!.rowId, 'amount')}
-              />
-            ) : fixed && (billFocus.active || billFocus.keyboardVisible) ? (
-              <Button label="OK" onPress={billFocus.dismiss} />
-            ) : (
-              <Button label="Done" onPress={close} />
-            )}
-          </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+              ) : fixed && (billFocus.active || billFocus.keyboardVisible) ? (
+                <Button label="OK" maxFontSizeMultiplier={2} onPress={billFocus.dismiss} />
+              ) : (
+                <Button label="Done" maxFontSizeMultiplier={2} onPress={close} />
+              )}
+            </View>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </SafeAreaProvider>
     </Modal>
   );
 }

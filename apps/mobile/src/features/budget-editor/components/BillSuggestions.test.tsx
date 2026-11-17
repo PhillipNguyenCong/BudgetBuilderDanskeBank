@@ -71,9 +71,7 @@ it('US-04: late results cannot replace manual bill entries; results can be expli
     <BudgetEditor initialPlan={manualPlan()} startBlank loadBillSuggestions={pending.load} />,
   );
   await openBills();
-  expect(
-    screen.getByText('Looking for bills… You can add bills manually while we look.'),
-  ).toBeVisible();
+  expect(screen.getByText('Looking for bills…')).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'Add bill to Fixed expenses' }));
   await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'My custom bill');
   await pending.finish();
@@ -81,7 +79,7 @@ it('US-04: late results cannot replace manual bill entries; results can be expli
   expect(screen.queryByLabelText('Fixed expenses row 2 label')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Add found bills' }));
   expect(screen.getByLabelText('Fixed expenses row 2 label')).toHaveDisplayValue('Rent');
-  expect(screen.getByRole('button', { name: 'Add found bills' })).toBeDisabled();
+  expect(screen.queryByRole('button', { name: 'Add found bills' })).toBeNull();
 });
 
 it('US-04: closing while loading caches results without adding hidden amounts', async () => {
@@ -105,6 +103,7 @@ it('US-04: removal and refresh preserve customer choices without duplicate/reins
   await openBills();
   await fireEvent.press(screen.getByRole('button', { name: 'Remove Fixed expenses row 1' }));
   await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 amount in DKK'), '109');
+  await fireEvent.press(screen.getByRole('button', { name: 'Suggestion details' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Refresh bill suggestions' }));
   expect(load).toHaveBeenCalledTimes(2);
   expect(screen.getByLabelText('Fixed expenses row 1 label')).toHaveDisplayValue('Netflix');
@@ -124,9 +123,8 @@ it('US-10: failed detection and no results retain manual entry and permit explic
   ).toBeVisible();
   expect(screen.getByRole('button', { name: 'Add bill to Fixed expenses' })).toBeEnabled();
   await fireEvent.press(screen.getByRole('button', { name: 'Try finding bills again' }));
-  expect(
-    screen.getByText('No recurring bills found. Add any bills you know about below.'),
-  ).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Suggestion details' }));
+  expect(screen.getByText('No recurring bills found.')).toBeVisible();
 });
 
 it('US-04: leaving the account draft aborts detection and ignores its late result', async () => {
@@ -177,13 +175,12 @@ it('US-10: a possible bill with unknown amount/frequency stays incomplete until 
   expect(screen.queryByLabelText('Fixed expenses row 1 label')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Add found bills' }));
   expect(screen.getByLabelText('Fixed expenses row 1 amount in DKK')).toHaveDisplayValue('');
+  await fireEvent.press(screen.getByRole('button', { name: 'Source details' }));
   expect(screen.getByText('Original suggestion: Rent, amount unavailable')).toBeVisible();
   await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 amount in DKK'), '1000');
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Fixed expenses row 1 frequency: Needs confirmation' }),
-  );
-  expect(screen.getByRole('radio', { name: 'Fixed expenses row 1: Monthly' })).not.toBeChecked();
-  await fireEvent.press(screen.getByRole('radio', { name: 'Fixed expenses row 1: Monthly' }));
+  expect(
+    screen.getByRole('button', { name: 'Fixed expenses row 1 frequency: Monthly' }),
+  ).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
   const row = submit.mock.calls[0]![0].pots.find(

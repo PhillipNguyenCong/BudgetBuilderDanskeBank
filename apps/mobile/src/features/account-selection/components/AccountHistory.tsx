@@ -1,3 +1,4 @@
+import { ReadMore } from '../../../foundation/components/ReadMore';
 import { AppText } from '../../../foundation/components/AppText';
 import { type AccountSelectionData } from '../api/accounts';
 
@@ -8,10 +9,13 @@ export function AccountHistory({
 }) {
   return (
     <>
-      <AppText variant="small">
-        Available history: {quality.coverage.from ?? 'Unknown start'} to{' '}
-        {quality.coverage.to ?? 'unknown end'} ({quality.coverage.completeMonths} complete months).
-      </AppText>
+      <ReadMore title="Account history">
+        <AppText variant="small">
+          Available history: {quality.coverage.from ?? 'Unknown start'} to{' '}
+          {quality.coverage.to ?? 'unknown end'} ({quality.coverage.completeMonths} complete
+          months).
+        </AppText>
+      </ReadMore>
       {quality.issues.length > 0 ? (
         <AppText variant="small">
           Some source data is incomplete or uncertain. Available history may contain gaps.

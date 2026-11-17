@@ -33,15 +33,19 @@ export function BillFrequencyPicker({
             {row.needsFrequencyReview ? 'Confirm frequency' : billFrequencyLabels[frequency]} ▾
           </AppText>
         </Pressable>
-        <AppText variant="small" style={styles.monthly}>
-          {row.needsFrequencyReview
-            ? 'Confirm frequency to calculate monthly amount'
-            : parsed.amount !== undefined
-              ? `${formatDkk(monthlyBillAllocation(parsed.amount, frequency))}/month`
-              : row.input.trim()
-                ? 'Check amount'
-                : 'Amount not entered'}
-        </AppText>
+        {frequency !== 'MONTHLY' ||
+        row.needsFrequencyReview ||
+        (row.input.trim() && parsed.error) ? (
+          <AppText variant="small" style={styles.monthly}>
+            {row.needsFrequencyReview
+              ? 'Confirm frequency to calculate monthly amount'
+              : parsed.amount !== undefined
+                ? `${formatDkk(monthlyBillAllocation(parsed.amount, frequency))}/month`
+                : row.input.trim()
+                  ? 'Check amount'
+                  : 'Amount not entered'}
+          </AppText>
+        ) : null}
       </View>
       {choosingFrequency ? (
         <View style={styles.choices}>
@@ -73,11 +77,7 @@ const styles = StyleSheet.create({
   frequencyButton: {
     minHeight: 44,
     justifyContent: 'center',
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.blue,
-    backgroundColor: colors.tint,
+    paddingHorizontal: 4,
   },
   action: { color: colors.blue, fontWeight: '600' },
   pressed: { opacity: 0.65 },

@@ -73,10 +73,10 @@ export function calculateGuidance(
     pendingSpendingOere,
     unconfirmedSpendingOere,
     reviewAffectingCount,
-    remainingOere: limitations.length ? null : signed,
-    overspentOere: limitations.length ? null : exact(remaining < 0n ? -remaining : 0n),
-    weeklyGuideDkk: limitations.length ? null : rounded(Math.min(7, days)),
-    dailyGuideDkk: limitations.length ? null : rounded(1),
+    remainingOere: signed,
+    overspentOere: exact(remaining < 0n ? -remaining : 0n),
+    weeklyGuideDkk: rounded(Math.min(7, days)),
+    dailyGuideDkk: rounded(1),
     limitations,
   };
 }
@@ -110,6 +110,8 @@ type ActivityDraft = Omit<
 > & {
   selected: boolean;
   conflictingSourceVersions: boolean;
+  resolvedMonth?: string;
+  releasedMonth?: string;
 };
 
 function classify(input: SnapshotInput): ActivityDraft[] {
@@ -119,7 +121,9 @@ function classify(input: SnapshotInput): ActivityDraft[] {
     input.corrections.map((correction) => [correction.transactionId, correction]),
   );
   const reconciled = reconcileTransactions(input.transactions, input.accountId);
-  const currentIds = new Set(reconciled.map((record) => record.transaction.id));
+  const currentIds = new Set(
+    reconciled.filter((record) => record.selected).map((record) => record.transaction.id),
+  );
 
   return reconciled.map((record) => {
     const tx = record.transaction;
@@ -236,6 +240,8 @@ function classify(input: SnapshotInput): ActivityDraft[] {
           (tx.amountOere === null || !Number.isSafeInteger(tx.amountOere) || !tx.date)),
       selected: record.selected,
       conflictingSourceVersions: record.conflictingSourceVersions,
+      ...(record.resolvedMonth ? { resolvedMonth: record.resolvedMonth } : {}),
+      ...(record.releasedMonth ? { releasedMonth: record.releasedMonth } : {}),
     };
   });
 }
@@ -257,7 +263,11 @@ function materialize(draft: ActivityDraft, date: string): ClassifiedTransaction 
   const exclusionReason = included
     ? null
     : !draft.selected
-      ? 'Replaced by another version of the same source movement; not counted twice.'
+      ? draft.resolvedMonth
+        ? `Booked in ${draft.resolvedMonth}; this reservation is not counted twice.`
+        : draft.releasedMonth
+          ? `Released in ${draft.releasedMonth}; this reservation does not reduce the budget.`
+          : 'Replaced by another version of the same source movement; not counted twice.'
       : tx.status === 'CANCELLED'
         ? 'Cancelled or released movement; it does not reduce the budget.'
         : contribution === 'PENDING'
@@ -331,7 +341,11 @@ export function calculateLiveBudgetSnapshot(input: SnapshotInput) {
         .reduce((total, item) => total + signedAmount(item), 0n);
     const limitations: string[] = [];
     if (!coverageComplete)
-      limitations.push('Source coverage does not span this month through the snapshot date.');
+      limitations.push(
+        input.coverage.to && input.coverage.to < `${month}-01`
+          ? `No source data covers this month. Latest available data ends ${input.coverage.to}.`
+          : 'Source coverage does not span this month through the snapshot date.',
+      );
     if (
       activity.some(
         (item) =>
@@ -341,11 +355,23 @@ export function calculateLiveBudgetSnapshot(input: SnapshotInput) {
           (item.potId === potId || item.potId === null) &&
           (item.kind === 'EXPENSE' || item.kind === 'REFUND' || item.kind === 'UNKNOWN') &&
           item.transaction.status !== 'CANCELLED' &&
-          !item.exclusionReason?.startsWith('Replaced by'),
+          !item.exclusionReason?.startsWith('Replaced by') &&
+          !item.exclusionReason?.startsWith('Booked in') &&
+          !item.exclusionReason?.startsWith('Released in'),
       )
     )
       limitations.push(
         'A transaction is missing information needed for this pot. Review account activity.',
+      );
+    if (
+      relevant.some(
+        (item) =>
+          (item.contribution === 'PENDING' || item.contribution === 'UNCONFIRMED') &&
+          (!item.transaction.date || item.transaction.dateBasis === 'AUTHORISED_ON'),
+      )
+    )
+      limitations.push(
+        'Outstanding commitments are included; their booking month is not confirmed.',
       );
     const reviewAffectingCount = activity.filter(
       (item) =>
@@ -380,7 +406,13 @@ export function calculateLiveBudgetSnapshot(input: SnapshotInput) {
     retainedCorrectionCount: input.corrections.filter(
       (correction) => !activity.some((item) => item.transaction.id === correction.transactionId),
     ).length,
-    reviewCount: activity.filter((item) => item.needsReview).length,
+    reviewCount: activity.filter(
+      (item) =>
+        item.needsReview &&
+        !!item.transaction.date &&
+        item.transaction.date.startsWith(month) &&
+        item.transaction.date <= input.date,
+    ).length,
     overall: calculateGuidance(
       total('allocationOere'),
       0,

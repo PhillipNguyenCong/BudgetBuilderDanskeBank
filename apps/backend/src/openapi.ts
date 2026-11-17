@@ -18,6 +18,7 @@ import {
   CorrectTransactionSchema,
   TransactionCorrectionSchema,
   BillSuggestionsSchema,
+  SalarySuggestionSchema,
 } from '@budget-builder/contracts';
 import { calculatePlan } from '@budget-builder/budget-core';
 const schemas = {
@@ -36,6 +37,7 @@ const schemas = {
   CorrectTransaction: CorrectTransactionSchema,
   TransactionCorrection: TransactionCorrectionSchema,
   BillSuggestions: BillSuggestionsSchema,
+  SalarySuggestion: SalarySuggestionSchema,
 };
 const ref = (name: string) => ({ $ref: '#/components/schemas/' + name });
 const response = (name: string, description: string) => ({
@@ -90,10 +92,27 @@ export const openapi = {
   },
   servers: [{ url: 'http://127.0.0.1:3001' }],
   paths: {
-    '/api/v1/budgets/{id}/spending': { get: read('SpendingSummary', 'getSpendingSummary', [id]) },
+    '/api/v1/budgets/{id}/spending': {
+      get: read('SpendingSummary', 'getSpendingSummary', [
+        id,
+        {
+          name: 'month',
+          in: 'query',
+          schema: { type: 'string', pattern: '^[0-9]{4}-[0-9]{2}$' },
+          description:
+            'Active budget month from Copenhagen creation month through the current calendar month; defaults to current month.',
+        },
+      ]),
+    },
     '/api/v1/budgets/{id}/activity': {
       get: read('BudgetActivity', 'getBudgetActivity', [
         id,
+        {
+          name: 'review',
+          in: 'query',
+          schema: { type: 'string', enum: ['undated'] },
+          description: 'Separate undated-record review view.',
+        },
         {
           name: 'limit',
           in: 'query',
@@ -105,7 +124,7 @@ export const openapi = {
           schema: { type: 'integer', minimum: 0, maximum: 100000, default: 0 },
         },
         { name: 'potId', in: 'query', schema: { type: 'string' } },
-        { name: 'month', in: 'query', schema: { type: 'string', pattern: '^\\d{4}-\\d{2}$' } },
+        { name: 'month', in: 'query', schema: { type: 'string', pattern: '^[0-9]{4}-[0-9]{2}$' } },
         {
           name: 'expectedSnapshotVersion',
           in: 'query',
@@ -116,6 +135,12 @@ export const openapi = {
     '/api/v1/budgets/{id}/transactions/{transactionId}': {
       get: read('ClassifiedTransaction', 'getBudgetTransaction', [
         id,
+        {
+          name: 'month',
+          in: 'query',
+          schema: { type: 'string', pattern: '^[0-9]{4}-[0-9]{2}$' },
+          description: 'Retain the selected monthly classification context.',
+        },
         { ...id, name: 'transactionId' },
       ]),
     },
@@ -138,6 +163,16 @@ export const openapi = {
     },
     '/api/v1/me': { get: read('UserProfile', 'getCurrentUser') },
     '/api/v1/accounts': { get: read('AccountList', 'listAccounts') },
+    '/api/v1/accounts/{id}/salary-suggestion': {
+      get: {
+        summary: 'Suggest the latest main salary for an owned account',
+        parameters: [id],
+        responses: {
+          '200': response('SalarySuggestion', 'Editable salary suggestion or no eligible salary'),
+          ...errors,
+        },
+      },
+    },
     '/api/v1/accounts/{id}/bill-suggestions': {
       get: read('BillSuggestions', 'getBillSuggestions', [id]),
     },

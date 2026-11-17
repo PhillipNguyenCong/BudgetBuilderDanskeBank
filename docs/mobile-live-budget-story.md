@@ -22,8 +22,9 @@ it is not a continuous bank feed or a forecast.
   pot conservatively as an unconfirmed commitment and remains visibly marked for review.
 - Booked, pending and unconfirmed amounts are shown separately. Only booked movements are called
   recorded spending.
-- Missing amount, direction, date or target remains an explicit limitation and can make the
-  affected guidance unavailable. Missing values are never treated as zero.
+- Missing amount, direction, date or target remains an explicit limitation. Guidance remains
+  numeric and is labelled provisional, based on known attributed movements. Missing source
+  values stay unknown; unresolved records may change the amount.
 - Scheduled payments, transfers, savings allocations and ordinary credits do not reduce a pot.
   A customer-confirmed refund restores the selected Spending or Fixed expenses pot.
 - The overall monthly, weekly and daily guidance combines Spending pots only. Fixed expenses are
@@ -58,3 +59,5 @@ Verified on 11 November 2026 with Node 24:
 - Contract drift, formatting, Expo dependency checks and iOS/Android Hermes exports passed. No
   database migration was added or applied for this calculation change. Native device layout,
   large-text and screen-reader checks could not run because no simulator/emulator was available.
+
+The [monthly overview decision](monthly-budget-views-story.md) supersedes cross-month reservation deductions: dated pending/unconfirmed movements remain in their own month, undated records have separate review, and reconstructed prior-month views are selectable. This does not implement persisted closed monthly results.

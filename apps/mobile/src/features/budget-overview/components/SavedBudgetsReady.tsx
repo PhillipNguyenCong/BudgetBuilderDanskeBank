@@ -17,6 +17,7 @@ export function SavedBudgetsReady({
   onRetrySpending,
   onOpenPot,
   onOpenActivity,
+  onOpenUndated,
 }: {
   budgets: Budget[];
   selected?: Budget;
@@ -26,6 +27,7 @@ export function SavedBudgetsReady({
   spending: SpendingState;
   onRetrySpending: () => void;
   onOpenPot?: ((budgetId: string, potId: string) => void) | undefined;
+  onOpenUndated?: ((budgetId: string) => void) | undefined;
   onOpenActivity?: ((budgetId: string) => void) | undefined;
 }) {
   const heading = useRef<ComponentRef<typeof View>>(null);
@@ -49,6 +51,7 @@ export function SavedBudgetsReady({
           onRetrySpending={onRetrySpending}
           onOpenPot={onOpenPot}
           onOpenActivity={onOpenActivity}
+          onOpenUndated={onOpenUndated}
         />
       ) : (
         <AppText accessibilityRole="alert">

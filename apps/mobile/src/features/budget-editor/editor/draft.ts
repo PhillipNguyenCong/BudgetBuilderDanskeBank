@@ -77,7 +77,7 @@ export function isAdjusted(row: DraftRow): boolean {
   const value = parseAmount(row);
   return (
     (row.sourceAmountKnown === false && row.input.trim() !== '') ||
-    (row.sourceFrequencyKnown === false && !row.needsFrequencyReview) ||
+    (row.sourceFrequencyKnown === false && (row.frequency ?? 'MONTHLY') !== 'MONTHLY') ||
     (!row.originalSuggestion && !!row.adjustedByUser) ||
     row.label !== row.original.label ||
     (row.frequency ?? 'MONTHLY') !== (row.original.frequency ?? 'MONTHLY') ||

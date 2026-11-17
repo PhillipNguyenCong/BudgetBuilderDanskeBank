@@ -72,7 +72,56 @@ The optional frequency contract field belongs only to fixed-expense rows; missin
 
 Frequency verification: 41 native tests and 46 backend/shared tests passed. Coverage includes equal monthly equivalents across all four frequencies, exact rounding, zero and overflow, legacy monthly totals, rejected frequency on non-fixed rows, live guidance, retained payment text, saved overview and backend save/reopen. All-workspace TypeScript, contract drift, formatting, whitespace checks and iOS/Android exports passed. No database migration was applied. Physical-device frequency-selector, keyboard and enlarged-text verification remains pending.
 
-
 ## Bill-entry focus flow — 10 November 2026
 
 For US-04 and NFR-02, Add bill focuses the new row's name and reveals it in the scroll view. Name submission/Next focuses that same row's amount without dismissing the keyboard. Amount submission/OK clears focus and dismisses the keyboard while preserving the overlay and draft. Done closes the overlay only when no bill input is focused and the keyboard is hidden; header Close remains available. Removing an active row or dismissing the keyboard clears the active field. Existing validation and two-decimal entry remain unchanged.
+
+## Simplified budget screens — 12 November 2026
+
+The [budget simplification criteria](mobile-budget-simplification-story.md) supersede earlier add-pot controls and repeated per-widget allocation guidance. The editor keeps its initial widgets and preserves any multiple-pot input plan, but offers no add-pot action or replacement menu. Bill additions/removals remain available. A single global allocation guide and local incomplete-input messages replace repeated remainders. Monthly totals are collapsed; savings review remains explicit. Read more replaces More info in creation. These are UI changes only; shared money rules, contracts and persistence are unchanged.
+
+## Restored per-widget guidance and simpler bills
+
+The [latest setup refinement](mobile-setup-refinement-story.md) restores the same global remainder beneath each widget amount, removes the separate top guide, defaults unknown bill frequencies to Monthly and collapses source explanations. Non-monthly monthly equivalents remain visible; other payment amounts are not duplicated. Editable latest salary prefill applies only to account-backed creation. It does not change offline sample values. Native simulator findings and verification are recorded in that story.
+
+## Amount input bubbles — 17 November 2026
+
+For US-04 and NFR-02, single-amount Income, Spending and Savings fields use a white rounded bubble with the same blue outline and 14 px corners as Add bills. The bubble is an editable text input with decimal keyboard, existing labels, visible focus/error states and unchanged validation/blur updates. Names and bill-row inputs retain their underlines; the fixed-expense total remains a bill-editor action. Allocation guidance and latest-salary attribution remain beneath the amount.
+
+Bubble refinement verification: 95 mobile tests, mobile TypeScript, targeted formatting and diff whitespace checks passed. An iPhone 17e / iOS 27.2 simulator screenshot confirmed that the editable salary bubble matches the adjacent Add bills outline and rounded shape while retaining the guidance below. No financial calculations, input parsing or persistence changed. Physical-device/VoiceOver verification remains separate.
+
+## Minimal remainder labels — 17 November 2026
+
+The latest user decision removes visible provisional, missing-entry and salary-source helper lines from the compact widgets. Below each amount, show only a short global remainder such as DKK 31,250 left or DKK 500 over. Hide the remainder until income can be calculated; do not substitute zero. Required-input validation, save blocking, over-allocation warnings and source explanations remain available in their existing fields, summary, overlays and Read more. Partial-input context stays in the compact label's accessibility hint. The bill overlay keeps its fuller allocation explanation. Calculations and draft persistence are unchanged.
+
+Minimal-label verification: 95 native tests, mobile TypeScript, targeted formatting and diff whitespace checks passed. An iPhone 17e simulator screenshot confirmed one-line DKK 31,250 left labels below Income and Fixed expenses, with no salary-source or provisional helper lines and visibly shorter widgets. Input retention, exact allocation guidance, bill entry and save validation remain covered by existing behaviour tests.
+
+## Fixed-expense total alignment — 17 November 2026
+
+Filled bill totals use the same 20 px semibold scale as the editable amount bubbles. DKK / month sits above the bubble, leaving only the formatted numeric total inside; numeric totals stay on one line and can scale to fit. The bill editor action retains its chevron and full DKK value for accessibility. Add bills stays blue while entered totals use the normal amount text colour. This removes the wrapped currency/value stack that made the fixed-expense widget unusually tall.
+
+### Compact widgets (US-04, NFR-02)
+
+Remove Settings buttons and colour selection. Keep compact type labels, editable names, amount bubbles and a short remainder. Savings is green in the editor and saved overview. Bills remain reachable through their amount action; spending rollover preferences remain reachable through a Rollover link. Stored colours and multiple-pot support remain compatible. Large text may stack fields rather than truncate inputs.
+
+### Compact setup header and Danish amount presentation (US-04, NFR-02)
+
+Keep Back, Create budget and Read more in one compact header row. Keep the linked account and budget-name label, without an initial missing-name message; submission still validates the name. Display currency after amounts (`31.250 kr.`), with dot grouping and a comma decimal separator. Editable widget amounts show grouped values when idle and the unchanged ungrouped draft while focused. No calculation or persistence format changes.
+
+### Fixed labels and aligned compact cards (US-04, NFR-02)
+
+Editor widgets display fixed labels Income, Fixed expenses, Budget and Savings. Remove widget-name editing and the repeated type/name rows. Preserve stored names and rows, budget-name editing, bill-name editing and existing multiple pots. Use 16-point horizontal and 14-point vertical card padding, with name and amount columns vertically centred. Place the short remainder directly below the amount in its column. Stack columns for enlarged text.
+
+### Icon-led nested columns (US-04, NFR-02)
+
+Each editor card has an outer icon column and a flexible content column. The content contains a left-aligned label/action column and a right-aligned amount/remainder column. Category icons are decorative and hidden from screen readers. The amount column receives more width for currency values. At enlarged text sizes, content columns stack while retaining the leading icon. Existing amounts, validation and bill/rollover actions are preserved.
+
+### Proportion review and deferred rollover (US-04, NFR-02)
+
+Supersedes the earlier Rollover-link criteria: no rollover action or settings are shown in setup. Retain existing stored preferences and domain support. Card labels use 16/22 typography, amount figures 18/24 and secondary remainders 12/16. Cards use 14-point horizontal and 12-point vertical padding, with a 10-point icon/content gap. Currency suffix spacing grows with system text size to avoid overlapping the amount.
+
+Verification: inspected the running iPhone 17 simulator at standard and accessibility-medium text sizes. Opened and closed the bill list, retaining the draft salary and bill total. Physical-device verification remains separate.
+
+### Two rows per content column (US-04, NFR-02)
+
+The icon remains in the outer leading column. Inside the flexible content area, the left column contains a title row and a muted `Per month` description row. The right column contains the amount field and the remainder. Align the first rows at 44 points minimum and the secondary rows with a 4-point gap and matching 12/16 typography. Keep the two-row columns separate so errors and longer amounts can grow without overlapping. At enlarged text sizes, stack the content columns. Rollover remains absent.

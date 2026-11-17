@@ -49,14 +49,16 @@ async function enterPlan() {
     ['Fixed expenses', '12000'],
     ['Savings', '4000'],
   ]) {
-    if (name === 'Fixed expenses')
+    if (name === 'Fixed expenses') {
       await fireEvent.press(screen.getByRole('button', { name: 'Add bills to Fixed expenses' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Add bill to Fixed expenses' }));
+    }
     const field = screen.getByLabelText(`${name} row 1 amount in DKK`);
     expect(field).toHaveDisplayValue('');
     await fireEvent.changeText(field, amount);
     if (name === 'Fixed expenses') {
       await fireEvent.changeText(screen.getByLabelText('Fixed expenses row 1 label'), 'Rent');
-      await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
     }
   }
 }
@@ -105,36 +107,14 @@ it('US-03: starts blank, submits the accepted manual plan once and preserves inp
   ]);
 });
 
-it('US-11: optional rollover validates a destination and saves the chosen savings target', async () => {
+it('US-04: keeps rollover controls out of setup', async () => {
   const api = services();
   await render(<CreateBudgetScreen {...props(api)} />);
   await enterPlan();
-  await fireEvent.press(screen.getByRole('button', { name: 'Settings for Spending budget' }));
-  await fireEvent(
-    screen.getByRole('switch', { name: 'Spending budget automatic rollover' }),
-    'valueChange',
-    true,
-  );
-  await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
-  expect(screen.getByRole('button', { name: 'Create budget' })).toBeDisabled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Settings for Spending budget' }));
-  await fireEvent.press(screen.getByRole('radio', { name: 'Spending budget: To savings' }));
-  expect(screen.getByText('Select a savings pot, or add one first.')).toBeVisible();
-  await fireEvent.press(
-    screen.getByRole('radio', { name: 'Spending budget savings target Savings' }),
-  );
-  await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+  expect(screen.queryByRole('button', { name: /Rollover/ })).toBeNull();
+  expect(screen.queryByRole('switch')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
-  expect(api.create.mock.calls[0]?.[1]).toEqual(
-    expect.objectContaining({
-      pots: expect.arrayContaining([
-        expect.objectContaining({
-          type: 'SPENDING',
-          rollover: { enabled: true, destination: 'TO_SAVINGS', targetPotId: 'savings' },
-        }),
-      ]),
-    }),
-  );
+  expect(api.create).toHaveBeenCalled();
 });
 
 it('US-03: a lost save response blocks resubmission and offers the existing budget without replacing the draft', async () => {
@@ -188,7 +168,7 @@ it('US-03: failed eligibility blocks the editor and back creates nothing', async
   expect(callbacks.onBack).toHaveBeenCalled();
 });
 
-it('US-04: More info discloses guidance without changing the draft or hiding errors after dismissal', async () => {
+it('US-04: Read more discloses guidance without changing the draft or hiding errors after dismissal', async () => {
   await render(<CreateBudgetScreen {...props()} />);
   await screen.findByLabelText('Budget name');
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'Keep my draft');
@@ -197,7 +177,7 @@ it('US-04: More info discloses guidance without changing the draft or hiding err
     '90071992547410',
   );
   expect(screen.queryByText(/No bank transfer/)).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'More info' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Read more' }));
   expect(screen.getByRole('header', { name: 'About your budget' })).toBeVisible();
   expect(screen.getByText(/No bank transfer/)).toBeVisible();
   expect(screen.getByText(/Available source history:/)).toBeVisible();
@@ -208,7 +188,25 @@ it('US-04: More info discloses guidance without changing the draft or hiding err
     '90071992547410',
   );
   expect(screen.getByText('This amount is too large.')).toBeVisible();
-  await fireEvent.press(screen.getByRole('button', { name: 'More info' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Read more' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
   expect(screen.getByLabelText('Budget name')).toHaveDisplayValue('Keep my draft');
+});
+
+it('US-10: failed salary lookup never blocks manual entry or saving', async () => {
+  const api = {
+    ...services(),
+    salary: jest.fn(async () => {
+      throw new Error('offline');
+    }),
+  };
+  await render(<CreateBudgetScreen {...props(api)} />);
+  await enterPlan();
+  await fireEvent.press(screen.getByRole('button', { name: 'Read more' }));
+  expect(
+    await screen.findByText('Salary could not be loaded. You can enter it manually.'),
+  ).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
+  expect(api.create).toHaveBeenCalledTimes(1);
 });

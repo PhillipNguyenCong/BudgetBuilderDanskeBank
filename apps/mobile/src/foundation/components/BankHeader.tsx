@@ -6,10 +6,10 @@ export function BankHeader() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <View style={styles.row}>
-        <AppText variant="heading" style={styles.text}>
+        <AppText variant="heading" maxFontSizeMultiplier={1.5} style={styles.text}>
           Danske Bank
         </AppText>
-        <AppText variant="small" style={styles.badge}>
+        <AppText variant="small" maxFontSizeMultiplier={1.5} style={styles.badge}>
           Demo
         </AppText>
       </View>
@@ -19,9 +19,9 @@ export function BankHeader() {
 const styles = StyleSheet.create({
   safe: { backgroundColor: colors.canvas },
   row: {
-    minHeight: 56,
+    minHeight: 40,
     paddingHorizontal: spacing.screen,
-    paddingVertical: spacing.medium,
+    paddingVertical: spacing.small,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

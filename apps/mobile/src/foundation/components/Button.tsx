@@ -3,6 +3,7 @@ import { AppText } from './AppText';
 import { colors, spacing } from '../theme/theme';
 type Props = {
   label: string;
+  maxFontSizeMultiplier?: number;
   disabled?: boolean;
   onPress?: () => void;
   accessibilityHint?: string;
@@ -10,6 +11,7 @@ type Props = {
 };
 export function Button({
   label,
+  maxFontSizeMultiplier,
   disabled = false,
   onPress,
   accessibilityHint,
@@ -32,6 +34,7 @@ export function Button({
     >
       <AppText
         variant="label"
+        maxFontSizeMultiplier={maxFontSizeMultiplier}
         style={[
           styles.label,
           variant === 'secondary' && styles.secondaryLabel,

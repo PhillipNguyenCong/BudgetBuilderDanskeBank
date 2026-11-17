@@ -59,17 +59,27 @@ export const SpendingNumbersSchema = z.strictObject({
   pendingSpendingOere: NonNegativeOereSchema,
   unconfirmedSpendingOere: NonNegativeOereSchema,
   reviewAffectingCount: z.number().int().nonnegative(),
-  remainingOere: OereSchema.nullable(),
-  overspentOere: NonNegativeOereSchema.nullable(),
-  weeklyGuideDkk: z.number().int().nonnegative().nullable(),
-  dailyGuideDkk: z.number().int().nonnegative().nullable(),
+  remainingOere: OereSchema,
+  overspentOere: NonNegativeOereSchema,
+  weeklyGuideDkk: z.number().int().nonnegative(),
+  dailyGuideDkk: z.number().int().nonnegative(),
   limitations: z.array(z.string()),
 });
 export type SpendingNumbers = z.infer<typeof SpendingNumbersSchema>;
+export const BudgetMonthSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}$/)
+  .refine((month) => DateSchema.safeParse(`${month}-01`).success);
+export const SpendingQuerySchema = z.strictObject({ month: BudgetMonthSchema.optional() });
 export const SpendingSummarySchema = z.strictObject({
   budget: BudgetSchema,
   account: AccountSchema,
   snapshotDate: DateSchema,
+  sourceSnapshotDate: DateSchema.optional(),
+  availableMonths: z.array(BudgetMonthSchema).optional(),
+  startMonth: BudgetMonthSchema.optional(),
+  currentMonth: BudgetMonthSchema.optional(),
+  undatedReviewCount: z.number().int().nonnegative().optional(),
   month: z.string().regex(/^\d{4}-\d{2}$/),
   daysRemaining: z.number().int().min(1).max(31),
   mode: z.literal('SOURCE_SNAPSHOT'),
@@ -92,6 +102,7 @@ export const ActivityQuerySchema = z.strictObject({
   limit: z.coerce.number().int().min(1).max(100).default(25),
   offset: z.coerce.number().int().min(0).max(100000).default(0),
   potId: IdSchema.optional(),
+  review: z.literal('undated').optional(),
   month: z
     .string()
     .regex(/^\d{4}-\d{2}$/)

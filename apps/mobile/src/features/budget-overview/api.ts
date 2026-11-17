@@ -1,4 +1,5 @@
 import {
+  BudgetMonthSchema,
   BudgetActivitySchema,
   ClassifiedTransactionSchema,
   CorrectTransactionSchema,
@@ -9,14 +10,19 @@ import {
 } from '@budget-builder/contracts';
 import { requestJson } from '../../lib/api';
 const base = (id: string) => `/api/v1/budgets/${encodeURIComponent(IdSchema.parse(id))}`;
-export const getSpendingSummary = (id: string, signal?: AbortSignal) =>
-  requestJson(`${base(id)}/spending`, SpendingSummarySchema, signal);
+export const getSpendingSummary = (id: string, signal?: AbortSignal, month?: string) =>
+  requestJson(
+    `${base(id)}/spending${month ? `?month=${BudgetMonthSchema.parse(month)}` : ''}`,
+    SpendingSummarySchema,
+    signal,
+  );
 export function getBudgetActivity(
   id: string,
   options: {
     offset?: number;
     potId?: string;
     month?: string;
+    review?: 'undated';
     expectedSnapshotVersion?: string;
   } = {},
   signal?: AbortSignal,
@@ -24,13 +30,19 @@ export function getBudgetActivity(
   const query = new URLSearchParams({ limit: '25', offset: String(options.offset ?? 0) });
   if (options.potId) query.set('potId', options.potId);
   if (options.month) query.set('month', options.month);
+  if (options.review) query.set('review', options.review);
   if (options.expectedSnapshotVersion)
     query.set('expectedSnapshotVersion', options.expectedSnapshotVersion);
   return requestJson(`${base(id)}/activity?${query}`, BudgetActivitySchema, signal);
 }
-export const getBudgetTransaction = (id: string, transactionId: string, signal?: AbortSignal) =>
+export const getBudgetTransaction = (
+  id: string,
+  transactionId: string,
+  signal?: AbortSignal,
+  month?: string,
+) =>
   requestJson(
-    `${base(id)}/transactions/${encodeURIComponent(IdSchema.parse(transactionId))}`,
+    `${base(id)}/transactions/${encodeURIComponent(IdSchema.parse(transactionId))}${month ? `?month=${BudgetMonthSchema.parse(month)}` : ''}`,
     ClassifiedTransactionSchema,
     signal,
   );

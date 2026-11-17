@@ -42,8 +42,9 @@ it('US-03: reopens the selected plan separately from other budgets and discloses
     <BudgetHomeScreen {...callbacks} selectedId="two" load={async () => [saved, other]} />,
   );
   expect(await screen.findByRole('header', { name: 'Household' })).toBeVisible();
-  expect(screen.getByText('Income: DKK 24,000')).toBeVisible();
-  expect(screen.getByText('Forecast unavailable')).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Monthly plan' }));
+  expect(screen.getByText('Income: 24.000 kr.')).toBeVisible();
+  expect(screen.queryByText('Forecast unavailable')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Choose budget' }));
   expect(screen.getByRole('radio', { name: 'Household' })).toBeChecked();
   expect(screen.getByRole('radio', { name: 'My budget' })).not.toBeChecked();
@@ -74,7 +75,7 @@ it('US-06: refreshes on re-entry, cancels abandoned reads and closes details on 
   await view.rerender(<BudgetHomeScreen {...callbacks} active load={load} />);
   await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
   expect(await screen.findByText('Monthly plan')).toBeVisible();
-  expect(screen.queryByText('Rent: DKK 9,000')).toBeNull();
+  expect(screen.queryByText('Rent: 9.000 kr.')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Choose budget' })).toBeNull();
 });
 
@@ -88,10 +89,11 @@ it('US-06: shows source snapshot guides and preserves the saved plan on independ
   expect(
     await screen.findByText('Spending unavailable. offline Your saved plan is still available.'),
   ).toBeVisible();
-  expect(screen.getByText('Income: DKK 24,000')).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Monthly plan' }));
+  expect(screen.getByText('Income: 24.000 kr.')).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'Retry spending' }));
   expect(await screen.findByText('Left to spend this month')).toBeVisible();
-  expect(screen.getByText('About DKK 165 per day · 17 days remaining')).toBeVisible();
+  expect(screen.getByText('About 165 kr. per day · 17 days remaining')).toBeVisible();
   expect(screen.getByText('Demo snapshot · 2026-10-15')).toBeVisible();
 });
 
@@ -110,4 +112,71 @@ it('US-06/10: recovers an unavailable selection when only one saved budget remai
   expect(screen.getByText('Monthly plan')).toBeVisible();
   expect(screen.queryByRole('button', { name: 'Choose budget' })).toBeNull();
   expect(screen.queryByRole('radio')).toBeNull();
+});
+
+it('US-06/12: changes monthly views without showing current weekly guides in history', async () => {
+  const current = {
+    ...spendingSummary(saved),
+    sourceSnapshotDate: '2026-10-15',
+    availableMonths: ['2026-09', '2026-10'],
+  };
+  const loadSpending = jest.fn(async (_id: string, _signal?: AbortSignal, month?: string) =>
+    month === '2026-09'
+      ? { ...current, month: '2026-09', snapshotDate: '2026-09-30', daysRemaining: 1 }
+      : current,
+  );
+  const load = async () => [saved];
+  const onOpenBudgetLog = jest.fn();
+  const view = await render(
+    <BudgetHomeScreen
+      {...callbacks}
+      selectedId="one"
+      load={load}
+      loadSpending={loadSpending}
+      onOpenBudgetLog={onOpenBudgetLog}
+    />,
+  );
+  expect(await screen.findByText('October 2026')).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Budget log' }));
+  expect(onOpenBudgetLog).toHaveBeenCalledWith('one');
+  await view.rerender(
+    <BudgetHomeScreen
+      {...callbacks}
+      selectedId="one"
+      month="2026-09"
+      load={load}
+      loadSpending={loadSpending}
+      onOpenBudgetLog={onOpenBudgetLog}
+    />,
+  );
+  expect(await screen.findByText('Historical view · Current plan applied')).toBeVisible();
+  expect(loadSpending).toHaveBeenLastCalledWith('one', expect.any(AbortSignal), '2026-09');
+  expect(screen.getByRole('header', { name: 'Remaining in September 2026' })).toBeVisible();
+  expect(screen.queryByText('About 165 kr. per day · 1 day remaining')).toBeNull();
+  await view.rerender(
+    <BudgetHomeScreen
+      {...callbacks}
+      selectedId="one"
+      load={load}
+      loadSpending={loadSpending}
+      onOpenBudgetLog={onOpenBudgetLog}
+    />,
+  );
+  expect(await screen.findByText('Left to spend this month')).toBeVisible();
+  expect(screen.queryByText('Historical view · Current plan applied')).toBeNull();
+});
+
+it('US-10: undated records have their own review action', async () => {
+  const onOpenUndated = jest.fn();
+  await render(
+    <BudgetHomeScreen
+      {...callbacks}
+      selectedId="one"
+      load={async () => [saved]}
+      loadSpending={async () => ({ ...spendingSummary(saved), undatedReviewCount: 2 })}
+      onOpenUndated={onOpenUndated}
+    />,
+  );
+  await fireEvent.press(await screen.findByRole('button', { name: 'Review undated records (2)' }));
+  expect(onOpenUndated).toHaveBeenCalledWith('one');
 });

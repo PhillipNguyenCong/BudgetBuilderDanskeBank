@@ -1,3 +1,8 @@
+import { Button } from '../../../foundation/components/Button';
+import { monthLabel } from '../components/budgetMonth';
+import { BudgetMonthSchema } from '@budget-builder/contracts';
+import { Pressable, View } from 'react-native';
+import { colors, spacing } from '../../../foundation/theme/theme';
 import { Screen } from '../../../foundation/components/Screen';
 import { listBudgets } from '../../budget-shared';
 import { BudgetsError } from '../components/BudgetsError';
@@ -13,6 +18,10 @@ export function BudgetHomeScreen({
   onCreate,
   onPreview,
   selectedId,
+  month,
+  onOpenBudgetLog,
+  onReturnCurrentMonth,
+  onOpenUndated,
   onSelect,
   active = true,
   load = listBudgets,
@@ -23,6 +32,10 @@ export function BudgetHomeScreen({
   onCreate: () => void;
   onPreview: () => void;
   selectedId?: string;
+  month?: string | undefined;
+  onOpenBudgetLog?: (budgetId: string) => void;
+  onReturnCurrentMonth?: () => void;
+  onOpenUndated?: (budgetId: string) => void;
   onSelect: (id: string) => void;
   active?: boolean;
   load?: typeof listBudgets;
@@ -36,11 +49,51 @@ export function BudgetHomeScreen({
       ? (state.budgets.find((budget) => budget.id === selectedId) ??
         (!selectedId ? state.budgets[0] : undefined))
       : undefined;
-  const spending = useSpendingSummary(selected?.id, selected?.revision, active, loadSpending);
+  const spending = useSpendingSummary(
+    selected?.id,
+    selected?.revision,
+    active,
+    loadSpending,
+    month,
+  );
   if (state.status === 'ready' && !state.budgets.length && !state.refreshing && !selectedId)
     return <BudgetIntroScreen onCreate={onCreate} onPreview={onPreview} />;
   return (
     <Screen>
+      {selected && onOpenBudgetLog ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: spacing.small,
+          }}
+        >
+          <AppText variant="label">
+            {BudgetMonthSchema.safeParse(
+              month ?? (spending.state.status === 'ready' ? spending.state.data.month : undefined),
+            ).success
+              ? monthLabel(
+                  month ?? (spending.state.status === 'ready' ? spending.state.data.month : ''),
+                )
+              : 'Monthly overview'}
+          </AppText>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Budget log"
+            onPress={() => onOpenBudgetLog(selected.id)}
+            style={{ minHeight: 44, minWidth: 44, justifyContent: 'center' }}
+          >
+            <AppText variant="label" style={{ color: colors.blue }}>
+              Budget log
+            </AppText>
+          </Pressable>
+        </View>
+      ) : null}
+      {selected && month && spending.state.status === 'error' && onReturnCurrentMonth ? (
+        <Button label="Current month" variant="secondary" onPress={onReturnCurrentMonth} />
+      ) : null}
       {state.status === 'ready' && state.refreshing ? (
         <AppText variant="small">Refreshing saved plans…</AppText>
       ) : null}
@@ -66,6 +119,7 @@ export function BudgetHomeScreen({
           onRetrySpending={spending.retry}
           onOpenPot={onOpenPot}
           onOpenActivity={onOpenActivity}
+          onOpenUndated={onOpenUndated}
         />
       )}
     </Screen>

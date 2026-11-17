@@ -59,6 +59,7 @@ test('US-04: on-demand bill reads enforce account ownership, create no budget an
   };
   const budgets = new MemoryBudgetRepository();
   const app = createApp({
+    clock: () => new Date('2026-09-03T12:00:00Z'),
     bank: new JsonBankDataProvider({ load: async () => raw }),
     budgets,
     identity: () => ({ userId: ownerId }),

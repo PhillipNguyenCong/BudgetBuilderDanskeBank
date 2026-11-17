@@ -6,7 +6,11 @@ import { MemoryBudgetRepository } from '../apps/backend/dist/features/budgets/me
 import { JsonBankDataProvider } from '../apps/backend/dist/infrastructure/banking/json-bank-data-provider.js';
 import { loadAccountSelection } from '../apps/mobile/src/features/account-selection/api.ts';
 import { createBudget, listBudgets } from '../apps/mobile/src/features/budget-shared/index.ts';
-import { manualPlan, loadBudgetSetup } from '../apps/mobile/src/features/budget-creation/api.ts';
+import {
+  manualPlan,
+  loadBudgetSetup,
+  loadSalarySuggestion,
+} from '../apps/mobile/src/features/budget-creation/api.ts';
 import { loadAccountBillSuggestions } from '../apps/mobile/src/features/budget-creation/api/billSuggestions.ts';
 import {
   getSpendingSummary,
@@ -31,6 +35,9 @@ test('native feature API creates and reopens a manual budget against an isolated
     const account = selection.accounts.items[0];
     const setup = await loadBudgetSetup(account.id);
     assert.equal(setup.quality.coverage.completeMonths, 2);
+    const salary = await loadSalarySuggestion(account.id);
+    assert.equal(salary.accountId, account.id);
+    assert.equal(salary.snapshotDate, '2026-09-03');
     const bills = await loadAccountBillSuggestions(account.id);
     assert.equal(bills.accountId, account.id);
     assert.equal(bills.snapshotDate, '2026-09-03');
@@ -55,6 +62,7 @@ test('native feature API creates and reopens a manual budget against an isolated
     assert.deepEqual(saved.plan, plan);
     assert.equal(saved.totals.unallocatedOere, 0);
     assert.deepEqual((await listBudgets())[0], saved);
+    await assert.rejects(() => getSpendingSummary(saved.id, undefined, '2026-08'));
     const summary = await getSpendingSummary(saved.id);
     assert.equal(summary.snapshotDate, '2026-09-03');
     assert.equal(summary.overall.remainingOere, 800000);

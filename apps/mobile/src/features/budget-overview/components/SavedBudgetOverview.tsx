@@ -1,3 +1,5 @@
+import { monthLabel, isHistorical } from './budgetMonth';
+import { Disclosure } from '../../../foundation/components/Disclosure';
 import type { Budget } from '@budget-builder/contracts';
 import type { ComponentRef, RefObject } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -6,7 +8,6 @@ import { Button } from '../../../foundation/components/Button';
 import { spacing } from '../../../foundation/theme/theme';
 import { typeLabels } from '../../budget-shared';
 import type { SpendingState } from '../hooks/useSpendingSummary';
-import { ForecastUnavailableNotice } from './ForecastUnavailableNotice';
 import { SavedBudgetHeading } from './SavedBudgetHeading';
 import { SavedBudgetTotals } from './SavedBudgetTotals';
 import { SavedPotCard, type SavedWidget } from './SavedPotCard';
@@ -21,15 +22,18 @@ export function SavedBudgetOverview({
   onRetrySpending,
   onOpenPot,
   onOpenActivity,
+  onOpenUndated,
 }: {
   budget: Budget;
   headingFocusTarget?: RefObject<ComponentRef<typeof View> | null>;
   spending?: SpendingState;
   onRetrySpending?: (() => void) | undefined;
   onOpenPot?: ((budgetId: string, potId: string) => void) | undefined;
+  onOpenUndated?: ((budgetId: string) => void) | undefined;
   onOpenActivity?: ((budgetId: string) => void) | undefined;
 }) {
   const summary = spending.status === 'ready' ? spending.data : undefined;
+  const historical = !!summary && isHistorical(summary);
   const groups: { type: SavedWidget['type']; widgets: SavedWidget[] }[] = [
     ...(['SPENDING', 'FIXED_EXPENSE', 'SAVINGS'] as const).map((type) => ({
       type,
@@ -51,7 +55,11 @@ export function SavedBudgetOverview({
               Spending refresh failed. Showing the last loaded snapshot. {spending.error}
             </AppText>
           ) : null}
-          <SpendingFigures numbers={summary.overall} daysRemaining={summary.daysRemaining} />
+          <SpendingFigures
+            numbers={summary.overall}
+            daysRemaining={summary.daysRemaining}
+            historicalMonth={historical ? summary.month : undefined}
+          />
         </>
       ) : spending.status === 'loading' ? (
         <AppText>Loading spending guidance…</AppText>
@@ -79,6 +87,7 @@ export function SavedBudgetOverview({
               <SavedPotCard
                 key={widget.id}
                 widget={widget}
+                periodLabel={historical ? monthLabel(summary!.month) : undefined}
                 allocationOere={
                   widget.type === 'INCOME'
                     ? budget.totals.incomeOere
@@ -97,6 +106,13 @@ export function SavedBudgetOverview({
             ))}
           </View>
         ))}
+      {summary?.undatedReviewCount ? (
+        <Button
+          label={`Review undated records (${summary.undatedReviewCount})`}
+          variant="secondary"
+          onPress={() => onOpenUndated?.(budget.id)}
+        />
+      ) : null}
       {summary ? (
         <View style={styles.group}>
           <AppText variant="heading" accessibilityRole="header">
@@ -110,15 +126,9 @@ export function SavedBudgetOverview({
         variant="secondary"
         onPress={() => onOpenActivity?.(budget.id)}
       />
-      <AppText variant="heading" accessibilityRole="header">
-        Monthly plan totals
-      </AppText>
-      <SavedBudgetTotals totals={budget.totals} />
-      <AppText variant="small">
-        Pots divide the money in your account. No bank transfer is made. Planned allocations are
-        separate from recorded spending.
-      </AppText>
-      <ForecastUnavailableNotice />
+      <Disclosure label="Monthly plan">
+        <SavedBudgetTotals totals={budget.totals} />
+      </Disclosure>
     </View>
   );
 }

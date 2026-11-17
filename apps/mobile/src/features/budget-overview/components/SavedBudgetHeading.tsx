@@ -20,8 +20,6 @@ export function SavedBudgetHeading({
       >
         <AppText variant="title">{budget.plan.name}</AppText>
       </View>
-      <AppText variant="label">Monthly plan</AppText>
-      <AppText variant="small">Last saved: {budget.updatedAt.slice(0, 10)}</AppText>
     </>
   );
 }

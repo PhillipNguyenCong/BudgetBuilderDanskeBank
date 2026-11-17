@@ -17,7 +17,7 @@ Status: agreed customer-flow baseline with implementation status checked against
 | US-09 | Understand spending changes within the budget             | Deferred: no separate insight journey in the active flow                                                                                                                                                                    |
 | US-10 | Understand data limitations and recover from errors       | Partial: normalization, API issues/coverage and native account loading/error states                                                                                                                                         |
 | US-11 | Set optional automatic rollover                           | Partial: native setup preferences and backend persistence; execution/month-end decisions pending                                                                                                                            |
-| US-12 | Review monthly results and rollover history               | Planned: month closure, history and fallback decisions pending                                                                                                                                                              |
+| US-12 | Review monthly results and rollover history               | Partial: reconstructed month views; persisted closed results, rollover history and fallback decisions pending                                                                                                                                                              |
 | US-13 | Edit an existing budget without regenerating suggestions  | Partial: revision-controlled backend update; native edit flow pending                                                                                                                                                       |
 | US-14 | Save for an item after budget creation                    | Planned prototype extension: sample proposal only; domain/API and recommendation logic deferred                                                                                                                             |
 
@@ -313,3 +313,11 @@ Stable US-01–12 identifiers are retained. US-13 makes the existing create/edit
 The subsequent focused-overlay decision supersedes inline expansion for the native editor; see [revised layout and verification](mobile-widget-editor-story.md#revised-widget-layout--focused-overlays). AI suggestions and saved-plan editing remain deferred.
 
 - [Source-snapshot spending](mobile-spending-story.md): automatic account activity, explainable attribution, exact monthly/weekly/daily guidance, native pot routes and optional independent corrections. Current-plan application and zero carry-in are explicit demonstration assumptions. This does not implement monthly history, live banking or month-end execution.
+
+## Monthly view delivery clarification — US-06 / US-10 / US-12
+
+The [monthly view slice](monthly-budget-views-story.md) adds month selection and period-isolated transactions. It reconstructs history with the current saved plan and latest source versions; it does not satisfy the closed-result preservation or completed-rollover-history criteria of US-12. Cross-month reservations no longer reduce the current allowance. Undated records stay in review until their month is known.
+
+## Budget log activation decision — US-06 / US-10 / US-12
+
+The [active-month Budget log](budget-log-story.md) replaces the month slider. List only the creation month and subsequent months through the current calendar month; opening imported bank records before creation must not create budget history. Actual Copenhagen creation month is used in the demonstration too, as explicitly chosen by the user. Source data may predate the budget, in which case missing coverage is visible rather than silently backdating its start. This does not implement frozen historical plans or closed month results.

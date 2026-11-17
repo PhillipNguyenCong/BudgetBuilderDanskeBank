@@ -7,3 +7,4 @@ export * from './examples.js';
 export * from './users.js';
 export * from './spending.js';
 export * from './bill-suggestions.js';
+export * from './salary.js';

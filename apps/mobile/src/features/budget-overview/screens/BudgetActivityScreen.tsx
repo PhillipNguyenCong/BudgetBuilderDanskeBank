@@ -1,3 +1,4 @@
+import { isHistorical } from '../components/budgetMonth';
 import type { ClassifiedTransaction } from '@budget-builder/contracts';
 import { useRef, useState, type ComponentRef } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
@@ -17,6 +18,8 @@ import { getBudgetActivity, getSpendingSummary } from '../api';
 export function BudgetActivityScreen({
   budgetId,
   potId,
+  month,
+  review,
   active = true,
   onBack,
   onOpenActivity,
@@ -25,21 +28,24 @@ export function BudgetActivityScreen({
 }: {
   budgetId: string;
   potId?: string | undefined;
+  month?: string | undefined;
+  review?: 'undated' | undefined;
   active?: boolean;
   onBack: () => void;
   onOpenActivity: () => void;
   loadSummary?: typeof getSpendingSummary;
   loadActivity?: typeof getBudgetActivity;
 }) {
-  const summary = useSpendingSummary(budgetId || undefined, undefined, active, loadSummary);
+  const summary = useSpendingSummary(budgetId || undefined, undefined, active, loadSummary, month);
   const data = summary.state.status === 'ready' ? summary.state.data : undefined;
   const activity = useBudgetActivity(
     budgetId || undefined,
     potId,
-    potId ? data?.month : undefined,
+    month ?? data?.month,
     data?.snapshotVersion,
     active && !!data && potId !== data.budget.plan.income.id,
     loadActivity,
+    review,
   );
   const [selected, select] = useState<ClassifiedTransaction | null>(null);
   const [saved, setSaved] = useState(false);
@@ -63,9 +69,11 @@ export function BudgetActivityScreen({
         ref={heading}
         accessible
         accessibilityRole="header"
-        accessibilityLabel={widget?.name ?? 'Account activity'}
+        accessibilityLabel={review ? 'Undated records' : (widget?.name ?? 'Account activity')}
       >
-        <AppText variant="title">{widget?.name ?? 'Account activity'}</AppText>
+        <AppText variant="title">
+          {review ? 'Undated records' : (widget?.name ?? 'Account activity')}
+        </AppText>
       </View>
       {!budgetId ? (
         <AppText accessibilityRole="alert">
@@ -101,6 +109,7 @@ export function BudgetActivityScreen({
               numbers={numbers}
               daysRemaining={data.daysRemaining}
               breakdown
+              historicalMonth={isHistorical(data) ? data.month : undefined}
               kind={widget?.type === 'FIXED_EXPENSE' ? 'FIXED_EXPENSE' : 'SPENDING'}
             />
           ) : null}
@@ -118,7 +127,7 @@ export function BudgetActivityScreen({
           {widget?.type !== 'INCOME' ? (
             <>
               <AppText variant="heading" accessibilityRole="header">
-                {potId ? `Transactions · ${data.month}` : 'All imported account transactions'}
+                {review ? 'Date needs review' : `Transactions · ${data.month}`}
               </AppText>
               {saved ? (
                 <AppText accessibilityLiveRegion="polite">
@@ -176,6 +185,7 @@ export function BudgetActivityScreen({
               key={selected.transaction.id}
               budget={data.budget}
               initial={selected}
+              month={month}
               onClose={() => select(null)}
               onSaved={() => {
                 select(null);

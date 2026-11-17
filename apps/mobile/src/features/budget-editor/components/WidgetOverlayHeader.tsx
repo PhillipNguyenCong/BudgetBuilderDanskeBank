@@ -21,7 +21,9 @@ export function WidgetOverlayHeader({
         accessibilityLabel={name}
         style={styles.title}
       >
-        <AppText variant="heading">{name}</AppText>
+        <AppText variant="heading" maxFontSizeMultiplier={2}>
+          {name}
+        </AppText>
       </View>
       <Pressable
         accessibilityRole="button"
@@ -29,7 +31,9 @@ export function WidgetOverlayHeader({
         onPress={onClose}
         style={styles.close}
       >
-        <AppText variant="heading">×</AppText>
+        <AppText variant="heading" maxFontSizeMultiplier={1.5}>
+          ×
+        </AppText>
       </Pressable>
     </View>
   );
