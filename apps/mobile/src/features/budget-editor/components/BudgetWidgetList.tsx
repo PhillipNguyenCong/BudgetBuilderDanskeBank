@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { allocationProgress } from '../editor/allocationProgress';
 import { type DraftWidget } from '../editor/draft';
 import { WidgetAllocationStatus } from './WidgetAllocationStatus';
@@ -19,15 +20,16 @@ export function BudgetWidgetList({
   return (
     <>
       {widgets.map((widget) => (
-        <BudgetWidget
-          key={widget.id}
-          widget={widget}
-          onOpen={() => onOpen(widget.id)}
-          onChange={onChange}
-          onAmountBlur={onAmountBlur}
-        />
+        <Fragment key={widget.id}>
+          <BudgetWidget
+            widget={widget}
+            onOpen={() => onOpen(widget.id)}
+            onChange={onChange}
+            onAmountBlur={onAmountBlur}
+          />
+          {widget.type === 'INCOME' ? <WidgetAllocationStatus progress={progress} /> : null}
+        </Fragment>
       ))}
-      <WidgetAllocationStatus progress={progress} />
     </>
   );
 }

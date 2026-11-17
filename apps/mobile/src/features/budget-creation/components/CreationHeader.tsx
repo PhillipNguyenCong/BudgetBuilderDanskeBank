@@ -2,25 +2,34 @@ import type { ComponentRef, RefObject } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { BackButton } from '../../../foundation/components/BackButton';
 import { AppText } from '../../../foundation/components/AppText';
-import { colors, spacing } from '../../../foundation/theme/theme';
+import { colors } from '../../../foundation/theme/theme';
 
 export function CreationHeader({
   busy,
   onInfo,
   infoRef,
   onBack,
+  accountLabel,
 }: {
   busy: boolean;
+  accountLabel?: string;
   onBack: () => void;
   onInfo: () => void;
   infoRef?: RefObject<ComponentRef<typeof View> | null>;
 }) {
   return (
     <View style={styles.header}>
-      <BackButton disabled={busy} onPress={onBack} />
-      <AppText variant="heading" accessibilityRole="header" style={styles.title}>
-        Create budget
-      </AppText>
+      <BackButton plain disabled={busy} onPress={onBack} />
+      <View style={styles.titleGroup}>
+        <AppText variant="heading" accessibilityRole="header" style={styles.title}>
+          Create budget
+        </AppText>
+        {accountLabel ? (
+          <AppText variant="small" style={styles.account}>
+            {accountLabel}
+          </AppText>
+        ) : null}
+      </View>
       <Pressable
         ref={infoRef}
         accessibilityRole="button"
@@ -34,24 +43,38 @@ export function CreationHeader({
         ]}
         onPress={onInfo}
       >
-        <AppText variant="small" style={styles.link}>
-          Read more
-        </AppText>
+        <View style={styles.infoMark} accessible={false}>
+          <AppText style={styles.link} accessible={false} maxFontSizeMultiplier={1}>
+            i
+          </AppText>
+        </View>
       </Pressable>
     </View>
   );
 }
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.medium },
-  title: { flex: 1, fontSize: 20, lineHeight: 26 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: -8 },
+  titleGroup: { flex: 1, gap: 2 },
+  account: { fontSize: 12, lineHeight: 16, color: colors.muted },
+  title: { fontSize: 20, lineHeight: 26 },
   info: {
     minWidth: 44,
     minHeight: 44,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 4,
     borderRadius: 22,
   },
   pressed: { opacity: 0.65 },
   disabled: { opacity: 0.4 },
-  link: { color: colors.blue, fontWeight: '700' },
+  infoMark: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  link: { color: colors.blue, fontWeight: '700', fontSize: 14, lineHeight: 18 },
 });

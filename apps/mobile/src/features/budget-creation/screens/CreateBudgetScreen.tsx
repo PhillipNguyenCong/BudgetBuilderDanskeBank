@@ -2,7 +2,6 @@ import { useSalarySuggestion } from '../hooks/useSalarySuggestion';
 import type { Budget } from '@budget-builder/contracts';
 import { useMemo, useState, useRef, type ComponentRef } from 'react';
 import { AccessibilityInfo, Keyboard, StyleSheet, View } from 'react-native';
-import { AppText } from '../../../foundation/components/AppText';
 import { Screen } from '../../../foundation/components/Screen';
 import { spacing } from '../../../foundation/theme/theme';
 import { BudgetEditor } from '../../budget-editor';
@@ -54,13 +53,18 @@ export function CreateBudgetScreen({
   );
   return (
     <>
-      <Screen>
+      <Screen contentStyle={styles.screen}>
         <View
           style={styles.content}
           accessibilityElementsHidden={infoOpen}
           importantForAccessibility={infoOpen ? 'no-hide-descendants' : 'auto'}
         >
           <CreationHeader
+            accountLabel={
+              flow.state.status === 'ready'
+                ? `${flow.state.data.account.name} · ${flow.state.data.account.maskedIdentifier ?? 'Identifier unavailable'}`
+                : undefined
+            }
             onBack={onBack}
             infoRef={infoTrigger}
             busy={flow.busy}
@@ -75,10 +79,6 @@ export function CreateBudgetScreen({
             <BudgetSetupError message={flow.state.message} onRetry={flow.retry} />
           ) : (
             <>
-              <AppText variant="small">
-                {flow.state.data.account.name} ·{' '}
-                {flow.state.data.account.maskedIdentifier ?? 'Identifier unavailable'}
-              </AppText>
               <BudgetEditor
                 initialPlan={initialPlan}
                 startBlank
@@ -117,5 +117,6 @@ export function CreateBudgetScreen({
 }
 
 const styles = StyleSheet.create({
+  screen: { paddingTop: 8 },
   content: { gap: spacing.medium },
 });

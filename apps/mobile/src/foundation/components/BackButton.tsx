@@ -4,9 +4,11 @@ import { colors } from '../theme/theme';
 export function BackButton({
   onPress,
   disabled = false,
+  plain = false,
 }: {
   onPress: () => void;
   disabled?: boolean;
+  plain?: boolean;
 }) {
   return (
     <Pressable
@@ -18,6 +20,7 @@ export function BackButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        plain && styles.plain,
         pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
       ]}
@@ -40,6 +43,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: colors.white,
   },
+  plain: { backgroundColor: 'transparent' },
   pressed: { backgroundColor: colors.disabled },
   disabled: { opacity: 0.4 },
   icon: { width: 24, height: 24 },

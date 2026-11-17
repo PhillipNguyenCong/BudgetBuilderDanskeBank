@@ -5,12 +5,17 @@ import {
   StyleSheet,
   View,
   type ViewProps,
+  type ViewStyle,
+  type StyleProp,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardDoneBar } from './KeyboardDoneBar';
 import { BankHeader } from './BankHeader';
 import { colors, spacing } from '../theme/theme';
-export function Screen({ children }: ViewProps) {
+export function Screen({
+  children,
+  contentStyle,
+}: ViewProps & { contentStyle?: StyleProp<ViewStyle> }) {
   return (
     <View style={styles.root}>
       <BankHeader />
@@ -23,7 +28,7 @@ export function Screen({ children }: ViewProps) {
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             automaticallyAdjustKeyboardInsets={false}
-            contentContainerStyle={styles.content}
+            contentContainerStyle={[styles.content, contentStyle]}
           >
             {children}
           </ScrollView>

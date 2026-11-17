@@ -141,3 +141,11 @@ Supersedes the quiet-field and per-widget-remainder layout: Income, Budget and S
 ### Prominent remainder and keyboard confirmation (US-04, NFR-02)
 
 Show the single allocation remainder in a distinct bordered summary with a visible Left to allocate label and 22-point amount. Negative remainders use Over-allocated and preserve the warning semantics. Missing amounts remain identified through accessible context. The screen shell shows an OK bar above the software keyboard; OK dismisses and blurs the active input, triggering its existing commit behaviour. Hide the bar after keyboard dismissal; bill overlays retain their existing keyboard controls.
+
+### Allocation summary placement (US-04)
+
+Place the single prominent Left to allocate summary immediately after Income, before Fixed expenses, Budget and Savings. Preserve its calculation, missing-data handling and over-allocation presentation.
+
+### Unified setup header (US-04, NFR-02)
+
+Use a plain Back arrow, a title/account subtitle group and a 44-point information action labelled Read more for accessibility. The account is secondary text under the title. Remove its separate row and reduce creation-screen top padding to 8 points. Keep branding, budget-name field and help popup focus restoration. Other screens keep their existing header padding and Back appearance.
