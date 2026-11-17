@@ -31,7 +31,9 @@ export function WidgetAmount({
           style={[styles.mainInput, styles.alignRight]}
           label="DKK / month"
           hideLabel
-          suffix="kr."
+          suffix={row.input.trim() ? 'kr.' : undefined}
+          placeholder="Angiv beløb"
+          placeholderTextColor={colors.muted}
           accessibilityHint="Monthly amount in DKK"
           accessibilityLabel={`${name} row 1 amount in DKK`}
           value={row.input}
@@ -72,7 +74,6 @@ export function WidgetAmount({
               >
                 {hasBillInput && numericTotal ? (
                   <>
-                    {' '}
                     {total.slice(0, -4)}
                     <AppText style={styles.currency}> kr.</AppText>
                   </>
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
   actionSurface: {
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.blue,
+    borderColor: colors.line,
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -124,6 +125,7 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   mainInput: {
+    borderColor: colors.line,
     fontSize: 18,
     lineHeight: 24,
     fontFamily: fonts.semibold,
@@ -133,8 +135,7 @@ const styles = StyleSheet.create({
   amountSurface: {
     minHeight: 44,
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderColor: colors.muted,
+
     flexDirection: 'row',
     gap: spacing.small,
     justifyContent: 'flex-end',

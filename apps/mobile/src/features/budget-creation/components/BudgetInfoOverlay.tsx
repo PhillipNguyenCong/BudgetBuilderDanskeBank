@@ -63,8 +63,8 @@ export function BudgetInfoOverlay({
           </AppText>
           <AppText variant="heading">Your pots</AppText>
           <AppText>
-            Pots divide the money in your account. No bank transfer is made. Edit the names, amounts
-            and colours of the existing pots.
+            Pots divide the money in your account. No bank transfer is made. Labels and colours are
+            fixed; tap an amount to edit it or open the fixed-expense bill list.
           </AppText>
           <AppText variant="heading">Left to allocate</AppText>
           <AppText>
@@ -81,11 +81,9 @@ export function BudgetInfoOverlay({
             nearest øre. This is an average amount to set aside, not a payment schedule or a
             calculation of catch-up funding.
           </AppText>
-          <AppText variant="heading">Savings and rollover</AppText>
+          <AppText variant="heading">Savings</AppText>
           <AppText>
             Savings stays as entered unless you edit it or confirm an Update savings proposal.
-            Spending settings can save a month-end rollover preference; automatic month-end
-            processing is not available in this prototype.
           </AppText>
           <AppText variant="heading">Source history</AppText>
           {quality ? (

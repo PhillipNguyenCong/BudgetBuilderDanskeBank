@@ -125,3 +125,15 @@ Verification: inspected the running iPhone 17 simulator at standard and accessib
 ### Two rows per content column (US-04, NFR-02)
 
 The icon remains in the outer leading column. Inside the flexible content area, the left column contains a title row and a muted `Per month` description row. The right column contains the amount field and the remainder. Align the first rows at 44 points minimum and the secondary rows with a 4-point gap and matching 12/16 typography. Keep the two-row columns separate so errors and longer amounts can grow without overlapping. At enlarged text sizes, stack the content columns. Rollover remains absent.
+
+### Quiet amount editing (US-04, NFR-02)
+
+Widget amounts use a transparent resting field with a subtle border only while focused. Empty fields display `Angiv beløb` and remain unknown; entered zero is still valid. Fixed-expense amounts and Add bills use a borderless action with a chevron. Keep 44-point touch targets, native text input, Danish amount formatting, validation and committed remainder updates. Other form fields retain their existing appearance.
+
+### Tighter paired text rows (US-04, NFR-02)
+
+Keep the 44-point amount touch area, but optically bring both secondary rows 8 points closer with no column gap. Leave full spacing after validation errors. Subtitles are Monthly salary, Monthly bills, Monthly budget and Monthly savings respectively. Financial calculations and draft labels remain unchanged.
+
+### Setup as a form, saved plans as an overview (US-04, NFR-02)
+
+Supersedes the quiet-field and per-widget-remainder layout: Income, Budget and Savings are edited directly in stable white fields with restrained borders. Fixed expenses retains its bill-list action. Remove negative spacing and show the shared remainder once after the four widgets; the bill overlay retains its own allocation guidance. Titles and monthly descriptions form a natural two-line group. Keep square icons, fixed labels, exact amounts, blank/zero distinction, blur commits and saved-plan overview behaviour. Rollover stays absent.

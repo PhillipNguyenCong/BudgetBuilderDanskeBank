@@ -1,5 +1,6 @@
 import { allocationProgress } from '../editor/allocationProgress';
 import { type DraftWidget } from '../editor/draft';
+import { WidgetAllocationStatus } from './WidgetAllocationStatus';
 import { BudgetWidget } from './BudgetWidget';
 
 export function BudgetWidgetList({
@@ -21,12 +22,12 @@ export function BudgetWidgetList({
         <BudgetWidget
           key={widget.id}
           widget={widget}
-          progress={progress}
           onOpen={() => onOpen(widget.id)}
           onChange={onChange}
           onAmountBlur={onAmountBlur}
         />
       ))}
+      <WidgetAllocationStatus progress={progress} />
     </>
   );
 }

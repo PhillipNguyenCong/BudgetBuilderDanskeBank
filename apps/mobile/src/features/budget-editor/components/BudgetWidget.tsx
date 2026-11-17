@@ -1,9 +1,7 @@
-import type { AllocationProgress } from '@budget-builder/budget-core/allocations';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Card } from '../../../foundation/components/Card';
 import { widgetPalette } from '../../budget-shared';
 import { type DraftWidget } from '../editor/draft';
-import { WidgetAllocationStatus } from './WidgetAllocationStatus';
 import { WidgetAmount } from './WidgetAmount';
 import { WidgetHeader } from './WidgetHeader';
 import { WidgetIcon } from './WidgetIcon';
@@ -13,13 +11,11 @@ export function BudgetWidget({
   onOpen,
   onChange,
   onAmountBlur,
-  progress,
 }: {
   widget: DraftWidget;
   onOpen: () => void;
   onChange: (widget: DraftWidget) => void;
   onAmountBlur: (rowId: string) => void;
-  progress: AllocationProgress;
 }) {
   const { fontScale } = useWindowDimensions();
   return (
@@ -50,7 +46,6 @@ export function BudgetWidget({
               onChange={onChange}
               onAmountBlur={onAmountBlur}
             />
-            <WidgetAllocationStatus progress={progress} />
           </View>
         </View>
       </View>
@@ -65,8 +60,8 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flexDirection: 'row',
     gap: 10,
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   nameCell: { flex: 1, flexBasis: 0, minWidth: 0, alignItems: 'flex-start' },
-  amountCell: { width: '52%', minWidth: 0, gap: 4 },
+  amountCell: { width: '52%', minWidth: 0, gap: 0 },
 });

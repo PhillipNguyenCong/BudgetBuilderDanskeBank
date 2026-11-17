@@ -104,3 +104,18 @@ it('formats idle amounts with Danish separators and preserves exact input while 
   await fireEvent(input, 'focus');
   expect(input).toHaveDisplayValue('32000,75');
 });
+
+it('keeps an empty quiet amount unknown and opens editing without inventing a zero', async () => {
+  await render(<BudgetEditor initialPlan={manualPlan()} startBlank />);
+  const input = screen.getByLabelText('Spending budget row 1 amount in DKK');
+  expect(input).toHaveDisplayValue('');
+  expect(input.props.placeholder).toBe('Angiv beløb');
+  await fireEvent(input, 'focus');
+  await fireEvent.changeText(input, '0');
+  await fireEvent(input, 'blur');
+  expect(input).toHaveDisplayValue('0');
+  await fireEvent(input, 'focus');
+  await fireEvent.changeText(input, '');
+  await fireEvent(input, 'blur');
+  expect(input).toHaveDisplayValue('');
+});

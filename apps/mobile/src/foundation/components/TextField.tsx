@@ -29,7 +29,7 @@ export function TextField({
   label: string;
   error?: string;
   containerStyle?: StyleProp<ViewStyle>;
-  appearance?: 'outlined' | 'underline' | 'bubble';
+  appearance?: 'outlined' | 'underline' | 'bubble' | 'quiet';
   hideLabel?: boolean;
   suffix?: string;
   displayValue?: string;
@@ -70,6 +70,9 @@ export function TextField({
             appearance === 'bubble' && styles.bubble,
             appearance === 'bubble' && focused && styles.activeBubble,
             appearance === 'bubble' && error && styles.invalid,
+            appearance === 'quiet' && styles.quiet,
+            appearance === 'quiet' && focused && styles.activeQuiet,
+            appearance === 'quiet' && error && styles.invalid,
             suffix && { paddingRight: Math.ceil(30 * fontScale) + 12 },
             style,
           ]}
@@ -129,6 +132,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: colors.white,
   },
+  quiet: { backgroundColor: 'transparent', borderColor: 'transparent' },
+  activeQuiet: { borderColor: colors.muted },
   activeBubble: { borderWidth: 2 },
   activeUnderline: { borderBottomWidth: 2, borderBottomColor: colors.ink },
   invalid: { borderColor: colors.ink, borderWidth: 2 },

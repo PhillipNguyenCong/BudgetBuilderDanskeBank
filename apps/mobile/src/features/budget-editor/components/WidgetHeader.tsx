@@ -4,6 +4,13 @@ import { colors } from '../../../foundation/theme/theme';
 import { typeLabels } from '../../budget-shared';
 import { type DraftWidget } from '../editor/draft';
 
+const descriptions = {
+  INCOME: 'Monthly salary',
+  FIXED_EXPENSE: 'Monthly bills',
+  SPENDING: 'Monthly budget',
+  SAVINGS: 'Monthly savings',
+};
+
 export function WidgetHeader({ widget }: { widget: DraftWidget }) {
   return (
     <View style={styles.column}>
@@ -13,14 +20,14 @@ export function WidgetHeader({ widget }: { widget: DraftWidget }) {
         </AppText>
       </View>
       <AppText variant="small" style={styles.description}>
-        Per month
+        {descriptions[widget.type]}
       </AppText>
     </View>
   );
 }
 const styles = StyleSheet.create({
-  column: { alignItems: 'flex-start', gap: 4 },
-  titleRow: { minHeight: 44, justifyContent: 'center' },
+  column: { alignItems: 'flex-start', gap: 2 },
+  titleRow: { justifyContent: 'center' },
   title: { fontSize: 16, lineHeight: 22 },
   description: { fontSize: 12, lineHeight: 16, color: colors.muted },
 });
