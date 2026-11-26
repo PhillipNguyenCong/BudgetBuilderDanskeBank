@@ -1,6 +1,6 @@
 import { calculatePlan, monthlyBillAllocation } from '@budget-builder/budget-core/allocations';
 import { BudgetPlanSchema, type BudgetPlan, type BudgetTotals } from '@budget-builder/contracts';
-import { formatDkk } from '../../budget-shared';
+import { formatDkk } from '../../budget-shared/data';
 
 type Row = Extract<BudgetPlan['pots'][number], { type: 'FIXED_EXPENSE' }>['rows'][number];
 export type DraftRow = Row & {

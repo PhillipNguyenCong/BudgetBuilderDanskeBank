@@ -9,10 +9,12 @@ import type { SpendingState } from '../hooks/useSpendingSummary';
 
 export function SavedBudgetsReady({
   budgets,
+  active,
   selected,
   onSelect,
   onCreate,
   onRetry,
+  showRefresh,
   spending,
   onRetrySpending,
   onOpenPot,
@@ -20,10 +22,12 @@ export function SavedBudgetsReady({
   onOpenUndated,
 }: {
   budgets: Budget[];
+  active: boolean;
   selected?: Budget;
   onSelect: (id: string) => void;
   onCreate: () => void;
   onRetry: () => void;
+  showRefresh: boolean;
   spending: SpendingState;
   onRetrySpending: () => void;
   onOpenPot?: ((budgetId: string, potId: string) => void) | undefined;
@@ -45,6 +49,7 @@ export function SavedBudgetsReady({
       {selected ? (
         <SavedBudgetOverview
           key={selected.id}
+          active={active}
           budget={selected}
           headingFocusTarget={heading}
           spending={spending}
@@ -60,8 +65,10 @@ export function SavedBudgetsReady({
             : 'No saved budget matches this selection. Refresh budgets or create a budget.'}
         </AppText>
       )}
-      <Button label="Create another budget" variant="secondary" onPress={onCreate} />
-      <Button label="Refresh budgets" variant="secondary" onPress={onRetry} />
+      <Button label="New budget" variant="secondary" onPress={onCreate} />
+      {showRefresh ? (
+        <Button label="Refresh budgets" variant="secondary" onPress={onRetry} />
+      ) : null}
     </>
   );
 }

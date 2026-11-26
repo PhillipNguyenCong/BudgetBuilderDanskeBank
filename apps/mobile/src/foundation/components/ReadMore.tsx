@@ -5,7 +5,15 @@ import { AppText } from './AppText';
 import { Button } from './Button';
 import { colors, spacing } from '../theme/theme';
 
-export function ReadMore({ title, children }: { title: string; children: ReactNode }) {
+export function ReadMore({
+  title,
+  children,
+  label = 'Read more',
+}: {
+  title: string;
+  children: ReactNode;
+  label?: string;
+}) {
   const [open, setOpen] = useState(false);
   const trigger = useRef<ComponentRef<typeof View>>(null);
   const heading = useRef<ComponentRef<typeof View>>(null);
@@ -28,13 +36,13 @@ export function ReadMore({ title, children }: { title: string; children: ReactNo
       <Pressable
         ref={trigger}
         accessibilityRole="button"
-        accessibilityLabel="Read more"
+        accessibilityLabel={label}
         accessibilityHint={title}
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen(true)}
         style={styles.link}
       >
-        <AppText style={styles.label}>Read more</AppText>
+        <AppText style={styles.label}>{label}</AppText>
       </Pressable>
       {open ? (
         <Modal

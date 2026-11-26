@@ -60,6 +60,20 @@ test('US-06/12: monthly reads isolate pending bills, resolve cross-month booking
   assert.equal(september.fixedExpenses[0]!.numbers.remainingOere, 350000);
   assert.equal(september.overall.recordedSpendingOere, 10000);
   assert.equal(september.undatedReviewCount, 1);
+  const accountPage = (offset: number) =>
+    request(app)
+      .get(
+        `${path}/activity?range=account&limit=3&offset=${offset}&expectedSnapshotVersion=${september.snapshotVersion}`,
+      )
+      .expect(200);
+  const firstPage = (await accountPage(0)).body;
+  const secondPage = (await accountPage(3)).body;
+  assert.equal(firstPage.page.hasMore, true);
+  assert.equal(secondPage.page.hasMore, false);
+  assert.deepEqual(
+    [...firstPage.items, ...secondPage.items].map((item) => item.transaction.date),
+    ['2026-09-02', '2026-09-01', '2026-08-28', '2026-08-01', null],
+  );
   const august = SpendingSummarySchema.parse(
     (await request(app).get(`${path}/spending?month=2026-08`).expect(200)).body,
   );

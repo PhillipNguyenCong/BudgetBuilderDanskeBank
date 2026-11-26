@@ -1,10 +1,9 @@
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Card } from '../../../foundation/components/Card';
-import { widgetPalette } from '../../budget-shared';
+import { widgetColor, WidgetIcon } from '../../budget-shared';
 import { type DraftWidget } from '../editor/draft';
 import { WidgetAmount } from './WidgetAmount';
 import { WidgetHeader } from './WidgetHeader';
-import { WidgetIcon } from './WidgetIcon';
 
 export function BudgetWidget({
   widget,
@@ -23,13 +22,12 @@ export function BudgetWidget({
       style={[
         styles.card,
         {
-          backgroundColor:
-            widgetPalette[widget.type === 'SAVINGS' ? 'MINT' : widget.color].background,
+          backgroundColor: widgetColor(widget.type, widget.purpose).background,
         },
       ]}
     >
       <View style={styles.outerRow}>
-        <WidgetIcon type={widget.type} />
+        <WidgetIcon type={widget.type} purpose={widget.purpose} />
         <View
           style={[
             styles.row,

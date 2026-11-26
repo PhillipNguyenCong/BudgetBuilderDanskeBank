@@ -3,9 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { Card } from '../../../foundation/components/Card';
 import { spacing } from '../../../foundation/theme/theme';
-import { formatDkk, typeLabels, widgetPalette } from '../../budget-shared';
+import { formatDkk, typeLabels, widgetColor } from '../../budget-shared';
 import { SavedPlanningRow } from './SavedPlanningRow';
-import type { SavedWidget } from './SavedPotCard';
+export type SavedWidget =
+  (Budget['plan']['income'] & { type: 'INCOME' }) | Budget['plan']['pots'][number];
 
 export function SavedPotDetails({
   widget,
@@ -27,8 +28,10 @@ export function SavedPotDetails({
     <View style={styles.rows}>
       <Card
         style={{
-          backgroundColor:
-            widgetPalette[widget.type === 'SAVINGS' ? 'MINT' : widget.color].background,
+          backgroundColor: widgetColor(
+            widget.type,
+            widget.type === 'SPENDING' ? widget.purpose : undefined,
+          ).background,
         }}
       >
         <AppText variant="label">{typeLabels[widget.type]}</AppText>

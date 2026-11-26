@@ -41,7 +41,7 @@ See [OpenAPI](../../docs/openapi.json), [create request](../../docs/examples/cre
 | POST   | /api/v1/budgets                                            | Create one budget per owned account; returns 201 and Location                     |
 | PUT    | /api/v1/budgets/:id                                        | Replace the reviewed plan using expectedRevision                                  |
 | GET    | /api/v1/budgets/:id/spending                               | Source-date snapshot, exact remaining spending and weekly/daily guides            |
-| GET    | /api/v1/budgets/:id/activity                               | Classified linked-account transactions, paginated independently of calculations   |
+| GET    | /api/v1/budgets/:id/activity                               | Paginated monthly activity. Optional `range=account` includes all linked-account dates, newest first, with undated entries last   |
 | GET    | /api/v1/budgets/:id/transactions/:transactionId            | Latest classification for a read-before-retry check                               |
 | PUT    | /api/v1/budgets/:id/transactions/:transactionId/correction | Accepted classification with expected budget/correction revisions                 |
 

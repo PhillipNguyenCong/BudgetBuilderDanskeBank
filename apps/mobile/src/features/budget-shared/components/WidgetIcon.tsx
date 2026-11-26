@@ -1,11 +1,21 @@
 import { StyleSheet, View } from 'react-native';
-import type { DraftWidget } from '../editor/draft';
+import { widgetColor, type widgetColors } from '../model/widgetPresentation';
 import { colors } from '../../../foundation/theme/theme';
 
 /** Decorative category marks; the adjacent fixed label carries their meaning. */
-export function WidgetIcon({ type }: { type: DraftWidget['type'] }) {
+export function WidgetIcon({
+  type,
+  purpose,
+}: {
+  type: keyof typeof widgetColors;
+  purpose?: string | undefined;
+}) {
   return (
-    <View accessible={false} importantForAccessibility="no-hide-descendants" style={styles.tile}>
+    <View
+      accessible={false}
+      importantForAccessibility="no-hide-descendants"
+      style={[styles.tile, { backgroundColor: widgetColor(type, purpose).accent }]}
+    >
       {type === 'SPENDING' ? (
         <View style={styles.bars}>
           {[9, 18, 13].map((height, index) => (
@@ -37,7 +47,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: colors.blue,
     justifyContent: 'center',
     alignItems: 'center',
   },

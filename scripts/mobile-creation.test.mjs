@@ -5,7 +5,7 @@ import { createApp } from '../apps/backend/dist/app.js';
 import { MemoryBudgetRepository } from '../apps/backend/dist/features/budgets/memory-repository.js';
 import { JsonBankDataProvider } from '../apps/backend/dist/infrastructure/banking/json-bank-data-provider.js';
 import { loadAccountSelection } from '../apps/mobile/src/features/account-selection/api.ts';
-import { createBudget, listBudgets } from '../apps/mobile/src/features/budget-shared/index.ts';
+import { createBudget, listBudgets } from '../apps/mobile/src/features/budget-shared/data.ts';
 import {
   manualPlan,
   loadBudgetSetup,
@@ -90,6 +90,13 @@ test('native feature API creates and reopens a manual budget against an isolated
     assert.equal(summary.overall.remainingOere, 800000);
     assert.equal(summary.overall.weeklyGuideDkk, 2000);
     const activity = await getBudgetActivity(saved.id);
+    const accountActivity = await getBudgetActivity(saved.id, {
+      range: 'account',
+      limit: 5,
+      expectedSnapshotVersion: summary.snapshotVersion,
+    });
+    assert.equal(accountActivity.page.limit, 5);
+    assert.ok(accountActivity.items.some((item) => item.transaction.date < '2026-09-01'));
     const rent = activity.items.find((item) => item.kind === 'EXPENSE');
     assert.equal(rent.potId, fixed.id);
     const correction = await correctBudgetTransaction(

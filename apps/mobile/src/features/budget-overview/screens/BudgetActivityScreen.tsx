@@ -1,4 +1,5 @@
-import { isHistorical } from '../components/budgetMonth';
+import { plannedWeeklyDkk } from '@budget-builder/budget-core/allocations';
+import { isHistorical, outsideActivityCoverage } from '../components/budgetMonth';
 import type { ClassifiedTransaction } from '@budget-builder/contracts';
 import { useRef, useState, type ComponentRef } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
@@ -45,7 +46,7 @@ export function BudgetActivityScreen({
     data?.snapshotVersion,
     active && !!data && potId !== data.budget.plan.income.id,
     loadActivity,
-    review,
+    { review },
   );
   const [selected, select] = useState<ClassifiedTransaction | null>(null);
   const [saved, setSaved] = useState(false);
@@ -58,6 +59,14 @@ export function BudgetActivityScreen({
   const numbers =
     data?.pots.find((p) => p.potId === potId)?.numbers ??
     data?.fixedExpenses.find((p) => p.potId === potId)?.numbers;
+  const weeklyPlanDkk =
+    widget?.type === 'SPENDING' &&
+    widget.purpose !== undefined &&
+    numbers &&
+    data &&
+    !isHistorical(data)
+      ? plannedWeeklyDkk(numbers.allocationOere, data.month)
+      : undefined;
   const invalidPot = !!data && !!potId && !widget;
   function restoreFocus() {
     if (heading.current) AccessibilityInfo.sendAccessibilityEvent(heading.current, 'focus');
@@ -109,6 +118,8 @@ export function BudgetActivityScreen({
               numbers={numbers}
               daysRemaining={data.daysRemaining}
               breakdown
+              weeklyPlanDkk={weeklyPlanDkk}
+              showActivityGuide={weeklyPlanDkk === undefined || !outsideActivityCoverage(data)}
               historicalMonth={isHistorical(data) ? data.month : undefined}
               kind={widget?.type === 'FIXED_EXPENSE' ? 'FIXED_EXPENSE' : 'SPENDING'}
             />

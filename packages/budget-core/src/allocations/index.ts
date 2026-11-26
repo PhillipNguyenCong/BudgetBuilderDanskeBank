@@ -1,5 +1,6 @@
 import type { BudgetPlan, BudgetTotals, BillFrequency } from '@budget-builder/contracts';
 export { inferCarExpenseKind } from './car-expenses.js';
+export { plannedWeeklyDkk } from './spending-period.js';
 export class AllocationError extends Error {
   constructor(public readonly code: 'AMOUNT_OVERFLOW' | 'OVER_ALLOCATED') {
     super(code);

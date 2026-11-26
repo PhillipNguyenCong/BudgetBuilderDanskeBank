@@ -1,5 +1,5 @@
 import { AccountListSchema, UserProfileSchema } from '@budget-builder/contracts';
-import { listBudgets } from '../../budget-shared';
+import { listBudgets } from '../../budget-shared/data';
 import { requestJson } from '../../../lib/api';
 export async function loadAccountSelection(signal?: AbortSignal) {
   const [user, accounts, budgets] = await Promise.all([

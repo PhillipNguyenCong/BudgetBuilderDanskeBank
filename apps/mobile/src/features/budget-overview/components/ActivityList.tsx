@@ -3,6 +3,11 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { colors, spacing } from '../../../foundation/theme/theme';
 import { formatDkk } from '../../budget-shared';
+export function transactionAmount(tx: ClassifiedTransaction['transaction']) {
+  if (tx.amountOere === null) return 'Amount unavailable';
+  const sign = tx.direction === 'DEBIT' ? '− ' : tx.direction === 'CREDIT' ? '+ ' : '';
+  return `${sign}${formatDkk(tx.amountOere)}`;
+}
 export function ActivityList({
   items,
   budget,
@@ -22,11 +27,7 @@ export function ActivityList({
         const content = (
           <>
             <AppText variant="label">{tx.text}</AppText>
-            <AppText>
-              {tx.amountOere === null
-                ? 'Amount unavailable'
-                : `${tx.direction === 'DEBIT' ? '− ' : tx.direction === 'CREDIT' ? '+ ' : ''}${formatDkk(tx.amountOere)}`}
-            </AppText>
+            <AppText>{transactionAmount(tx)}</AppText>
             <AppText variant="small">
               {tx.date ?? 'Date unknown'} · {tx.status} ·{' '}
               {item.kind === 'UNKNOWN' ? 'Uncertain classification' : item.kind.toLowerCase()}

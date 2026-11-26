@@ -1,10 +1,13 @@
 import { calculatePlan } from '@budget-builder/budget-core/allocations';
 import { BudgetSchema, createBudgetExample } from '@budget-builder/contracts';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, within, waitFor } from '@testing-library/react-native';
 import { useState } from 'react';
 import { BudgetHomeScreen } from './BudgetHomeScreen';
 import { spendingSummary } from '../../../tests/spendingFixtures';
 jest.mock('../api', () => ({
+  getBudgetActivity: jest.fn(async () =>
+    require('../../../tests/spendingFixtures').activityPage([]),
+  ),
   getSpendingSummary: jest.fn(async () => {
     throw new Error('Spending unavailable in this fixture.');
   }),
@@ -42,8 +45,7 @@ it('US-03: reopens the selected plan separately from other budgets and discloses
     <BudgetHomeScreen {...callbacks} selectedId="two" load={async () => [saved, other]} />,
   );
   expect(await screen.findByRole('header', { name: 'Household' })).toBeVisible();
-  await fireEvent.press(screen.getByRole('button', { name: 'Monthly plan' }));
-  expect(screen.getByText('Income: 24.000 kr.')).toBeVisible();
+  expect(screen.getAllByText('24.000 kr.')[0]!).toBeVisible();
   expect(screen.queryByText('Forecast unavailable')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Choose budget' }));
   expect(screen.getByRole('radio', { name: 'Household' })).toBeChecked();
@@ -60,7 +62,7 @@ it('US-06/10: an unavailable selection offers explicit selection without opening
       'The selected budget is unavailable. Choose one of your saved budgets above.',
     ),
   ).toBeVisible();
-  expect(screen.queryByText('Monthly plan')).toBeNull();
+  expect(screen.queryByText('Left after bills and savings')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Choose budget' }));
   await fireEvent.press(screen.getByRole('radio', { name: 'My budget' }));
   expect(callbacks.onSelect).toHaveBeenCalledWith('one');
@@ -74,7 +76,7 @@ it('US-06: refreshes on re-entry, cancels abandoned reads and closes details on 
   expect(load.mock.calls[0]![0]!.aborted).toBe(true);
   await view.rerender(<BudgetHomeScreen {...callbacks} active load={load} />);
   await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
-  expect(await screen.findByText('Monthly plan')).toBeVisible();
+  expect(await screen.findByRole('button', { name: 'View Monthly salary details' })).toBeVisible();
   expect(screen.queryByText('Rent: 9.000 kr.')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Choose budget' })).toBeNull();
 });
@@ -89,12 +91,12 @@ it('US-06: shows source snapshot guides and preserves the saved plan on independ
   expect(
     await screen.findByText('Spending unavailable. offline Your saved plan is still available.'),
   ).toBeVisible();
-  await fireEvent.press(screen.getByRole('button', { name: 'Monthly plan' }));
-  expect(screen.getByText('Income: 24.000 kr.')).toBeVisible();
+  expect(screen.getAllByText('24.000 kr.')[0]!).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'Retry spending' }));
-  expect(await screen.findByText('Left to spend this month')).toBeVisible();
-  expect(screen.getByText('About 165 kr. per day · 17 days remaining')).toBeVisible();
-  expect(screen.getByText('Demo snapshot · 2026-10-15')).toBeVisible();
+  expect(await screen.findByRole('button', { name: 'View Monthly salary details' })).toBeVisible();
+  expect(screen.getByText('2.800 kr.')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Budget details' })).toBeVisible();
+  expect(screen.queryByRole('button', { name: 'Refresh budgets' })).toBeNull();
 });
 
 it('US-06/10: recovers an unavailable selection when only one saved budget remains', async () => {
@@ -109,7 +111,7 @@ it('US-06/10: recovers an unavailable selection when only one saved budget remai
   await fireEvent.press(await screen.findByRole('button', { name: 'Choose budget' }));
   await fireEvent.press(screen.getByRole('radio', { name: 'My budget' }));
   expect(screen.getByRole('header', { name: 'My budget' })).toBeVisible();
-  expect(screen.getByText('Monthly plan')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'View Monthly salary details' })).toBeVisible();
   expect(screen.queryByRole('button', { name: 'Choose budget' })).toBeNull();
   expect(screen.queryByRole('radio')).toBeNull();
 });
@@ -151,8 +153,8 @@ it('US-06/12: changes monthly views without showing current weekly guides in his
   );
   expect(await screen.findByText('Historical view · Current plan applied')).toBeVisible();
   expect(loadSpending).toHaveBeenLastCalledWith('one', expect.any(AbortSignal), '2026-09');
-  expect(screen.getByRole('header', { name: 'Remaining in September 2026' })).toBeVisible();
-  expect(screen.queryByText('About 165 kr. per day · 1 day remaining')).toBeNull();
+  expect(screen.getByText('Remaining in September 2026')).toBeVisible();
+  expect(screen.queryByText('About 1.153 kr. for the next 7 days')).toBeNull();
   await view.rerender(
     <BudgetHomeScreen
       {...callbacks}
@@ -162,7 +164,7 @@ it('US-06/12: changes monthly views without showing current weekly guides in his
       onOpenBudgetLog={onOpenBudgetLog}
     />,
   );
-  expect(await screen.findByText('Left to spend this month')).toBeVisible();
+  expect(await screen.findByText('Left after bills and savings')).toBeVisible();
   expect(screen.queryByText('Historical view · Current plan applied')).toBeNull();
 });
 
@@ -179,4 +181,68 @@ it('US-10: undated records have their own review action', async () => {
   );
   await fireEvent.press(await screen.findByRole('button', { name: 'Review undated records (2)' }));
   expect(onOpenUndated).toHaveBeenCalledWith('one');
+});
+
+it('keeps the last spending snapshot on refresh failure and updates both amounts on retry', async () => {
+  const first = spendingSummary(saved);
+  const loadSpending = jest
+    .fn()
+    .mockResolvedValueOnce(first)
+    .mockRejectedValueOnce(new Error('Offline.'))
+    .mockResolvedValueOnce({
+      ...first,
+      overall: { ...first.overall, remainingOere: 250000, weeklyGuideDkk: 1029 },
+    });
+  await render(
+    <BudgetHomeScreen {...callbacks} load={async () => [saved]} loadSpending={loadSpending} />,
+  );
+  await fireEvent.press(await screen.findByRole('button', { name: 'Budget details' }));
+  const details = () => within(screen.getByTestId('read-more-overlay'));
+  await fireEvent.press(details().getByRole('button', { name: 'Refresh spending' }));
+  expect(await details().findByText(/Spending refresh failed/)).toBeVisible();
+  expect(details().getByText('2.800 kr.')).toBeVisible();
+  expect(details().getByText('Demo data as of 2026-10-15')).toBeVisible();
+  await fireEvent.press(details().getByRole('button', { name: 'Refresh spending' }));
+  expect(await details().findByText('2.500 kr.')).toBeVisible();
+  expect(details().getByText('About 1.029 kr. for the next 7 days')).toBeVisible();
+  await fireEvent.press(details().getByRole('button', { name: 'Close' }));
+  expect(screen.getByText('2.500 kr.')).toBeVisible();
+  expect(screen.queryByText(/for the next/)).toBeNull();
+});
+
+it('replaces the spending figures when switching between independent budgets', async () => {
+  const second = {
+    ...saved,
+    id: 'two',
+    accountId: 'second-account',
+    plan: { ...saved.plan, name: 'Household' },
+  };
+  const budgets = [saved, second];
+  const load = async () => budgets;
+  const loadSpending = async (id: string) => {
+    const data = spendingSummary(id === saved.id ? saved : second);
+    if (id === second.id)
+      data.overall = { ...data.overall, remainingOere: 680000, weeklyGuideDkk: 2800 };
+    return data;
+  };
+  const view = await render(
+    <BudgetHomeScreen
+      {...callbacks}
+      selectedId={saved.id}
+      load={load}
+      loadSpending={loadSpending}
+    />,
+  );
+  await screen.findByText('Left after bills and savings');
+  await view.rerender(
+    <BudgetHomeScreen
+      {...callbacks}
+      selectedId={second.id}
+      load={load}
+      loadSpending={loadSpending}
+    />,
+  );
+  expect(await screen.findByText('6.800 kr.')).toBeVisible();
+  expect(screen.queryByText(/for the next/)).toBeNull();
+  expect(screen.queryByText('2.800 kr.')).toBeNull();
 });

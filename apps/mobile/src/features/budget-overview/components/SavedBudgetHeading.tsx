@@ -18,7 +18,9 @@ export function SavedBudgetHeading({
         accessibilityRole="header"
         accessibilityLabel={budget.plan.name}
       >
-        <AppText variant="title">{budget.plan.name}</AppText>
+        <AppText variant="title" style={{ textAlign: 'center' }}>
+          {budget.plan.name}
+        </AppText>
       </View>
     </>
   );

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { BudgetPlanSchema } from '@budget-builder/contracts';
-import { calculatePlan, proposeSavingsUpdate } from './index.js';
+import { calculatePlan, plannedWeeklyDkk, proposeSavingsUpdate } from './index.js';
 const row = (id: string, amountOere: number) => ({ id, label: id, amountOere });
 export const plan = {
   name: 'My budget',
@@ -68,4 +68,12 @@ test('US-04: a savings review changes only the chosen row and does not mutate th
   input.income.rows[0]!.amountOere = 700000;
   assert.throws(() => proposeSavingsUpdate(input, 'savings', 'rainy'), /INSUFFICIENT_CAPACITY/);
   assert.throws(() => proposeSavingsUpdate(input, 'spend', 'groceries'), /INVALID_SAVINGS_ROW/);
+});
+
+test('grocery planning spreads the monthly allocation over actual calendar days and rounds once', () => {
+  assert.equal(plannedWeeklyDkk(637200, '2026-11'), 1487);
+  assert.equal(plannedWeeklyDkk(637200, '2026-12'), 1439);
+  assert.equal(plannedWeeklyDkk(637200, '2028-02'), 1538);
+  assert.equal(plannedWeeklyDkk(200, '2026-02'), 1);
+  assert.equal(plannedWeeklyDkk(0, '2026-11'), 0);
 });

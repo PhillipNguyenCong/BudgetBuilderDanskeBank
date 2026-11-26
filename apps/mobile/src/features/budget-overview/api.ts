@@ -19,6 +19,8 @@ export const getSpendingSummary = (id: string, signal?: AbortSignal, month?: str
 export function getBudgetActivity(
   id: string,
   options: {
+    limit?: number;
+    range?: 'account';
     offset?: number;
     potId?: string;
     month?: string;
@@ -27,7 +29,11 @@ export function getBudgetActivity(
   } = {},
   signal?: AbortSignal,
 ) {
-  const query = new URLSearchParams({ limit: '25', offset: String(options.offset ?? 0) });
+  const query = new URLSearchParams({
+    limit: String(options.limit ?? 25),
+    offset: String(options.offset ?? 0),
+  });
+  if (options.range) query.set('range', options.range);
   if (options.potId) query.set('potId', options.potId);
   if (options.month) query.set('month', options.month);
   if (options.review) query.set('review', options.review);

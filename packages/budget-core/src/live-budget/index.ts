@@ -7,6 +7,8 @@ import {
   type TransactionCorrection,
 } from '@budget-builder/contracts';
 import { AllocationError, calculatePlan } from '../allocations/index.js';
+import { remainingDays, periodShareDkk } from '../allocations/spending-period.js';
+export { remainingDays } from '../allocations/spending-period.js';
 import { billMatchScore, billMerchantKeys } from '../bills/matching.js';
 import { reconcileTransactions } from './reconcile.js';
 
@@ -19,14 +21,6 @@ function exact(value: bigint): number {
 function money(value: number): bigint {
   if (!Number.isSafeInteger(value)) throw new AllocationError('AMOUNT_OVERFLOW');
   return BigInt(value);
-}
-
-export function remainingDays(date: string): number {
-  DateSchema.parse(date);
-  const day = new Date(`${date}T00:00:00Z`);
-  const end = new Date(day);
-  end.setUTCMonth(day.getUTCMonth() + 1, 0);
-  return end.getUTCDate() - day.getUTCDate() + 1;
 }
 
 /** Rounding happens once, directly from the exact rational number to whole DKK. */
@@ -63,9 +57,6 @@ export function calculateGuidance(
   const signed = exact(remaining);
   const days = remainingDays(date);
   const positive = remaining > 0n ? remaining : 0n;
-  const denominator = BigInt(days * 100);
-  const rounded = (factor: number) =>
-    exact((positive * BigInt(factor) + denominator / 2n) / denominator);
   return {
     allocationOere,
     carriedInOere,
@@ -75,8 +66,8 @@ export function calculateGuidance(
     reviewAffectingCount,
     remainingOere: signed,
     overspentOere: exact(remaining < 0n ? -remaining : 0n),
-    weeklyGuideDkk: rounded(Math.min(7, days)),
-    dailyGuideDkk: rounded(1),
+    weeklyGuideDkk: periodShareDkk(positive, days, Math.min(7, days)),
+    dailyGuideDkk: periodShareDkk(positive, days, 1),
     limitations,
   };
 }

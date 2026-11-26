@@ -103,3 +103,18 @@ export function spendingSummary(budget = savedBudget()): SpendingSummary {
     recent: [activityItem()],
   };
 }
+
+export function activityPage(
+  items: ClassifiedTransaction[],
+  offset = 0,
+  limit = 5,
+  version = 'a'.repeat(64),
+) {
+  return {
+    budgetRevision: 1,
+    snapshotVersion: version,
+    snapshotDate: '2026-10-15',
+    items: items.slice(offset, offset + limit),
+    page: { offset, limit, total: items.length, hasMore: offset + limit < items.length },
+  };
+}

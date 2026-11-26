@@ -168,7 +168,7 @@ it('US-03: routes account selection through manual creation to the saved plan wi
     await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
     expect(createBudget).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
-    expect(await screen.findByText('Monthly plan')).toBeVisible();
+    expect(await screen.findByRole('button', { name: 'View Income details' })).toBeVisible();
     expect(router.getPathname()).toBe('/budget');
     expect(screen.getByRole('header', { name: 'November plan' })).toBeVisible();
     expect(screen.getByRole('tab', { name: 'Budget' })).toBeSelected();
@@ -178,10 +178,11 @@ it('US-03: routes account selection through manual creation to the saved plan wi
     expect(router.getPathname()).toBe('/budget/pot');
     expect(screen.getByRole('tab', { name: 'Budget' })).toBeSelected();
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
-    await screen.findByText('Monthly plan');
+    await screen.findByRole('button', { name: 'View Income details' });
     expect(createBudget).toHaveBeenCalledTimes(1);
-    await fireEvent.press(screen.getByRole('button', { name: 'Monthly plan' }));
-    expect(screen.getByText('Income: 24.000,55 kr.')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'View Income details' })).toHaveAccessibilityValue({
+      text: '24.000,55 kr., planned per month',
+    });
     expect(mockSaved[0]!.plan.income.rows[0]!.amountOere).toBe(2400055);
     expect(mockSaved[0]!.totals.unallocatedOere).toBe(0);
     expect(alert).not.toHaveBeenCalled();

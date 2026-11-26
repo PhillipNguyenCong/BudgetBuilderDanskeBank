@@ -8,18 +8,30 @@ import { colors, spacing } from '../../../foundation/theme/theme';
 import { formatDkk } from '../../budget-shared';
 export const formatGuideDkk = (amount: number) =>
   `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} kr.`;
+export function guideWindow(daysRemaining: number) {
+  const days = Math.min(7, daysRemaining);
+  return `${days} ${days === 1 ? 'day' : 'days'}`;
+}
+export function weeklyGuide(amount: number, daysRemaining: number) {
+  const period = daysRemaining === 1 ? 'today' : `the next ${guideWindow(daysRemaining)}`;
+  return `About ${formatGuideDkk(amount)} for ${period}`;
+}
 export function SpendingFigures({
   numbers,
   daysRemaining,
   breakdown = false,
   kind = 'SPENDING',
   historicalMonth,
+  weeklyPlanDkk,
+  showActivityGuide = true,
 }: {
   numbers: SpendingNumbers;
   daysRemaining: number;
   breakdown?: boolean;
   kind?: 'SPENDING' | 'FIXED_EXPENSE';
   historicalMonth?: string | undefined;
+  weeklyPlanDkk?: number | undefined;
+  showActivityGuide?: boolean;
 }) {
   const status = kind === 'FIXED_EXPENSE' ? billStatus(numbers) : undefined;
   const available =
@@ -48,12 +60,15 @@ export function SpendingFigures({
         {numbers.overspentOere !== null && numbers.overspentOere > 0 ? (
           <AppText variant="label">{formatDkk(numbers.overspentOere)} over your allowance</AppText>
         ) : null}
-        {kind === 'SPENDING' && !historicalMonth ? (
+        {weeklyPlanDkk !== undefined && !historicalMonth ? (
+          <AppText variant="label">Weekly plan · About {formatGuideDkk(weeklyPlanDkk)}</AppText>
+        ) : null}
+        {kind === 'SPENDING' && !historicalMonth && showActivityGuide ? (
           <>
             <AppText variant="label">
               {numbers.weeklyGuideDkk === null
                 ? 'Weekly guide unavailable'
-                : `About ${formatGuideDkk(numbers.weeklyGuideDkk)} for the next ${Math.min(7, daysRemaining)} ${Math.min(7, daysRemaining) === 1 ? 'day' : 'days'}`}
+                : weeklyGuide(numbers.weeklyGuideDkk, daysRemaining)}
             </AppText>
             <AppText>
               {numbers.dailyGuideDkk === null

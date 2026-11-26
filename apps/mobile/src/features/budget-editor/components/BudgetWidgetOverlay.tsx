@@ -13,7 +13,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../../foundation/components/Button';
 import { colors, spacing } from '../../../foundation/theme/theme';
-import { widgetPalette } from '../../budget-shared';
+import { widgetColor } from '../../budget-shared';
 import { widgetTotal, type DraftWidget } from '../editor/draft';
 import { useBillFocus } from '../hooks/useBillFocus';
 import { AllocationGuidance } from './AllocationGuidance';
@@ -67,7 +67,11 @@ export function BudgetWidgetOverlay({
         <SafeAreaView
           style={[
             styles.root,
-            { backgroundColor: fixed ? colors.canvas : widgetPalette[widget.color].background },
+            {
+              backgroundColor: fixed
+                ? colors.canvas
+                : widgetColor(widget.type, widget.purpose).background,
+            },
           ]}
           accessibilityViewIsModal
         >

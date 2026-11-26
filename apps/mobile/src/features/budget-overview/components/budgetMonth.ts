@@ -17,3 +17,8 @@ export const creationMonth = (createdAt: string) => {
   }).formatToParts(new Date(createdAt));
   return `${parts.find((part) => part.type === 'year')!.value}-${parts.find((part) => part.type === 'month')!.value}`;
 };
+
+export function outsideActivityCoverage({ month, quality }: SpendingSummary): boolean {
+  const { from, to } = quality.coverage;
+  return (to !== null && to.slice(0, 7) < month) || (from !== null && from.slice(0, 7) > month);
+}

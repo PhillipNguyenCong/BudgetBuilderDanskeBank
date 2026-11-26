@@ -108,6 +108,13 @@ export const openapi = {
       get: read('BudgetActivity', 'getBudgetActivity', [
         id,
         {
+          name: 'range',
+          in: 'query',
+          schema: { type: 'string', enum: ['account'] },
+          description:
+            'Include all linked-account dates, newest first, with undated records last. Defaults to the selected month.',
+        },
+        {
           name: 'review',
           in: 'query',
           schema: { type: 'string', enum: ['undated'] },

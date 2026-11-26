@@ -59,7 +59,9 @@ export function BudgetHomeScreen({
   if (state.status === 'ready' && !state.budgets.length && !state.refreshing && !selectedId)
     return <BudgetIntroScreen onCreate={onCreate} onPreview={onPreview} />;
   return (
-    <Screen>
+    <Screen
+      contentStyle={selected ? { paddingTop: spacing.small, gap: spacing.medium } : undefined}
+    >
       {selected && onOpenBudgetLog ? (
         <View
           style={{
@@ -110,11 +112,18 @@ export function BudgetHomeScreen({
         <BudgetsError onRetry={retry} onPreview={onPreview} />
       ) : (
         <SavedBudgetsReady
+          active={active}
           budgets={state.budgets}
           selected={selected}
           onSelect={onSelect}
           onCreate={onCreate}
           onRetry={retry}
+          showRefresh={
+            !!state.refreshError ||
+            !selected ||
+            spending.state.status === 'error' ||
+            (spending.state.status === 'ready' && !!spending.state.error)
+          }
           spending={spending.state}
           onRetrySpending={spending.retry}
           onOpenPot={onOpenPot}

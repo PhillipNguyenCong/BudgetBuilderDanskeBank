@@ -166,7 +166,8 @@ export class SpendingService {
         (!query.potId || a.potId === query.potId) &&
         (query.review === 'undated'
           ? a.transaction.date === null
-          : !!a.transaction.date && a.transaction.date.startsWith(query.month ?? date.slice(0, 7))),
+          : query.range === 'account' ||
+            !!a.transaction.date?.startsWith(query.month ?? date.slice(0, 7))),
     );
     return {
       budgetRevision: budget.revision,

@@ -95,6 +95,7 @@ export const SpendingSummarySchema = z.strictObject({
 });
 export type SpendingSummary = z.infer<typeof SpendingSummarySchema>;
 export const ActivityQuerySchema = z.strictObject({
+  range: z.literal('account').optional(),
   expectedSnapshotVersion: z
     .string()
     .regex(/^[a-f0-9]{64}$/)

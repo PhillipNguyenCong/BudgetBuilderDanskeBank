@@ -8,7 +8,11 @@ export function useBudgetActivity(
   snapshotVersion: string | undefined,
   active = true,
   load = getBudgetActivity,
-  review?: 'undated' | undefined,
+  {
+    limit,
+    range,
+    review,
+  }: { limit?: number; range?: 'account' | undefined; review?: 'undated' | undefined } = {},
 ) {
   const [state, setState] = useState({
     ownerScope: '',
@@ -19,7 +23,7 @@ export function useBudgetActivity(
   });
   const [offset, setOffset] = useState(0);
   const [attempt, setAttempt] = useState(0);
-  const scope = JSON.stringify([id, potId, month, snapshotVersion, review]);
+  const scope = JSON.stringify([id, potId, month, snapshotVersion, review, limit, range]);
   const previous = useRef({ scope: '', active: false });
   useEffect(() => {
     const restart = previous.current.scope !== scope || !previous.current.active;
@@ -38,6 +42,8 @@ export function useBudgetActivity(
       id,
       {
         offset,
+        ...(limit ? { limit } : {}),
+        ...(range ? { range } : {}),
         ...(review ? { review } : {}),
         ...(potId ? { potId } : {}),
         ...(month ? { month } : {}),
@@ -59,10 +65,29 @@ export function useBudgetActivity(
       })
       .catch(() => {
         if (!controller.signal.aborted)
-          setState({ ownerScope: scope, items: [], error: true, loading: false, hasMore: false });
+          setState((previous) => ({
+            ...previous,
+            ownerScope: scope,
+            error: true,
+            loading: false,
+            hasMore: false,
+          }));
       });
     return () => controller.abort();
-  }, [id, potId, month, snapshotVersion, scope, offset, attempt, active, load, review]);
+  }, [
+    id,
+    potId,
+    month,
+    snapshotVersion,
+    scope,
+    offset,
+    attempt,
+    active,
+    load,
+    review,
+    limit,
+    range,
+  ]);
   return {
     ...(state.ownerScope === scope
       ? state

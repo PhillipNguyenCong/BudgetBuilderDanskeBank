@@ -1,17 +1,30 @@
-import { isHistorical } from './budgetMonth';
+import { isHistorical, outsideActivityCoverage, monthLabel } from './budgetMonth';
 import { View } from 'react-native';
 import { spacing } from '../../../foundation/theme/theme';
+import { Button } from '../../../foundation/components/Button';
 import { ReadMore } from '../../../foundation/components/ReadMore';
 import type { SpendingSummary } from '@budget-builder/contracts';
 import { AppText } from '../../../foundation/components/AppText';
-export function SnapshotNotice({ summary }: { summary: SpendingSummary }) {
+import { SpendingFigures } from './SpendingFigures';
+export function SnapshotNotice({
+  summary,
+  onRefresh,
+  onOpenActivity,
+  refreshing,
+  refreshError,
+}: {
+  summary: SpendingSummary;
+  onOpenActivity?: (() => void) | undefined;
+  onRefresh?: (() => void) | undefined;
+  refreshing?: boolean;
+  refreshError?: string | null;
+}) {
   return (
     <View style={{ gap: spacing.small }}>
       <AppText variant="label">
         {summary.account.name}
         {summary.account.maskedIdentifier ? ` · ${summary.account.maskedIdentifier}` : ''}
       </AppText>
-      <AppText>Demo snapshot · {summary.sourceSnapshotDate ?? summary.snapshotDate}</AppText>
       {isHistorical(summary) ? (
         <AppText variant="small">Historical view · Current plan applied</AppText>
       ) : null}
@@ -22,7 +35,34 @@ export function SnapshotNotice({ summary }: { summary: SpendingSummary }) {
           account activity to see uncertain records.
         </AppText>
       ) : null}
-      <ReadMore title="About this budget">
+      <ReadMore title="About this budget" label="Budget details">
+        <AppText>Demo data as of {summary.sourceSnapshotDate ?? summary.snapshotDate}</AppText>
+        {outsideActivityCoverage(summary) ? (
+          <AppText>
+            No activity data for {monthLabel(summary.month)}. The estimate uses your plan.
+          </AppText>
+        ) : null}
+        {onRefresh ? (
+          <Button
+            label={refreshing ? 'Refreshing…' : 'Refresh spending'}
+            onPress={onRefresh}
+            disabled={!!refreshing}
+            variant="secondary"
+          />
+        ) : null}
+        {refreshError ? (
+          <AppText accessibilityRole="alert">
+            Spending refresh failed. Showing the last loaded snapshot. {refreshError}
+          </AppText>
+        ) : null}
+        {onOpenActivity ? (
+          <Button label="View monthly transactions" onPress={onOpenActivity} variant="secondary" />
+        ) : null}
+        <SpendingFigures
+          numbers={summary.overall}
+          daysRemaining={summary.daysRemaining}
+          historicalMonth={isHistorical(summary) ? summary.month : undefined}
+        />
         <AppText variant="small">
           Source coverage: {summary.quality.coverage.from ?? 'unknown start'} to{' '}
           {summary.quality.coverage.to ?? 'unknown end'}.

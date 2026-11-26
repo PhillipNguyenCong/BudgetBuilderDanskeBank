@@ -4,11 +4,15 @@ export const typeLabels = {
   FIXED_EXPENSE: 'Fixed expenses',
   SAVINGS: 'Savings',
 };
-export const widgetPalette = {
-  OCEAN: { name: 'Ocean', background: '#E1E7FA' },
-  SKY: { name: 'Sky', background: '#E4EDFF' },
-  MINT: { name: 'Mint', background: '#DFF2E6' },
-  LAVENDER: { name: 'Lavender', background: '#EAE4FA' },
-  SAND: { name: 'Sand', background: '#F7EDCF' },
-  ROSE: { name: 'Rose', background: '#F9E2EB' },
+export const widgetColors = {
+  INCOME: { accent: '#141414', background: '#ECECEF' },
+  SPENDING: { accent: '#334DDB', background: '#E4EDFF' },
+  FIXED_EXPENSE: { accent: '#40434B', background: '#E7E8EC' },
+  SAVINGS: { accent: '#167348', background: '#DFF2E6' },
 };
+
+const groceriesColors = { accent: '#8050A0', background: '#F1E6F8' };
+
+export function widgetColor(type: keyof typeof widgetColors, purpose?: string) {
+  return type === 'SPENDING' && purpose === 'GROCERIES' ? groceriesColors : widgetColors[type];
+}

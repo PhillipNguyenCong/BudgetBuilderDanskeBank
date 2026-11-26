@@ -1,9 +1,39 @@
 import { calculatePlan } from '@budget-builder/budget-core/allocations';
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import { savedBudget, spendingSummary } from '../../../tests/spendingFixtures';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { Dimensions } from 'react-native';
+import {
+  activityItem,
+  activityPage,
+  savedBudget,
+  spendingSummary,
+} from '../../../tests/spendingFixtures';
+import { formatDkk } from '../../budget-shared';
 import { SavedBudgetOverview } from './SavedBudgetOverview';
 import { SavedPotDetails } from './SavedPotDetails';
 import { SpendingFigures } from './SpendingFigures';
+import { getBudgetActivity } from '../api';
+jest.mock('../api', () => ({ ...jest.requireActual('../api'), getBudgetActivity: jest.fn() }));
+beforeEach(() => jest.mocked(getBudgetActivity).mockResolvedValue(activityPage([activityItem()])));
+
+it('shows unallocated income even when spending guidance is unavailable', async () => {
+  const budget = savedBudget();
+  budget.totals.incomeOere += 10050;
+  budget.totals.unallocatedOere += 10050;
+  const onRetrySpending = jest.fn();
+  await render(
+    <SavedBudgetOverview
+      budget={budget}
+      spending={{ status: 'error', message: 'Offline.' }}
+      onRetrySpending={onRetrySpending}
+    />,
+  );
+  expect(
+    screen.getByText(`Unallocated · ${formatDkk(budget.totals.unallocatedOere)}`),
+  ).toBeVisible();
+  expect(screen.queryByText(/About .* kr\./)).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry spending' }));
+  expect(onRetrySpending).toHaveBeenCalledTimes(1);
+});
 
 it('US-06: leads with snapshot spending and routes pot details through callbacks', async () => {
   const budget = savedBudget();
@@ -17,14 +47,14 @@ it('US-06: leads with snapshot spending and routes pot details through callbacks
       onOpenActivity={onOpenActivity}
     />,
   );
-  expect(screen.getByText('Left to spend this month')).toBeVisible();
-  expect(screen.getByText('About 165 kr. per day · 17 days remaining')).toBeVisible();
-  expect(screen.getByText('Synthetic grocery shop')).toBeVisible();
+  expect(screen.getByText('Left after bills and savings')).toBeVisible();
+  expect(screen.queryByText(/for the next/)).toBeNull();
+  expect(await screen.findByText('Synthetic grocery shop')).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'View Spending budget details' }));
   expect(onOpenPot).toHaveBeenCalledWith(budget.id, 'spending');
-  await fireEvent.press(screen.getByRole('button', { name: 'All account activity' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Budget details' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'View monthly transactions' }));
   expect(onOpenActivity).toHaveBeenCalledWith(budget.id);
-  expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
 });
 
 it('US-06/10: shows fixed-expense progress and separates pending and unconfirmed commitments', async () => {
@@ -46,15 +76,15 @@ it('US-06/10: shows fixed-expense progress and separates pending and unconfirmed
       spending={{ status: 'ready', data: summary, refreshing: false, error: null }}
     />,
   );
-  expect(screen.getAllByText('2.699 kr.')).toHaveLength(2);
+  await fireEvent.press(screen.getByRole('button', { name: 'Budget details' }));
+  expect(within(screen.getByTestId('read-more-overlay')).getByText('2.699 kr.')).toBeVisible();
   expect(screen.getByText('Pending commitments: 100 kr.')).toBeVisible();
   expect(screen.getByText('Unconfirmed commitments: 1 kr.')).toBeVisible();
   expect(screen.queryByText('Unconfirmed: 1 kr.')).toBeNull();
   expect(screen.queryByText('Pending: 1.000 kr.')).toBeNull();
-  expect(screen.getByText('Left for bills')).toBeVisible();
 });
 
-it('US-06: groups spending first, retains within-type ordering and API plan totals', async () => {
+it('US-06: shows spending pots first and preserves API plan totals', async () => {
   const budget = savedBudget();
   const spending = budget.plan.pots.find((p) => p.type === 'SPENDING')!;
   budget.plan.pots = [
@@ -68,11 +98,9 @@ it('US-06: groups spending first, retains within-type ordering and API plan tota
   expect(screen.getAllByRole('button').map((b) => b.props.accessibilityLabel)).toEqual([
     'View Travel details',
     'View Spending budget details',
+    'View Monthly salary details',
     'View Fixed expenses details',
     'View Savings details',
-    'View Monthly salary details',
-    'All account activity',
-    'Monthly plan',
   ]);
   expect(screen.getByText('123,45 kr.')).toBeVisible();
 });
@@ -193,16 +221,10 @@ it('US-06: discloses background and plan totals without losing the overview', as
   );
   expect(screen.queryByText(/Source coverage:/)).toBeNull();
   expect(screen.queryByText('Forecast unavailable')).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Read more' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Budget details' }));
   expect(screen.getByText(/Source coverage:/)).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
-  expect(screen.getByText('Left to spend this month')).toBeVisible();
-  const disclosure = screen.getByRole('button', { name: 'Monthly plan' });
-  expect(disclosure.props.accessibilityState.expanded).toBe(false);
-  await fireEvent.press(disclosure);
-  expect(
-    screen.getByRole('button', { name: 'Monthly plan' }).props.accessibilityState.expanded,
-  ).toBe(true);
+  expect(screen.getByText('Left after bills and savings')).toBeVisible();
 });
 
 it('US-06: zero booked bill remainder shows paid status in the overview and details', async () => {
@@ -220,11 +242,7 @@ it('US-06: zero booked bill remainder shows paid status in the overview and deta
       spending={{ status: 'ready', data: summary, refreshing: false, error: null }}
     />,
   );
-  expect(screen.getByText('All bills are paid')).toBeVisible();
-  expect(
-    screen.getByRole('button', { name: 'View Fixed expenses details' }).props.accessibilityValue
-      .text,
-  ).toContain('All bills are paid');
+  expect(screen.queryByText('All bills are paid')).toBeNull();
   await view.rerender(
     <SpendingFigures numbers={numbers} daysRemaining={17} kind="FIXED_EXPENSE" breakdown />,
   );
@@ -269,7 +287,7 @@ it('US-06/10: overspent provisional bills show their signed remainder instead of
       spending={{ status: 'ready', data: summary, refreshing: false, error: null }}
     />,
   );
-  expect(screen.getByText('-8.510 kr.')).toBeVisible();
+  expect(screen.queryByText('-8.510 kr.')).toBeNull();
   expect(screen.queryByText('All bills are paid')).toBeNull();
   await view.rerender(
     <SpendingFigures numbers={numbers} daysRemaining={17} kind="FIXED_EXPENSE" breakdown />,
@@ -289,4 +307,199 @@ it('US-12: historical remainder stays signed and does not offer a current-week s
   expect(screen.getByText('-300 kr.')).toBeVisible();
   expect(screen.getByRole('header', { name: 'Remaining in September 2026' })).toBeVisible();
   expect(screen.queryByText(/for the next/)).toBeNull();
+});
+
+it('shows each spending pot’s own weekly guide in its row', async () => {
+  const budget = savedBudget();
+  const spending = budget.plan.pots.find((pot) => pot.type === 'SPENDING')!;
+  budget.plan.pots = [
+    ...budget.plan.pots.filter((pot) => pot.id !== spending.id),
+    { ...spending, purpose: 'FUN', rows: [{ id: 'fun', label: 'Leisure', amountOere: 937500 }] },
+    {
+      ...spending,
+      id: 'groceries-pot',
+      name: 'Groceries',
+      purpose: 'GROCERIES',
+      rows: [{ id: 'food', label: 'Food', amountOere: 637200 }],
+    },
+  ];
+  budget.totals = calculatePlan(budget.plan);
+  const data = spendingSummary(budget);
+  data.month = '2026-11';
+  data.quality.coverage = { from: '2026-11-01', to: '2026-11-15', completeMonths: 0 };
+  data.pots.push({
+    potId: 'groceries-pot',
+    numbers: { ...data.overall, weeklyGuideDkk: 420 },
+  });
+  const view = await render(
+    <SavedBudgetOverview
+      budget={budget}
+      spending={{ status: 'ready', data, refreshing: false, error: null }}
+    />,
+  );
+  expect(screen.queryByText(/for 7 days/)).toBeNull();
+  const funRow = () => within(screen.getByRole('button', { name: 'View Spending budget details' }));
+  expect(funRow().getByText('≈ 2.188 kr./week')).toBeVisible();
+  const groceryRow = () => within(screen.getByRole('button', { name: 'View Groceries details' }));
+  expect(groceryRow().getByText('≈ 1.487 kr./week')).toBeVisible();
+  data.daysRemaining = 5;
+  data.quality.coverage.to = '2026-09-03';
+  data.quality.coverage.from = '2026-09-01';
+  await view.rerender(
+    <SavedBudgetOverview
+      budget={budget}
+      spending={{ status: 'ready', data, refreshing: false, error: null }}
+    />,
+  );
+  expect(groceryRow().getByText('≈ 1.487 kr./week')).toBeVisible();
+  expect(groceryRow().getByText('Monthly plan · 6.372 kr.')).toBeVisible();
+  expect(groceryRow().queryByText(/for 5 days/)).toBeNull();
+  expect(funRow().getByText('≈ 2.188 kr./week')).toBeVisible();
+  expect(funRow().getByText('Monthly plan · 9.375 kr.')).toBeVisible();
+  expect(funRow().queryByText(/for 5 days/)).toBeNull();
+});
+
+it('updates the remainder and spending arc from the same snapshot', async () => {
+  const summary = spendingSummary();
+  summary.daysRemaining = 14;
+  const show = (remainingOere: number, weeklyGuideDkk: number) => (
+    <SavedBudgetOverview
+      budget={summary.budget}
+      spending={{
+        status: 'ready',
+        refreshing: false,
+        error: null,
+        data: {
+          ...summary,
+          overall: { ...summary.overall, allocationOere: 1000000, remainingOere, weeklyGuideDkk },
+        },
+      }}
+    />
+  );
+  const view = await render(show(1000000, 5000));
+  expect(screen.getByText('100% left')).toBeVisible();
+  await view.rerender(show(970000, 4850));
+  expect(screen.getByText('97% left')).toBeVisible();
+  expect(screen.getByText('9.700 kr.')).toBeVisible();
+  expect(screen.queryByText(/for the next/)).toBeNull();
+  await view.rerender(show(0, 0));
+  expect(screen.getByText('0% left')).toBeVisible();
+  await view.rerender(show(1005000, 5025));
+  expect(screen.getByText('100% left')).toBeVisible();
+  expect(screen.getByText('10.050 kr.')).toBeVisible();
+});
+
+it('labels a month beyond demo coverage and shortens the guide through month end', async () => {
+  const data = spendingSummary();
+  data.month = '2026-11';
+  data.snapshotDate = '2026-11-26';
+  data.daysRemaining = 5;
+  data.overall.weeklyGuideDkk = 2800;
+  data.overall.limitations.push('Missing coverage');
+  await render(
+    <SavedBudgetOverview
+      budget={data.budget}
+      spending={{ status: 'ready', data, refreshing: false, error: null }}
+    />,
+  );
+  expect(screen.getByText('Plan estimate')).toBeVisible();
+  expect(screen.queryByText(/for the next|Demo data as of/)).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Budget details' }));
+  expect(
+    screen.getByText('No activity data for November 2026. The estimate uses your plan.'),
+  ).toBeVisible();
+  expect(screen.getByText('About 2.800 kr. for the next 5 days')).toBeVisible();
+  expect(screen.queryByText(/% left/)).toBeNull();
+});
+
+it('reports overspending and a zero one-day guide when there was no spending allocation', async () => {
+  const data = spendingSummary();
+  data.daysRemaining = 1;
+  data.overall = {
+    ...data.overall,
+    allocationOere: 0,
+    remainingOere: -30000,
+    overspentOere: 30000,
+    weeklyGuideDkk: 0,
+    limitations: ['Incomplete activity'],
+  };
+  await render(
+    <SavedBudgetOverview
+      budget={data.budget}
+      spending={{ status: 'ready', data, refreshing: false, error: null }}
+    />,
+  );
+  expect(
+    screen.getByLabelText('Over budget, 300 kr., Provisional, No spending allocation'),
+  ).toBeVisible();
+  expect(screen.queryByText(/% left/)).toBeNull();
+});
+
+it.each([1, 2])(
+  'exposes the complete guide on a 320-point screen at font scale %s',
+  async (fontScale) => {
+    const dimensions = jest
+      .spyOn(Dimensions, 'get')
+      .mockReturnValue({ width: 320, height: 568, scale: 2, fontScale });
+    try {
+      const data = spendingSummary();
+      await render(
+        <SavedBudgetOverview
+          budget={data.budget}
+          spending={{ status: 'ready', data, refreshing: false, error: null }}
+        />,
+      );
+      expect(
+        screen.getByLabelText(/Left after bills and savings, 2.800 kr., 35% left/),
+      ).toBeVisible();
+      expect(screen.getByText('2.800 kr.').props.numberOfLines).toBe(
+        fontScale === 1 ? 1 : undefined,
+      );
+    } finally {
+      dimensions.mockRestore();
+    }
+  },
+);
+
+it('shows five account transactions immediately and appends five at a time, including credits', async () => {
+  const data = spendingSummary();
+  const seed = activityItem();
+  const records = Array.from({ length: 11 }, (_, i) => ({
+    ...seed,
+    transaction: {
+      ...seed.transaction,
+      id: String(i),
+      text: `Payment ${i + 1}`,
+      direction: 'CREDIT' as const,
+    },
+  }));
+  const load = jest.mocked(getBudgetActivity);
+  load.mockImplementation(async (_id, options) =>
+    activityPage(records, options?.offset, options?.limit),
+  );
+  await render(
+    <SavedBudgetOverview
+      budget={data.budget}
+      spending={{ status: 'ready', data, refreshing: false, error: null }}
+    />,
+  );
+  expect(await screen.findByText('Payment 5')).toBeVisible();
+  expect(load).toHaveBeenLastCalledWith(
+    data.budget.id,
+    {
+      month: data.month,
+      range: 'account',
+      offset: 0,
+      limit: 5,
+      expectedSnapshotVersion: data.snapshotVersion,
+    },
+    expect.any(AbortSignal),
+  );
+  expect(screen.queryByText('Payment 6')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Show more' }));
+  expect(await screen.findByText('Payment 10')).toBeVisible();
+  expect(screen.getByText('Payment 1')).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Show more' }));
+  expect(await screen.findByText('Payment 11')).toBeVisible();
+  expect(screen.queryByRole('button', { name: 'Show more' })).toBeNull();
 });
