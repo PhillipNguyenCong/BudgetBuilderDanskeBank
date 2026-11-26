@@ -92,6 +92,15 @@ export function useBudgetEditor({
     setReviewed(false);
     onDirty?.();
   }
+  function applyAllocation(value: Draft) {
+    if (busy) return;
+    update(value);
+    setCommittedAmounts(
+      Object.fromEntries(
+        value.widgets.flatMap((widget) => widget.rows.map((row) => [row.id, row.input])),
+      ),
+    );
+  }
   function changeWidget(widget: DraftWidget) {
     if (busy) return;
     const previous = draft.widgets.find((item) => item.id === widget.id);
@@ -165,6 +174,7 @@ export function useBudgetEditor({
     result,
     progress,
     update,
+    applyAllocation,
     changeWidget,
     addRow,
     addSuggestedBills,

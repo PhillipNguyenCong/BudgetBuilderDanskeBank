@@ -16,11 +16,21 @@ export function WidgetHeader({ widget }: { widget: DraftWidget }) {
     <View style={styles.column}>
       <View style={styles.titleRow}>
         <AppText variant="label" style={styles.title}>
-          {widget.type === 'SPENDING' ? 'Budget' : typeLabels[widget.type]}
+          {widget.type === 'INCOME'
+            ? 'Income'
+            : widget.type === 'SPENDING'
+              ? widget.purpose
+                ? widget.name
+                : 'Budget'
+              : typeLabels[widget.type]}
         </AppText>
       </View>
       <AppText variant="small" style={styles.description}>
-        {descriptions[widget.type]}
+        {widget.purpose === 'GROCERIES'
+          ? 'Monthly groceries'
+          : widget.purpose === 'FUN'
+            ? 'Monthly fun'
+            : descriptions[widget.type]}
       </AppText>
     </View>
   );

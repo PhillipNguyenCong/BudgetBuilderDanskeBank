@@ -147,8 +147,9 @@ it('US-03: routes account selection through manual creation to the saved plan wi
     expect(await screen.findByLabelText('Budget name')).toBeVisible();
     await fireEvent.changeText(screen.getByLabelText('Budget name'), 'November plan');
     for (const [name, amount] of [
-      ['Monthly salary', '24000,55'],
-      ['Spending budget', '8000.10'],
+      ['Income', '24000,55'],
+      ['Groceries', '0'],
+      ['Fun budget', '8000.10'],
       ['Fixed expenses', '12000,20'],
       ['Savings', '4000.25'],
     ]) {

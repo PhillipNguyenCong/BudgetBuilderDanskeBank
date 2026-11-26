@@ -13,13 +13,18 @@ export function SavedPlanningRow({
 }) {
   return (
     <View>
+      {fixed && row.suggestionConfidence === 'POSSIBLE' ? (
+        <AppText variant="small">Possible bill · recurrence unconfirmed</AppText>
+      ) : null}
       <AppText>
         {row.label}: {formatDkk(row.amountOere)}
       </AppText>
       {fixed ? (
         <AppText variant="small">
-          {billFrequencyLabels[row.frequency ?? 'MONTHLY']} ·{' '}
-          {formatDkk(monthlyBillAllocation(row.amountOere, row.frequency))}/month
+          {row.carExpense?.basis === 'MONTHLY_RESERVE'
+            ? 'Monthly planning reserve'
+            : billFrequencyLabels[row.frequency ?? 'MONTHLY']}{' '}
+          · {formatDkk(monthlyBillAllocation(row.amountOere, row.frequency))}/month
         </AppText>
       ) : null}
       {row.adjustedByUser ? <AppText variant="small">Adjusted by you</AppText> : null}

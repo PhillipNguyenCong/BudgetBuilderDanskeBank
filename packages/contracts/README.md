@@ -12,7 +12,13 @@ Future AI, forecast and rollover execution contracts are intentionally not inven
 
 Planning rows optionally preserve `originalSuggestion` (original label and exact amount) and `adjustedByUser`. Existing rows without these fields remain valid. These fields preserve editable planning evidence across save/reopen; they do not authenticate source transactions or implement AI generation.
 
+Spending pots optionally carry `purpose: 'GROCERIES' | 'FUN'`, with each purpose allowed at most once per budget. Both remain Spending pots with independent rollover preferences. The Fun-purpose pot is the unmatched-spending default; plans without it retain the legacy first-Spending-pot fallback. Fixed-expense rows optionally preserve `suggestionConfidence: 'RECURRING' | 'POSSIBLE'` so uncertain recurrence remains visible after saving. All additions are backward-compatible optional JSONB plan fields and need no migration or new endpoint.
+
 Fixed-expense rows optionally carry `frequency`: `MONTHLY`, `QUARTERLY`, `HALF_YEARLY` or `YEARLY`. Missing frequency means monthly. `amountOere` is the amount per payment; totals contain monthly allocations. Income, spending and savings rows reject frequency. Fixed-expense original-suggestion metadata may also preserve the original frequency. Older monthly plans remain valid without changes.
+
+Manual and auto-budget creation use Monthly without extra confirmation when a detected bill has no frequency. Explicit non-monthly frequencies remain unchanged. The accepted planning row uses `MONTHLY`, while an unknown original-suggestion frequency remains null rather than becoming confirmed source evidence.
+
+Fixed-expense rows optionally retain `carExpense: { kind, basis }`. Kinds cover `VEHICLE_TAX`, `INSURANCE`, `FUEL`, `MAINTENANCE`, `TYRES` and `INSPECTION`; basis is `PAYMENT` or `MONTHLY_RESERVE`. A monthly reserve allows only Monthly or omitted frequency. This metadata describes accepted planning rows, not verified car ownership or bank transactions. It survives renamed labels and JSONB persistence without a migration; legacy plans remain valid.
 
 `BillSuggestionsSchema` validates on-demand account bill discovery: source date/quality, recurring or possible candidates, nullable suggested amount/frequency and evidence. Fixed-expense rows optionally retain `match.merchantKeys` separately from display labels. Their original-suggestion amount/frequency may explicitly be null when not established by the source; accepted current payment amounts remain required non-negative integers. Missing frequency still preserves older monthly-plan semantics. Classified activity optionally identifies the matched billRowId. These fields do not implement AI generation or payment execution.
 

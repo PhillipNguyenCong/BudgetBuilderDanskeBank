@@ -1,4 +1,5 @@
 import type { BudgetPlan, BudgetTotals, BillFrequency } from '@budget-builder/contracts';
+export { inferCarExpenseKind } from './car-expenses.js';
 export class AllocationError extends Error {
   constructor(public readonly code: 'AMOUNT_OVERFLOW' | 'OVER_ALLOCATED') {
     super(code);
@@ -38,6 +39,37 @@ export function validateAllocation(plan: BudgetPlan): BudgetTotals {
   const result = calculatePlan(plan);
   if (result.unallocatedOere < 0) throw new AllocationError('OVER_ALLOCATED');
   return result;
+}
+
+export class AutoAllocationError extends Error {
+  constructor(public readonly code: 'INVALID_INCOME' | 'BILLS_EXCEED_CAPACITY') {
+    super(code);
+  }
+}
+
+/** Allocate a complete take-home income; source bill payments are never changed. */
+export function allocateAutoBudget(
+  incomeOere: number,
+  bills: readonly { amountOere: number; frequency?: BillFrequency | undefined }[],
+) {
+  if (!Number.isSafeInteger(incomeOere) || incomeOere <= 0)
+    throw new AutoAllocationError('INVALID_INCOME');
+  const fixedExpensesOere = total(
+    bills.map((bill) => monthlyBillAllocation(bill.amountOere, bill.frequency)),
+  );
+  const income = BigInt(incomeOere);
+  const fallback = BigInt(fixedExpensesOere) * 100n > income * 50n;
+  const needsOere = Number((income * (fallback ? 85n : 50n)) / 100n);
+  if (fixedExpensesOere > needsOere) throw new AutoAllocationError('BILLS_EXCEED_CAPACITY');
+  const funOere = Number((income * (fallback ? 5n : 30n)) / 100n);
+  return {
+    split: fallback ? ('85/5/10' as const) : ('50/30/20' as const),
+    incomeOere,
+    fixedExpensesOere,
+    groceriesOere: needsOere - fixedExpensesOere,
+    funOere,
+    savingsOere: incomeOere - needsOere - funOere,
+  };
 }
 
 export type DraftAmount = number | null | 'invalid';

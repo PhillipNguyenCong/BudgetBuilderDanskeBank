@@ -8,6 +8,10 @@ Native mobile is the first frontend delivery. The [mobile shell](mobile-shell-st
 
 ## Delivery order
 
+The [confirmed auto-budget slice](mobile-auto-budget-story.md) adds default Groceries and Fun pots and explicit rules-based 50/30/20 allocation, with an automatic 85/5/10 fallback for bills above 50%. It fills only a draft and preserves the separate review/save flow. Full AI generation and saved-plan editing remain separate work.
+
+The [car-checklist slice](mobile-car-checklist-story.md) asks about car ownership during auto creation and reviews common missing costs before allocation. It uses detected/user-entered amounts and explicit monthly reserves, providing a deterministic baseline for later AI omission suggestions without inventing fees or due dates.
+
 The subsequent [on-demand bill-discovery slice](mobile-bill-suggestions-story.md) adds deterministic recurring/possible bill suggestions on the first Add bills tap in creation. It preserves edits, source uncertainty and saved merchant connections. The [live-budget helper](mobile-live-budget-story.md) then centralizes source reconciliation and classification: matched bills reduce Fixed expenses, other eligible debits reduce Spending, and known pending/unconfirmed commitments no longer blank an otherwise calculable guide. This partially advances US-04/05/06/10; full AI generation and dated payment scheduling remain pending.
 
 | Stage                                     | Stories                                                                    | Intended outcome                                                                                                                                                |

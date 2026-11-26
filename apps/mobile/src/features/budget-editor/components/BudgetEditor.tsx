@@ -1,6 +1,6 @@
 import type { SalarySuggestion, BudgetPlan } from '@budget-builder/contracts';
 import { billIdentityKeys } from '@budget-builder/budget-core/bill-matching';
-import { useRef, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Keyboard, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../foundation/components/AppText';
 import { TextField } from '../../../foundation/components/TextField';
@@ -18,6 +18,7 @@ import { formatDkk } from '../../budget-shared';
 import { BudgetReview } from './BudgetReview';
 import { Button } from '../../../foundation/components/Button';
 import { validateDraft, type DraftWidget } from '../editor/draft';
+import { AutoBudgetAction } from './AutoBudgetAction';
 
 /** Mount with a new key when intentionally switching plans; rerenders never reset a draft. */
 export function BudgetEditor({
@@ -47,6 +48,8 @@ export function BudgetEditor({
   feedback?: ReactNode;
   loadBillSuggestions?: BillSuggestionLoader | undefined;
 }) {
+  const [autoActive, setAutoActive] = useState(false);
+  const autoActiveRef = useRef(false);
   const {
     draft,
     overlay,
@@ -55,6 +58,7 @@ export function BudgetEditor({
     result,
     progress,
     update,
+    applyAllocation,
     changeWidget,
     addRow,
     addSuggestedBills,
@@ -87,7 +91,8 @@ export function BudgetEditor({
       auto &&
       activeOverlay.current === targetId &&
       !touchedBills.current.has(targetId) &&
-      !busy
+      !busy &&
+      !autoActiveRef.current
     ) {
       addSuggestedBills(
         targetId,
@@ -101,6 +106,7 @@ export function BudgetEditor({
     }
   });
   function change(widget: DraftWidget) {
+    if (autoActiveRef.current) return;
     const previous = draft.widgets.find((item) => item.id === widget.id);
     if (widget.type === 'FIXED_EXPENSE' && previous && previous.rows !== widget.rows) {
       touchedBills.current.add(widget.id);
@@ -126,9 +132,9 @@ export function BudgetEditor({
       ) : null}
       <View
         style={styles.content}
-        pointerEvents={busy ? 'none' : 'auto'}
-        accessibilityElementsHidden={busy || !!overlay}
-        importantForAccessibility={busy || overlay ? 'no-hide-descendants' : 'auto'}
+        pointerEvents={busy || autoActive ? 'none' : 'auto'}
+        accessibilityElementsHidden={busy || !!overlay || autoActive}
+        importantForAccessibility={busy || overlay || autoActive ? 'no-hide-descendants' : 'auto'}
       >
         {!inReview ? (
           <>
@@ -138,8 +144,34 @@ export function BudgetEditor({
               value={draft.name}
               maxLength={100}
               placeholder="e.g. Everyday budget"
-              onChangeText={(name) => update({ ...draft, name })}
+              onChangeText={(name) => {
+                if (!autoActiveRef.current) update({ ...draft, name });
+              }}
             />
+          </>
+        ) : null}
+      </View>
+      {creationStep === 'allocate' ? (
+        <AutoBudgetAction
+          draft={draft}
+          dismissed={discovery.dismissed}
+          disabled={busy || !!overlay}
+          load={discovery.loadForAllocation}
+          onApply={applyAllocation}
+          onActiveChange={(active) => {
+            autoActiveRef.current = active;
+            setAutoActive(active);
+          }}
+        />
+      ) : null}
+      <View
+        style={styles.content}
+        pointerEvents={busy || autoActive ? 'none' : 'auto'}
+        accessibilityElementsHidden={busy || !!overlay || autoActive}
+        importantForAccessibility={busy || overlay || autoActive ? 'no-hide-descendants' : 'auto'}
+      >
+        {!inReview ? (
+          <>
             <BudgetWidgetList
               widgets={draft.widgets}
               progress={progress}
@@ -187,7 +219,7 @@ export function BudgetEditor({
             ) : null}
             <Button
               label="Next"
-              disabled={!balanced || busy}
+              disabled={!balanced || busy || autoActive}
               onPress={() => {
                 Keyboard.dismiss();
                 draft.widgets.forEach((widget) =>

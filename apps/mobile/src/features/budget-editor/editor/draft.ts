@@ -10,10 +10,10 @@ export type DraftRow = Row & {
   confirmedAmount?: number;
   sourceAmountKnown?: boolean;
   sourceFrequencyKnown?: boolean;
-  needsFrequencyReview?: boolean;
 };
 export type DraftWidget = Omit<BudgetPlan['income'], 'rows'> & {
   type: 'INCOME' | BudgetPlan['pots'][number]['type'];
+  purpose?: 'GROCERIES' | 'FUN';
   rows: DraftRow[];
   rollover?: Extract<BudgetPlan['pots'][number], { type: 'SPENDING' }>['rollover'];
 };
@@ -94,15 +94,6 @@ export function validateDraft(draft: Draft): {
       error: 'Add an income row and enter your monthly income, including zero if applicable.',
     };
   if (
-    draft.widgets.some(
-      (widget) =>
-        widget.type === 'FIXED_EXPENSE' && widget.rows.some((row) => row.needsFrequencyReview),
-    )
-  )
-    return {
-      error: 'Confirm the payment frequency for suggested bills before creating the budget.',
-    };
-  if (
     draft.widgets.some((widget) => widget.rows.some((row) => parseAmount(row).amount === undefined))
   ) {
     return { error: 'Complete the amounts to calculate the plan.' };
@@ -117,6 +108,10 @@ export function validateDraft(draft: Draft): {
       amountOere: parseAmount(row).amount,
       ...(type === 'FIXED_EXPENSE' && row.frequency ? { frequency: row.frequency } : {}),
       ...(type === 'FIXED_EXPENSE' && row.match ? { match: row.match } : {}),
+      ...(type === 'FIXED_EXPENSE' && row.carExpense ? { carExpense: row.carExpense } : {}),
+      ...(type === 'FIXED_EXPENSE' && row.suggestionConfidence
+        ? { suggestionConfidence: row.suggestionConfidence }
+        : {}),
       ...(row.source ? { source: row.source } : {}),
       ...(row.source?.kind === 'SUGGESTED'
         ? {
@@ -161,8 +156,6 @@ export function validateDraft(draft: Draft): {
 }
 
 export function widgetTotal(widget: DraftWidget): string {
-  if (widget.type === 'FIXED_EXPENSE' && widget.rows.some((row) => row.needsFrequencyReview))
-    return 'Frequency needs review';
   if (widget.rows.some((row) => parseAmount(row).amount === undefined)) return 'Amount incomplete';
   const plan: BudgetPlan = {
     name: 'Total',

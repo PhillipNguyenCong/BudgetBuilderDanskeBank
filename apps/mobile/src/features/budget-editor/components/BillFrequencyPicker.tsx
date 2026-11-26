@@ -19,31 +19,29 @@ export function BillFrequencyPicker({
   const [choosingFrequency, setChoosingFrequency] = useState(false);
   const frequency = row.frequency ?? 'MONTHLY';
   const parsed = parseAmount(row);
+  if (row.carExpense?.basis === 'MONTHLY_RESERVE')
+    return <AppText variant="small">Monthly reserve · not a monthly bill</AppText>;
   return (
     <>
       <View style={styles.frequencyRow}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${prefix} frequency: ${row.needsFrequencyReview ? 'Needs confirmation' : billFrequencyLabels[frequency]}`}
+          accessibilityLabel={`${prefix} frequency: ${billFrequencyLabels[frequency]}`}
           accessibilityState={{ expanded: choosingFrequency }}
           style={({ pressed }) => [styles.frequencyButton, pressed && styles.pressed]}
           onPress={() => setChoosingFrequency(!choosingFrequency)}
         >
           <AppText variant="small" style={styles.action}>
-            {row.needsFrequencyReview ? 'Confirm frequency' : billFrequencyLabels[frequency]} ▾
+            {billFrequencyLabels[frequency]} ▾
           </AppText>
         </Pressable>
-        {frequency !== 'MONTHLY' ||
-        row.needsFrequencyReview ||
-        (row.input.trim() && parsed.error) ? (
+        {frequency !== 'MONTHLY' || (row.input.trim() && parsed.error) ? (
           <AppText variant="small" style={styles.monthly}>
-            {row.needsFrequencyReview
-              ? 'Confirm frequency to calculate monthly amount'
-              : parsed.amount !== undefined
-                ? `${formatDkk(monthlyBillAllocation(parsed.amount, frequency))}/month`
-                : row.input.trim()
-                  ? 'Check amount'
-                  : 'Amount not entered'}
+            {parsed.amount !== undefined
+              ? `${formatDkk(monthlyBillAllocation(parsed.amount, frequency))}/month`
+              : row.input.trim()
+                ? 'Check amount'
+                : 'Amount not entered'}
           </AppText>
         ) : null}
       </View>
@@ -54,15 +52,15 @@ export function BillFrequencyPicker({
               key={choice}
               accessibilityRole="radio"
               accessibilityLabel={`${prefix}: ${billFrequencyLabels[choice]}`}
-              accessibilityState={{ checked: !row.needsFrequencyReview && choice === frequency }}
+              accessibilityState={{ checked: choice === frequency }}
               style={({ pressed }) => [styles.frequencyButton, pressed && styles.pressed]}
               onPress={() => {
-                onChange({ ...row, frequency: choice, needsFrequencyReview: false });
+                onChange({ ...row, frequency: choice });
                 setChoosingFrequency(false);
               }}
             >
               <AppText variant="small" style={styles.action}>
-                {!row.needsFrequencyReview && choice === frequency ? '✓ ' : ''}
+                {choice === frequency ? '✓ ' : ''}
                 {billFrequencyLabels[choice]}
               </AppText>
             </Pressable>

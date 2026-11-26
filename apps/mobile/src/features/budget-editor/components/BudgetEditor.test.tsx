@@ -168,24 +168,22 @@ it('US-04: prefills salary and committed guidance once, retaining other blank am
   await view.rerender(
     <BudgetEditor initialPlan={initialPlan} startBlank salarySuggestion={suggestion} />,
   );
-  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue(
-    '25.000,50',
-  );
+  expect(screen.getByLabelText('Income row 1 amount in DKK')).toHaveDisplayValue('25.000,50');
   expect(screen.getAllByText('25.000,50 kr.')).toHaveLength(1);
   expect(screen.queryByText('From latest salary')).toBeNull();
-  expect(screen.getByLabelText('Spending budget row 1 amount in DKK')).toHaveDisplayValue('');
-  await edit('Monthly salary row 1 amount in DKK', '');
+  expect(screen.getByLabelText('Fun budget row 1 amount in DKK')).toHaveDisplayValue('');
+  await edit('Income row 1 amount in DKK', '');
   await view.rerender(
     <BudgetEditor initialPlan={initialPlan} startBlank salarySuggestion={{ ...suggestion }} />,
   );
-  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('');
+  expect(screen.getByLabelText('Income row 1 amount in DKK')).toHaveDisplayValue('');
   expect(screen.queryByText('From latest salary')).toBeNull();
 });
 
 it('US-04: a delayed salary suggestion cannot overwrite manual input', async () => {
   const initialPlan = manualPlan();
   const view = await render(<BudgetEditor initialPlan={initialPlan} startBlank />);
-  await edit('Monthly salary row 1 amount in DKK', '28000');
+  await edit('Income row 1 amount in DKK', '28000');
   await view.rerender(
     <BudgetEditor
       initialPlan={initialPlan}
@@ -198,5 +196,5 @@ it('US-04: a delayed salary suggestion cannot overwrite manual input', async () 
       }}
     />,
   );
-  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('28000');
+  expect(screen.getByLabelText('Income row 1 amount in DKK')).toHaveDisplayValue('28000');
 });

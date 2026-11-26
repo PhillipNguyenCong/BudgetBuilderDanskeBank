@@ -10,6 +10,7 @@ A simplified conceptual model of the agreed design, not an implemented database 
 
 - A user can create multiple budgets. Each budget uses exactly one account, and an account belongs to at most one budget. The account must belong to that user.
 - Subaccounts are named virtual pots within the account. Each has exactly one type: savings, spending, or fixed expense.
+- New-budget defaults include Groceries and Fun as separate spending pots, alongside Fixed expenses and Savings. These are purposes, not additional pot types. Confirmed auto allocation may fill a draft using the agreed 50/30/20 or high-bill 85/5/10 guide; it does not execute payments or save the plan. See [auto-budget behavior](docs/mobile-auto-budget-story.md).
 - The user divides monthly take-home salary between the pots. Total monthly allocations cannot exceed that salary.
 - Savings accumulate across months. Fixed-expense allocations reserve money for bills.
 - Transactions record actual income, expenses, or transfers. A transaction can be assigned to one pot or remain unassigned. Transfers are not income or spending.

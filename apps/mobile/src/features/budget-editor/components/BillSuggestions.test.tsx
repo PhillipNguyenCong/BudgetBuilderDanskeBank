@@ -34,8 +34,9 @@ it('US-04: fetches on first Add bills only, inserts editable draft suggestions a
   expect(load).not.toHaveBeenCalled();
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'My suggested bills');
   for (const [name, amount] of [
-    ['Monthly salary', '24000'],
-    ['Spending budget', '8000'],
+    ['Income', '24000'],
+    ['Groceries', '0'],
+    ['Fun budget', '8000'],
     ['Savings', '4000'],
   ])
     await fireEvent.changeText(screen.getByLabelText(`${name} row 1 amount in DKK`), amount);
@@ -139,7 +140,7 @@ it('US-04: leaving the account draft aborts detection and ignores its late resul
   await pending.finish();
 });
 
-it('US-10: a possible bill with unknown amount/frequency stays incomplete until explicitly reviewed', async () => {
+it('US-04/10: unknown bill frequency defaults Monthly while missing amounts still need input', async () => {
   const data = billSuggestions();
   data.suggestions = [
     {
@@ -150,7 +151,7 @@ it('US-10: a possible bill with unknown amount/frequency stays incomplete until 
       source: {
         ...data.suggestions[0]!.source,
         explanation:
-          'A recurring planned payment was found; amount and frequency need confirmation.',
+          'A recurring planned payment was found; amount and frequency were not supplied.',
       },
     },
   ];
@@ -166,8 +167,9 @@ it('US-10: a possible bill with unknown amount/frequency stays incomplete until 
   );
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'Reviewed suggestions');
   for (const [name, amount] of [
-    ['Monthly salary', '24000'],
-    ['Spending budget', '8000'],
+    ['Income', '24000'],
+    ['Groceries', '0'],
+    ['Fun budget', '8000'],
     ['Savings', '4000'],
   ])
     await fireEvent.changeText(screen.getByLabelText(`${name} row 1 amount in DKK`), amount);
@@ -194,7 +196,7 @@ it('US-10: a possible bill with unknown amount/frequency stays incomplete until 
   )!.rows[0]!;
   expect(reopened.sourceAmountKnown).toBe(false);
   expect(reopened.sourceFrequencyKnown).toBe(false);
-  expect(reopened.needsFrequencyReview).toBeUndefined();
+  expect(reopened.frequency).toBe('MONTHLY');
   expect(isAdjusted(reopened)).toBe(true);
 });
 

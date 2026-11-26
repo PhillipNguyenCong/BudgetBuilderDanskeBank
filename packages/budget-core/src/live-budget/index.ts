@@ -116,7 +116,7 @@ type ActivityDraft = Omit<
 
 function classify(input: SnapshotInput): ActivityDraft[] {
   const spending = input.plan.pots.filter((pot) => pot.type === 'SPENDING');
-  const defaultPot = spending[0]?.id ?? null;
+  const defaultPot = spending.find((pot) => pot.purpose === 'FUN')?.id ?? spending[0]?.id ?? null;
   const corrections = new Map(
     input.corrections.map((correction) => [correction.transactionId, correction]),
   );
@@ -218,7 +218,9 @@ function classify(input: SnapshotInput): ActivityDraft[] {
           reason = found.length
             ? 'Automatically matched a saved pot or bill label.'
             : defaultPot
-              ? 'Automatically assigned to the first spending pot (default).'
+              ? spending.some((pot) => pot.purpose === 'FUN')
+                ? 'Automatically assigned to Fun (default spending pot).'
+                : 'Automatically assigned to the first spending pot (default).'
               : 'There is no spending pot for unmatched transactions.';
         }
       }
@@ -316,7 +318,10 @@ export function calculateLiveBudgetSnapshot(input: SnapshotInput) {
   DateSchema.parse(input.date);
   const month = input.date.slice(0, 7);
   const totals = calculatePlan(input.plan);
-  const defaultPot = input.plan.pots.find((pot) => pot.type === 'SPENDING')?.id ?? null;
+  const defaultPot =
+    input.plan.pots.find((pot) => pot.type === 'SPENDING' && pot.purpose === 'FUN')?.id ??
+    input.plan.pots.find((pot) => pot.type === 'SPENDING')?.id ??
+    null;
   const activity = classify(input)
     .map((draft) => materialize(draft, input.date))
     .sort(

@@ -1,8 +1,10 @@
 # Native mobile app
 
-First frontend delivery: React Native, TypeScript and Expo SDK 58 with Expo Router. Four working tabs open on Budget. Create budget opens account selection; Home, Cards and More are explicit demo screens. Account selection reads the local backend profile, masked accounts, coverage and existing budgets. Budget also offers an offline sample-widget editor. Setup saves through the backend and opens the spending overview for the linked account’s source-date snapshot. Add bills discovers account-derived fixed expenses on demand. Full AI budget generation, saved-plan editing and login remain deferred.
+First frontend delivery: React Native, TypeScript and Expo SDK 58 with Expo Router. Four working tabs open on Budget. Create budget opens account selection; Home, Cards and More are explicit demo screens. Account selection reads the local backend profile, masked accounts, coverage and existing budgets. Budget also offers an offline sample-widget editor. Setup saves through the backend and opens the spending overview for the linked account’s source-date snapshot. Add bills discovers account-derived fixed expenses on demand. Create Auto Budget offers explicitly confirmed rules-based allocation. Full AI budget generation, saved-plan editing and login remain deferred.
 
 ## Start on iPhone
+
+Create Auto Budget asks whether you have a car before discovery. Yes opens a review of vehicle tax / ejerafgift, car insurance, fuel/charging, service/repairs, tyre changes and inspection / syn. Existing matched bills are prefilled and editable. Enter each missing amount or explicitly skip it; no prices are invented. Fuel and irregular costs are monthly reserves rather than monthly payment schedules. Accepted costs enter Fixed expenses before allocation; cancellation changes no draft amounts. See [car-checklist behavior](../../docs/mobile-car-checklist-story.md).
 
 1. Install current Node 24 LTS (minimum 24.3; `nvm install && nvm use` if using nvm). Node 22.13+ is also supported. The host's original Node 24.2 is too old for this React Native release.
 2. From the **BudgetBuilderDanskeBank repository root**, run `npm ci`, then `npm run dev:mobile`.
@@ -39,7 +41,7 @@ Root `npm test` still runs only backend/shared Node tests. `npm run typecheck` c
 - `src/foundation/theme`: colors, typography and spacing.
 - `src/features/account-selection`: account eligibility/loading hook, account list and history components.
 - `src/features/budget-creation`: setup checks, initial manual plan, save/recovery hook and creation UI.
-- `src/features/budget-editor`: draft hook and validation adapter; composed widgets, bill inputs, savings review and rollover controls.
+- `src/features/budget-editor`: draft hook and validation adapter; composed widgets, bill inputs, confirmed auto allocation, savings review and rollover controls. Its React Native-free `api.ts` exposes draft operations to the synthetic HTTP integration harness.
 - `src/features/budget-overview`: saved-budget/spending/activity hooks, summary and tile presentation, Budget-stack pot/activity screens and a transaction-correction container. API requests have a React Native-free public `api.ts` entry for integration tests.
 - `src/features/budget-preview`: offline sample-plan factory and preview screen.
 - `src/features/budget-shared`: budget list/create requests, DKK formatting, labels and widget palette; no workflow or React Native imports.

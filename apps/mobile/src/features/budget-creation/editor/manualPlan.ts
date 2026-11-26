@@ -6,7 +6,7 @@ export function manualPlan(): BudgetPlan {
     name: '',
     income: {
       id: 'income',
-      name: 'Monthly salary',
+      name: 'Income',
       color: 'OCEAN',
       rows: [{ id: 'salary', label: 'Take-home salary', amountOere: 0 }],
     },
@@ -19,11 +19,21 @@ export function manualPlan(): BudgetPlan {
         rows: [],
       },
       {
-        id: 'spending',
-        name: 'Spending budget',
+        id: 'groceries',
+        name: 'Groceries',
         type: 'SPENDING',
+        purpose: 'GROCERIES',
+        color: 'LAVENDER',
+        rows: [{ id: 'groceries-row', label: 'Monthly groceries', amountOere: 0 }],
+        rollover: { enabled: false, destination: null, targetPotId: null },
+      },
+      {
+        id: 'spending',
+        name: 'Fun budget',
+        type: 'SPENDING',
+        purpose: 'FUN',
         color: 'SKY',
-        rows: [{ id: 'spending-row', label: 'Everyday spending', amountOere: 0 }],
+        rows: [{ id: 'spending-row', label: 'Monthly fun', amountOere: 0 }],
         rollover: { enabled: false, destination: null, targetPotId: null },
       },
       {

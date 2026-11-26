@@ -2937,6 +2937,13 @@
                           "type": "string",
                           "const": "SPENDING"
                         },
+                        "purpose": {
+                          "type": "string",
+                          "enum": [
+                            "GROCERIES",
+                            "FUN"
+                          ]
+                        },
                         "rollover": {
                           "type": "object",
                           "properties": {
@@ -3137,6 +3144,41 @@
                               },
                               "adjustedByUser": {
                                 "type": "boolean"
+                              },
+                              "carExpense": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": [
+                                      "VEHICLE_TAX",
+                                      "INSURANCE",
+                                      "FUEL",
+                                      "MAINTENANCE",
+                                      "TYRES",
+                                      "INSPECTION"
+                                    ]
+                                  },
+                                  "basis": {
+                                    "type": "string",
+                                    "enum": [
+                                      "PAYMENT",
+                                      "MONTHLY_RESERVE"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "basis"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "suggestionConfidence": {
+                                "type": "string",
+                                "enum": [
+                                  "RECURRING",
+                                  "POSSIBLE"
+                                ]
                               },
                               "match": {
                                 "type": "object",
@@ -3664,6 +3706,13 @@
                           "type": "string",
                           "const": "SPENDING"
                         },
+                        "purpose": {
+                          "type": "string",
+                          "enum": [
+                            "GROCERIES",
+                            "FUN"
+                          ]
+                        },
                         "rollover": {
                           "type": "object",
                           "properties": {
@@ -3864,6 +3913,41 @@
                               },
                               "adjustedByUser": {
                                 "type": "boolean"
+                              },
+                              "carExpense": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": [
+                                      "VEHICLE_TAX",
+                                      "INSURANCE",
+                                      "FUEL",
+                                      "MAINTENANCE",
+                                      "TYRES",
+                                      "INSPECTION"
+                                    ]
+                                  },
+                                  "basis": {
+                                    "type": "string",
+                                    "enum": [
+                                      "PAYMENT",
+                                      "MONTHLY_RESERVE"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "basis"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "suggestionConfidence": {
+                                "type": "string",
+                                "enum": [
+                                  "RECURRING",
+                                  "POSSIBLE"
+                                ]
                               },
                               "match": {
                                 "type": "object",
@@ -4411,6 +4495,13 @@
                           "type": "string",
                           "const": "SPENDING"
                         },
+                        "purpose": {
+                          "type": "string",
+                          "enum": [
+                            "GROCERIES",
+                            "FUN"
+                          ]
+                        },
                         "rollover": {
                           "type": "object",
                           "properties": {
@@ -4611,6 +4702,41 @@
                               },
                               "adjustedByUser": {
                                 "type": "boolean"
+                              },
+                              "carExpense": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": [
+                                      "VEHICLE_TAX",
+                                      "INSURANCE",
+                                      "FUEL",
+                                      "MAINTENANCE",
+                                      "TYRES",
+                                      "INSPECTION"
+                                    ]
+                                  },
+                                  "basis": {
+                                    "type": "string",
+                                    "enum": [
+                                      "PAYMENT",
+                                      "MONTHLY_RESERVE"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "basis"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "suggestionConfidence": {
+                                "type": "string",
+                                "enum": [
+                                  "RECURRING",
+                                  "POSSIBLE"
+                                ]
                               },
                               "match": {
                                 "type": "object",
@@ -5218,6 +5344,13 @@
                                 "type": "string",
                                 "const": "SPENDING"
                               },
+                              "purpose": {
+                                "type": "string",
+                                "enum": [
+                                  "GROCERIES",
+                                  "FUN"
+                                ]
+                              },
                               "rollover": {
                                 "type": "object",
                                 "properties": {
@@ -5418,6 +5551,41 @@
                                     },
                                     "adjustedByUser": {
                                       "type": "boolean"
+                                    },
+                                    "carExpense": {
+                                      "type": "object",
+                                      "properties": {
+                                        "kind": {
+                                          "type": "string",
+                                          "enum": [
+                                            "VEHICLE_TAX",
+                                            "INSURANCE",
+                                            "FUEL",
+                                            "MAINTENANCE",
+                                            "TYRES",
+                                            "INSPECTION"
+                                          ]
+                                        },
+                                        "basis": {
+                                          "type": "string",
+                                          "enum": [
+                                            "PAYMENT",
+                                            "MONTHLY_RESERVE"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "kind",
+                                        "basis"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    "suggestionConfidence": {
+                                      "type": "string",
+                                      "enum": [
+                                        "RECURRING",
+                                        "POSSIBLE"
+                                      ]
                                     },
                                     "match": {
                                       "type": "object",
@@ -6077,6 +6245,13 @@
                               "type": "string",
                               "const": "SPENDING"
                             },
+                            "purpose": {
+                              "type": "string",
+                              "enum": [
+                                "GROCERIES",
+                                "FUN"
+                              ]
+                            },
                             "rollover": {
                               "type": "object",
                               "properties": {
@@ -6277,6 +6452,41 @@
                                   },
                                   "adjustedByUser": {
                                     "type": "boolean"
+                                  },
+                                  "carExpense": {
+                                    "type": "object",
+                                    "properties": {
+                                      "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                          "VEHICLE_TAX",
+                                          "INSURANCE",
+                                          "FUEL",
+                                          "MAINTENANCE",
+                                          "TYRES",
+                                          "INSPECTION"
+                                        ]
+                                      },
+                                      "basis": {
+                                        "type": "string",
+                                        "enum": [
+                                          "PAYMENT",
+                                          "MONTHLY_RESERVE"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "kind",
+                                      "basis"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "suggestionConfidence": {
+                                    "type": "string",
+                                    "enum": [
+                                      "RECURRING",
+                                      "POSSIBLE"
+                                    ]
                                   },
                                   "match": {
                                     "type": "object",

@@ -51,6 +51,7 @@ export function insertSuggestedBills(
       label: suggestion.label,
       amountOere: suggestion.amountOere ?? 0,
       frequency: suggestion.frequency ?? 'MONTHLY',
+      suggestionConfidence: suggestion.confidence,
       match: suggestion.match,
       source: suggestion.source,
       originalSuggestion: {

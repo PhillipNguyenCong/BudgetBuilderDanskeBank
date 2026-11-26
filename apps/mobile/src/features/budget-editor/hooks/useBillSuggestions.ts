@@ -19,6 +19,8 @@ export function useBillSuggestions(
   const handler = useRef(onComplete);
   handler.current = onComplete;
   const controller = useRef<AbortController | null>(null);
+  const cached = useRef<BillSuggestions | null>(null);
+  const pending = useRef<Promise<BillSuggestions> | null>(null);
   const started = useRef(false);
   useEffect(
     () => () => {
@@ -26,34 +28,68 @@ export function useBillSuggestions(
     },
     [load],
   );
-  function request(targetId: string, auto: boolean) {
-    if (!load || (controller.current && !controller.current.signal.aborted)) return;
+  function fetchData(refresh: boolean, signal?: AbortSignal): Promise<BillSuggestions> {
+    if (signal?.aborted) return Promise.reject(new Error('Bill discovery cancelled.'));
+    if (!load)
+      return Promise.reject(new Error('Bill discovery is unavailable. Enter bills manually.'));
+    if (!refresh && cached.current) return Promise.resolve(cached.current);
+    if (pending.current && controller.current && !controller.current.signal.aborted)
+      return pending.current;
     started.current = true;
     const current = new AbortController();
     controller.current = current;
+    const abort = () => {
+      current.abort();
+      if (controller.current === current) {
+        controller.current = null;
+        pending.current = null;
+        started.current = cached.current !== null;
+        setState((previous) => ({
+          ...previous,
+          status: cached.current ? 'ready' : 'idle',
+          error: null,
+        }));
+      }
+    };
+    signal?.addEventListener('abort', abort, { once: true });
     setState((previous) => ({ ...previous, status: 'loading', error: null }));
-    Promise.resolve()
+    const task = Promise.resolve()
       .then(() => load(current.signal))
       .then((data) => {
-        if (current.signal.aborted) return;
+        if (current.signal.aborted) throw new Error('Bill discovery cancelled.');
+        cached.current = data;
         setState({ status: 'ready', data, error: null });
-        handler.current(data, targetId, auto);
+        return data;
       })
       .catch(() => {
+        const message = 'Could not find bills right now. You can still add bills manually.';
         if (!current.signal.aborted)
           setState((previous) => ({
             ...previous,
             status: 'error',
-            error: 'Could not find bills right now. You can still add bills manually.',
+            error: message,
           }));
+        throw new Error(message);
       })
       .finally(() => {
-        if (controller.current === current) controller.current = null;
+        signal?.removeEventListener('abort', abort);
+        if (controller.current === current) {
+          controller.current = null;
+          pending.current = null;
+        }
       });
+    pending.current = task;
+    return task;
+  }
+  function request(targetId: string, auto: boolean) {
+    void fetchData(true)
+      .then((data) => handler.current(data, targetId, auto))
+      .catch(() => {});
   }
   return {
     state,
     dismissed,
+    loadForAllocation: (signal: AbortSignal) => fetchData(false, signal),
     open: (targetId: string) => {
       if (!started.current) request(targetId, true);
     },

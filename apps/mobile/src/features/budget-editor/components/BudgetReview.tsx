@@ -55,9 +55,14 @@ export function BudgetReview({
               ) : null}
               {pot.rows.map((row) => (
                 <View key={row.id} style={styles.bill}>
+                  {'suggestionConfidence' in row && row.suggestionConfidence === 'POSSIBLE' ? (
+                    <AppText variant="small">Possible bill · review before saving</AppText>
+                  ) : null}
                   <Figure label={row.label} amount={row.amountOere} />
                   <AppText variant="small" style={styles.secondary}>
-                    {billFrequencyLabels[row.frequency ?? 'MONTHLY']}
+                    {row.carExpense?.basis === 'MONTHLY_RESERVE'
+                      ? 'Monthly planning reserve'
+                      : billFrequencyLabels[row.frequency ?? 'MONTHLY']}
                     {row.frequency && row.frequency !== 'MONTHLY'
                       ? ` · ${formatDkk(monthlyBillAllocation(row.amountOere, row.frequency))}/month`
                       : ''}

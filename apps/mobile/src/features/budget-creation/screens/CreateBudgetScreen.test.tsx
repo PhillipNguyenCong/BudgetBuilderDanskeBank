@@ -45,8 +45,9 @@ async function enterPlan(review = true) {
   await screen.findByLabelText('Budget name');
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'My manual budget');
   for (const [name, amount] of [
-    ['Monthly salary', '24000'],
-    ['Spending budget', '8000'],
+    ['Income', '24000'],
+    ['Groceries', '0'],
+    ['Fun budget', '8000'],
     ['Fixed expenses', '12000'],
     ['Savings', '4000'],
   ]) {
@@ -100,7 +101,7 @@ it('US-03: starts blank, submits the accepted manual plan once and preserves inp
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
   expect(await screen.findByText('Review the inputs.')).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
-  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue('24.000');
+  expect(screen.getByLabelText('Income row 1 amount in DKK')).toHaveDisplayValue('24.000');
   await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
   expect(callbacks.onCreated).toHaveBeenCalledWith(saved);
@@ -117,11 +118,13 @@ it('US-11: saves the selected month-end rule with the explicit budget creation',
   await enterPlan();
   expect(screen.getByRole('header', { name: 'Rollover' })).toBeVisible();
   await fireEvent.press(
-    screen.getByRole('radio', { name: 'Spending budget: Add to next month’s Budget' }),
+    screen.getByRole('radio', { name: 'Fun budget: Add to next month’s Budget' }),
   );
   expect(api.create).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Create budget' }));
-  expect(api.create.mock.calls[0]?.[1]?.pots.find((p) => p.type === 'SPENDING')).toEqual(
+  expect(
+    api.create.mock.calls[0]?.[1]?.pots.find((p) => p.type === 'SPENDING' && p.purpose === 'FUN'),
+  ).toEqual(
     expect.objectContaining({
       rollover: { enabled: true, destination: 'TO_NEXT_MONTH', targetPotId: null },
     }),
@@ -186,10 +189,7 @@ it('US-04: Read more discloses guidance without changing the draft or hiding err
   await render(<CreateBudgetScreen {...props()} />);
   await screen.findByLabelText('Budget name');
   await fireEvent.changeText(screen.getByLabelText('Budget name'), 'Keep my draft');
-  await fireEvent.changeText(
-    screen.getByLabelText('Monthly salary row 1 amount in DKK'),
-    '90071992547410',
-  );
+  await fireEvent.changeText(screen.getByLabelText('Income row 1 amount in DKK'), '90071992547410');
   expect(screen.queryByText(/No bank transfer/)).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Read more' }));
   expect(screen.getByRole('header', { name: 'About your budget' })).toBeVisible();
@@ -198,9 +198,7 @@ it('US-04: Read more discloses guidance without changing the draft or hiding err
   expect(screen.queryByLabelText('Budget name')).toBeNull();
   await fireEvent(screen.getByTestId('budget-info-overlay'), 'requestClose');
   expect(screen.getByLabelText('Budget name')).toHaveDisplayValue('Keep my draft');
-  expect(screen.getByLabelText('Monthly salary row 1 amount in DKK')).toHaveDisplayValue(
-    '90071992547410',
-  );
+  expect(screen.getByLabelText('Income row 1 amount in DKK')).toHaveDisplayValue('90071992547410');
   expect(screen.getByText('This amount is too large.')).toBeVisible();
   await fireEvent.press(screen.getByRole('button', { name: 'Read more' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
@@ -232,22 +230,22 @@ it('US-03/04: Next requires a complete zero remainder and does not save', async 
   expect(screen.queryByRole('header', { name: 'Rollover' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'Create budget' })).toBeNull();
   expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
-  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '25000');
+  await fireEvent.changeText(screen.getByLabelText('Income row 1 amount in DKK'), '25000');
   expect(screen.getByText('Allocate the remaining 1.000 kr. to continue.')).toBeVisible();
   expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
-  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '23000');
+  await fireEvent.changeText(screen.getByLabelText('Income row 1 amount in DKK'), '23000');
   expect(screen.getByText(/Over-allocated by/)).toBeVisible();
   expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
-  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '');
+  await fireEvent.changeText(screen.getByLabelText('Income row 1 amount in DKK'), '');
   expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
-  await fireEvent.changeText(screen.getByLabelText('Monthly salary row 1 amount in DKK'), '24000');
+  await fireEvent.changeText(screen.getByLabelText('Income row 1 amount in DKK'), '24000');
   await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
   expect(api.create).not.toHaveBeenCalled();
   expect(screen.getByRole('header', { name: 'Review budget' })).toBeVisible();
   expect(screen.getByText('Fully allocated')).toBeVisible();
   expect(screen.getByText('Rent')).toBeVisible();
   expect(screen.getByText('Monthly')).toBeVisible();
-  expect(screen.queryByLabelText('Monthly salary row 1 amount in DKK')).toBeNull();
+  expect(screen.queryByLabelText('Income row 1 amount in DKK')).toBeNull();
 });
 
 it('US-04/11: review lists irregular bills and Back preserves amounts, frequencies and rules', async () => {
@@ -266,7 +264,7 @@ it('US-04/11: review lists irregular bills and Back preserves amounts, frequenci
   expect(screen.getByText('Quarterly · 4.000 kr./month')).toBeVisible();
   expect(screen.getAllByText('12.000 kr.')).toHaveLength(2);
   await fireEvent.press(
-    screen.getByRole('radio', { name: 'Spending budget: Add to next month’s Budget' }),
+    screen.getByRole('radio', { name: 'Fun budget: Add to next month’s Budget' }),
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
   expect(callbacks.onBack).not.toHaveBeenCalled();
@@ -279,7 +277,7 @@ it('US-04/11: review lists irregular bills and Back preserves amounts, frequenci
   await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
   expect(
-    screen.getByRole('radio', { name: 'Spending budget: Add to next month’s Budget' }),
+    screen.getByRole('radio', { name: 'Fun budget: Add to next month’s Budget' }),
   ).toBeChecked();
   expect(api.create).not.toHaveBeenCalled();
 });

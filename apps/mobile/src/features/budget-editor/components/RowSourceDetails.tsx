@@ -19,7 +19,10 @@ export function RowSourceDetails({ row }: { row: DraftRow }) {
             </AppText>
           ) : null}
           {row.sourceFrequencyKnown === false ? (
-            <AppText variant="small">Original payment frequency was not established.</AppText>
+            <AppText variant="small">
+              Original payment frequency was not established. Monthly is the planning default unless
+              changed.
+            </AppText>
           ) : null}
           {row.source.kind === 'SUGGESTED' ? (
             <AppText variant="small">

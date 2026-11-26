@@ -23,7 +23,22 @@ export type BillFrequency = z.infer<typeof BillFrequencySchema>;
 export const BillMatchSchema = z.strictObject({
   merchantKeys: z.array(z.string().trim().min(1).max(200)).min(1).max(20),
 });
+export const CarExpenseKindSchema = z.enum([
+  'VEHICLE_TAX',
+  'INSURANCE',
+  'FUEL',
+  'MAINTENANCE',
+  'TYRES',
+  'INSPECTION',
+]);
+export type CarExpenseKind = z.infer<typeof CarExpenseKindSchema>;
+export const CarExpenseSchema = z.strictObject({
+  kind: CarExpenseKindSchema,
+  basis: z.enum(['PAYMENT', 'MONTHLY_RESERVE']),
+});
 export const FixedExpenseRowSchema = BudgetRowSchema.extend({
+  carExpense: CarExpenseSchema.optional(),
+  suggestionConfidence: z.enum(['RECURRING', 'POSSIBLE']).optional(),
   match: BillMatchSchema.optional(),
   frequency: BillFrequencySchema.optional(),
   originalSuggestion: z
@@ -33,7 +48,14 @@ export const FixedExpenseRowSchema = BudgetRowSchema.extend({
       frequency: BillFrequencySchema.nullable().optional(),
     })
     .optional(),
-});
+}).refine(
+  (row) =>
+    row.carExpense?.basis !== 'MONTHLY_RESERVE' || !row.frequency || row.frequency === 'MONTHLY',
+  {
+    message: 'A monthly car reserve must use Monthly frequency',
+    path: ['frequency'],
+  },
+);
 const widget = {
   id: IdSchema,
   name: NameSchema,
@@ -47,7 +69,12 @@ export const RolloverSchema = z.strictObject({
   targetPotId: IdSchema.nullable(),
 });
 export const PotSchema = z.discriminatedUnion('type', [
-  z.strictObject({ ...widget, type: z.literal('SPENDING'), rollover: RolloverSchema }),
+  z.strictObject({
+    ...widget,
+    type: z.literal('SPENDING'),
+    purpose: z.enum(['GROCERIES', 'FUN']).optional(),
+    rollover: RolloverSchema,
+  }),
   z.strictObject({
     ...widget,
     type: z.literal('FIXED_EXPENSE'),
@@ -63,6 +90,7 @@ export const BudgetPlanSchema = z
   })
   .superRefine((plan, ctx) => {
     const ids = new Set<string>();
+    const purposes = new Set<string>();
     const check = (id: string, path: (string | number)[]) => {
       if (ids.has(id))
         ctx.addIssue({ code: 'custom', path, message: 'IDs must be unique within a budget' });
@@ -74,6 +102,15 @@ export const BudgetPlanSchema = z
       check(p.id, ['pots', i, 'id']);
       p.rows.forEach((r, j) => check(r.id, ['pots', i, 'rows', j, 'id']));
       if (p.type !== 'SPENDING') return;
+      if (p.purpose) {
+        if (purposes.has(p.purpose))
+          ctx.addIssue({
+            code: 'custom',
+            path: ['pots', i, 'purpose'],
+            message: 'Each spending purpose may appear at most once in a budget',
+          });
+        purposes.add(p.purpose);
+      }
       const r = p.rollover,
         path = ['pots', i, 'rollover'];
       if (r.enabled && !r.destination)

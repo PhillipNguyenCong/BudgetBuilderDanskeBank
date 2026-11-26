@@ -64,8 +64,18 @@ export function BudgetInfoOverlay({
           </AppText>
           <AppText variant="heading">Your pots</AppText>
           <AppText>
-            Pots divide the money in your account. No bank transfer is made. Labels and colours are
+            Income, Fixed expenses, Groceries, Fun budget and Savings organise your plan. Pots
+            divide the money in your account. No bank transfer is made. Labels and colours are
             fixed; tap an amount to edit it or open the fixed-expense bill list.
+          </AppText>
+          <AppText variant="heading">Create Auto Budget</AppText>
+          <AppText>
+            Confirm to include detected bills and replace groceries, fun and savings allocations.
+            Bills and groceries share 50% of income, Fun gets 30%, and Savings gets 20%. If bills
+            exceed 50%, they share 85% with groceries instead, with 5% for Fun and 10% for Savings.
+            Actual bills stay unchanged; groceries receives the remainder. Bills above 85% or
+            incomplete bill data prevent auto allocation. The result is editable and is saved only
+            with Create budget on the review page.
           </AppText>
           <AppText variant="heading">Left to allocate</AppText>
           <AppText>
@@ -76,18 +86,19 @@ export function BudgetInfoOverlay({
           </AppText>
           <AppText variant="heading">Bill frequency</AppText>
           <AppText>
-            Bills default to Monthly when no frequency is established. You can change this planning
-            default. Enter each bill’s amount per payment and choose Monthly, Quarterly, Every 6
-            months or Yearly. We divide by 1, 3, 6 or 12 and round each monthly allocation up to the
-            nearest øre. This is an average amount to set aside, not a payment schedule or a
-            calculation of catch-up funding.
+            Bills default to Monthly unless another frequency is supplied or you change it. Unknown
+            original frequency stays visible in source details. Enter each bill’s amount per payment
+            and choose Monthly, Quarterly, Every 6 months or Yearly. We divide by 1, 3, 6 or 12 and
+            round each monthly allocation up to the nearest øre. This is an average amount to set
+            aside, not a payment schedule or a calculation of catch-up funding.
           </AppText>
           <AppText variant="heading">Savings</AppText>
           <AppText>
-            Savings stays as entered unless you edit it or confirm an Update savings proposal.
-            Rollover sets a rule for positive money left in Budget at month-end: savings, next
-            month’s Budget or unallocated. It does not allocate unused setup income. The rule is
-            saved with your budget, but automatic month-end processing is not available yet.
+            Savings stays as entered unless you edit it, confirm Create Auto Budget or confirm an
+            Update savings proposal. Rollover sets a rule for positive money left in Budget at
+            month-end: savings, next month’s Budget or unallocated. It does not allocate unused
+            setup income. The rule is saved with your budget, but automatic month-end processing is
+            not available yet.
           </AppText>
           <AppText variant="heading">Source history</AppText>
           {quality ? (
@@ -96,7 +107,7 @@ export function BudgetInfoOverlay({
                 Available source history: {quality.coverage.from ?? 'Unknown start'} to{' '}
                 {quality.coverage.to ?? 'unknown end'} ({quality.coverage.completeMonths} complete
                 months). Bill suggestions use eligible records from this history; other allocations
-                remain manual.
+                are entered manually or calculated from income using the auto-budget guideline.
               </AppText>
               {quality.issues.length ? (
                 <AppText>Some source data is incomplete or uncertain.</AppText>

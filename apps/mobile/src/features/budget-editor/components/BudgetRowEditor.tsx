@@ -29,6 +29,9 @@ export function BudgetRowEditor({
   const [sourceOpen, setSourceOpen] = useState(false);
   return (
     <View style={styles.row}>
+      {row.suggestionConfidence === 'POSSIBLE' ? (
+        <AppText variant="small">Possible bill · review before saving</AppText>
+      ) : null}
       <View style={[styles.fields, stacked && styles.stacked]}>
         <TextField
           ref={(input) => focus.register(row.id, 'name', input)}
@@ -59,7 +62,11 @@ export function BudgetRowEditor({
           returnKeyType="default"
           submitBehavior="submit"
           onSubmitEditing={focus.dismiss}
-          label="DKK / payment"
+          label={
+            row.carExpense?.basis === 'MONTHLY_RESERVE'
+              ? 'DKK / month to set aside'
+              : 'DKK / payment'
+          }
           placeholder="Amount"
           suffix={row.input.trim() ? 'kr.' : undefined}
           displayValue={

@@ -56,6 +56,49 @@ test('US-06: bill matching, default spending and purchases update remaining auto
   assert.equal(after.activity.find((a) => a.transaction.id === 'rent')!.potId, 'bills');
 });
 
+test('US-04/06: Groceries and Fun have independent guides; unmatched and uncertain spending default to Fun', () => {
+  const plan = structuredClone(createBudgetExample.plan);
+  const spending = plan.pots.find((pot) => pot.type === 'SPENDING')!;
+  if (spending.type !== 'SPENDING') throw new Error('Missing spending fixture');
+  spending.purpose = 'FUN';
+  spending.name = 'Fun budget';
+  spending.rows = [{ id: 'fun-row', label: 'Monthly fun', amountOere: 600000 }];
+  plan.pots.unshift({
+    ...structuredClone(spending),
+    id: 'food',
+    purpose: 'GROCERIES',
+    name: 'Groceries',
+    rows: [{ id: 'food-row', label: 'Groceries', amountOere: 200000 }],
+  });
+  const result = buildSpendingSnapshot({
+    plan,
+    accountId: 'demo-account',
+    transactions: [
+      transaction('food', 'Groceries', 10000),
+      transaction('cinema', 'Cinema', 20000),
+      { ...transaction('uncertain', 'Unknown purchase'), amountOere: null },
+    ],
+    corrections: [],
+    date: '2026-10-15',
+    coverage: { from: '2026-10-01', to: '2026-10-15', completeMonths: 0 },
+  });
+  assert.equal(result.activity.find((item) => item.transaction.id === 'food')!.potId, 'food');
+  assert.equal(
+    result.activity.find((item) => item.transaction.id === 'cinema')!.potId,
+    spending.id,
+  );
+  assert.equal(
+    result.activity.find((item) => item.transaction.id === 'uncertain')!.potId,
+    spending.id,
+  );
+  assert.equal(result.pots.find((pot) => pot.potId === 'food')!.numbers.remainingOere, 190000);
+  assert.equal(result.pots.find((pot) => pot.potId === spending.id)!.numbers.remainingOere, 580000);
+  assert.equal(
+    result.pots.find((pot) => pot.potId === spending.id)!.numbers.reviewAffectingCount,
+    1,
+  );
+});
+
 test('US-04/06: manually named Husleje and Netflix bills use known aliases without merchant metadata', () => {
   const plan = structuredClone(createBudgetExample.plan);
   const fixed = plan.pots.find((pot) => pot.type === 'FIXED_EXPENSE')!;

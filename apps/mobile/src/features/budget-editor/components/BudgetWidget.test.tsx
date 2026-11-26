@@ -97,7 +97,7 @@ it('formats idle amounts with Danish separators and preserves exact input while 
   const plan = manualPlan();
   plan.income.rows[0]!.amountOere = 3125050;
   await render(<BudgetEditor initialPlan={plan} />);
-  const input = screen.getByLabelText('Monthly salary row 1 amount in DKK');
+  const input = screen.getByLabelText('Income row 1 amount in DKK');
   expect(input).toHaveDisplayValue('31.250,50');
   await fireEvent(input, 'focus');
   expect(input).toHaveDisplayValue('31250.50');
@@ -110,7 +110,7 @@ it('formats idle amounts with Danish separators and preserves exact input while 
 
 it('keeps an empty quiet amount unknown and opens editing without inventing a zero', async () => {
   await render(<BudgetEditor initialPlan={manualPlan()} startBlank />);
-  const input = screen.getByLabelText('Spending budget row 1 amount in DKK');
+  const input = screen.getByLabelText('Fun budget row 1 amount in DKK');
   expect(input).toHaveDisplayValue('');
   expect(input.props.placeholder).toBe('Angiv beløb');
   await fireEvent(input, 'focus');

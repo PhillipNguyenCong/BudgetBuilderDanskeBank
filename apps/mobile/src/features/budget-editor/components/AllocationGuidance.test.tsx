@@ -28,14 +28,15 @@ function remaining(value: string) {
 it('US-04: guides 17000 → 9000 → 7000 → 0 without filling amounts, including inside the bill overlay', async () => {
   await render(<BudgetEditor initialPlan={manualPlan()} startBlank onSubmit={jest.fn()} />);
   expect(screen.queryByText('Not entered yet')).toBeNull();
-  const income = screen.getByLabelText('Monthly salary row 1 amount in DKK');
+  const income = screen.getByLabelText('Income row 1 amount in DKK');
   await fireEvent.changeText(income, '17000');
   expect(screen.queryByText(/17,000 left to allocate$/)).toBeNull();
   await fireEvent(income, 'blur');
   remaining('17,000');
   expect(screen.queryByText(/Provisional|Based on amounts entered so far/)).toBeNull();
   expect(screen.getByRole('button', { name: 'Create budget' })).toBeDisabled();
-  await amount('Spending budget', '8000');
+  await amount('Fun budget', '8000');
+  await amount('Groceries', '0');
   remaining('9,000');
   expect(screen.getByLabelText('Savings row 1 amount in DKK')).toHaveDisplayValue('');
   await amount('Savings', '2000');
@@ -55,26 +56,26 @@ it('US-04: guides 17000 → 9000 → 7000 → 0 without filling amounts, includi
 
 it('US-10: clearing restores partial guidance; invalid edits retain it; zero is entered', async () => {
   await render(<BudgetEditor initialPlan={manualPlan()} startBlank />);
-  await amount('Monthly salary', '17000');
-  await amount('Spending budget', '8000');
-  await amount('Spending budget', '');
+  await amount('Income', '17000');
+  await amount('Fun budget', '8000');
+  await amount('Fun budget', '');
   remaining('17,000');
   expect(screen.queryByText('Not entered yet')).toBeNull();
-  await amount('Spending budget', '-10');
+  await amount('Fun budget', '-10');
   remaining('17,000');
-  expect(screen.getByLabelText('Spending budget row 1 amount in DKK')).toHaveDisplayValue('');
-  await amount('Spending budget', '0');
+  expect(screen.getByLabelText('Fun budget row 1 amount in DKK')).toHaveDisplayValue('');
+  await amount('Fun budget', '0');
   remaining('17,000');
   expect(screen.queryByText('Not entered yet')).toBeNull();
-  await amount('Monthly salary', '');
+  await amount('Income', '');
   expect(screen.queryByText(/left to allocate$/)).toBeNull();
 });
 
 it('US-04: adding and removing bills updates progress without redistributing savings', async () => {
   await render(<BudgetEditor initialPlan={manualPlan()} startBlank />);
   await amount('Savings', '2000');
-  await amount('Spending budget', '8000');
-  await amount('Monthly salary', '17000');
+  await amount('Fun budget', '8000');
+  await amount('Income', '17000');
   await bills();
   await fireEvent.press(screen.getByRole('button', { name: 'Add bill to Fixed expenses' }));
   await amount('Fixed expenses', '7000');
@@ -86,9 +87,9 @@ it('US-04: adding and removing bills updates progress without redistributing sav
   await fireEvent.press(screen.getByRole('button', { name: 'Remove Fixed expenses row 2' }));
   remaining('0');
   await done();
-  await amount('Monthly salary', '12000');
+  await amount('Income', '12000');
   expect(screen.getAllByText('5.000 kr.')).toHaveLength(1);
   expect(screen.getByLabelText('Savings row 1 amount in DKK')).toHaveDisplayValue('2.000');
-  expect(screen.getByLabelText('Spending budget row 1 amount in DKK')).toHaveDisplayValue('8.000');
+  expect(screen.getByLabelText('Fun budget row 1 amount in DKK')).toHaveDisplayValue('8.000');
   expect(screen.queryByRole('button', { name: 'Use remaining' })).toBeNull();
 });
